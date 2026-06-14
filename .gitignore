@@ -1,3 +1,5 @@
 .opencode/
 opencode.json
-backend/.venv
+backend/venv
+backend/.env
+frontend/.env

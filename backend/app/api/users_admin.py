@@ -16,6 +16,7 @@ class CreateUserRequest(BaseModel):
     password: str
     nome: str
     role: str
+    cras: str
 
 @router.post("/users")
 def create_user(data: CreateUserRequest):
@@ -29,6 +30,7 @@ def create_user(data: CreateUserRequest):
         "user_metadata": {
             "nome": data.nome,
             "role": data.role,
+            "cras": data.cras,
         },
     }
 

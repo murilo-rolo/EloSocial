@@ -21,3 +21,18 @@ export function canManageUsers(role) {
 export function canViewAllReports(role) {
   return role === ROLES.GERENTE
 }
+
+export const CRAS_LIST = [
+  'CRAS Aurá',
+  'CRAS Barreiro',
+  'CRAS Benguí',
+  'CRAS Cremação',
+  'CRAS Guamá',
+  'CRAS Icoaraci',
+  'CRAS Jurunas',
+  'CRAS Mosqueiro',
+  'CRAS Outeiro',
+  'CRAS Pedreira',
+  'CRAS Tapanã',
+  'CRAS Terra Firme',
+]

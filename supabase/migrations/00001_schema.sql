@@ -178,12 +178,14 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
 CREATE OR REPLACE FUNCTION public.validate_institutional_email()
 RETURNS TRIGGER AS $$
 DECLARE
-  allowed_domains TEXT[] := ARRAY['gov.br', 'gov.com.br'];
   email_domain TEXT;
 BEGIN
   email_domain := SPLIT_PART(NEW.email, '@', 2);
-  IF NOT (email_domain ILIKE ANY(allowed_domains) OR email_domain = ANY(allowed_domains)) THEN
-    RAISE EXCEPTION 'Email institucional inválido. Use um email com domínio %', array_to_string(allowed_domains, ', ');
+  IF NOT (
+    email_domain = 'gov.br' OR email_domain LIKE '%.gov.br' OR
+    email_domain = 'gov.com.br' OR email_domain LIKE '%.gov.com.br'
+  ) THEN
+    RAISE EXCEPTION 'Email institucional inválido. Use um email com domínio gov.br';
   END IF;
   RETURN NEW;
 END;

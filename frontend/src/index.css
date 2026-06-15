@@ -380,6 +380,13 @@ table tr:hover {
   letter-spacing: 0.3px;
 }
 
+.badge-outline {
+  background: transparent;
+  border: 1px solid #bdc3c7;
+  color: #7f8c8d;
+  text-transform: none;
+}
+
 .badge-assistente_social { background: #d5f5e3; color: #1a7a3a; }
 .badge-psicologo { background: #d4e6f1; color: #1a5276; }
 .badge-pedagogo { background: #fdebd0; color: #935116; }

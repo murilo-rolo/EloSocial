@@ -1,25 +1,33 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
-import { ROLE_LABELS } from '../utils/roles'
+import { useAuth } from '../hooks/useAuth'
+import { ROLE_LABELS, CRAS_LIST } from '../utils/roles'
 import { formatDateTime } from '../utils/format'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export default function Admin() {
+  const { profile } = useAuth()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [logs, setLogs] = useState([])
   const [tab, setTab] = useState('users')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [form, setForm] = useState({ nome: '', email: '', password: '', role: 'tecnico' })
+  const [form, setForm] = useState({ nome: '', email: '', password: '', role: 'tecnico', cras: '' })
   const [saving, setSaving] = useState(false)
 
   async function loadUsers() {
-    const { data } = await supabase
+    let query = supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false })
+
+    if (profile?.role === 'gerente') {
+      query = query.eq('cras', profile.cras)
+    }
+
+    const { data } = await query
     setUsers(data || [])
     setLoading(false)
   }
@@ -33,7 +41,7 @@ export default function Admin() {
     setLogs(data || [])
   }
 
-  useEffect(() => { loadUsers() }, [])
+  useEffect(() => { if (profile) loadUsers() }, [profile])
 
   async function toggleUserStatus(userId, currentStatus) {
     const { error } = await supabase
@@ -65,7 +73,7 @@ export default function Admin() {
         throw new Error(err.detail || 'Erro ao criar usuário')
       }
       setShowAddModal(false)
-      setForm({ nome: '', email: '', password: '', role: 'tecnico' })
+      setForm({ nome: '', email: '', password: '', role: 'tecnico', cras: '' })
       loadUsers()
     } catch (err) {
       alert('Erro: ' + err.message)
@@ -105,7 +113,10 @@ export default function Admin() {
         <div className="card">
           <div className="card-header">
             <h3>Usuários ({users.length})</h3>
-            <button className="btn btn-primary btn-sm" onClick={() => setShowAddModal(true)}>
+            <button className="btn btn-primary btn-sm" onClick={() => {
+              setForm({ nome: '', email: '', password: '', role: 'tecnico', cras: profile?.role === 'gerente' ? profile.cras : '' })
+              setShowAddModal(true)
+            }}>
               + Novo Usuário
             </button>
           </div>
@@ -118,6 +129,7 @@ export default function Admin() {
                   <tr>
                     <th>Nome</th>
                     <th>Email</th>
+                    <th>CRAS</th>
                     <th>Perfil</th>
                     <th>Status</th>
                     <th>Criado em</th>
@@ -129,6 +141,7 @@ export default function Admin() {
                     <tr key={u.id}>
                       <td><strong>{u.nome}</strong></td>
                       <td>{u.email}</td>
+                      <td><span className="badge badge-outline">{u.cras}</span></td>
                       <td>
                         <select
                           className="form-control"
@@ -247,6 +260,18 @@ export default function Admin() {
                   onChange={(e) => setForm({...form, role: e.target.value})}>
                   {Object.entries(ROLE_LABELS).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>CRAS *</label>
+                <select className="form-control" value={form.cras}
+                  onChange={(e) => setForm({...form, cras: e.target.value})}
+                  disabled={profile?.role === 'gerente'}
+                  required>
+                  <option value="">Selecione o CRAS</option>
+                  {CRAS_LIST.map((cras) => (
+                    <option key={cras} value={cras}>{cras}</option>
                   ))}
                 </select>
               </div>

@@ -7,10 +7,59 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 | Camada | Tecnologia |
 |---|---|
 | Frontend | React + JavaScript + Vite + PWA |
-| Backend | Python + FastAPI (apenas PDF) |
+| Backend | Python + FastAPI (PDF + admin de usuários) |
 | Banco + Auth | Supabase (PostgreSQL + Auth + Realtime + RLS) |
 | Chat | Supabase Realtime (WebSocket nativo) |
 | PDF | ReportLab |
+
+## Arquitetura
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                     FRONTEND (React PWA)                    │
+│                                                            │
+│  ┌──────────┐  ┌───────────┐  ┌──────┐  ┌──────────────┐ │
+│  │ Dashboard│  │Requerentes│  │ Chat │  │ Admin/CRAS    │ │
+│  └────┬─────┘  └─────┬─────┘  └──┬───┘  └──────┬───────┘ │
+│       │              │           │              │         │
+│  ┌────▼──────────────▼───────────▼──────────────▼───────┐ │
+│  │               Supabase SDK (supabase-js)              │ │
+│  │       Auth · DB queries · Realtime subscriptions      │ │
+│  └────────────────────┬─────────────────────────────────┘ │
+└───────────────────────┼───────────────────────────────────┘
+                        │
+          ┌─────────────┼─────────────┐
+          ▼             ▼             ▼
+┌─────────────────┐ ┌───────────┐ ┌──────────────────────┐
+│  Supabase Auth   │ │PostgreSQL │ │  Supabase Admin API  │
+│ (email + JWT)    │ │  (RLS)    │ │  (service_role_key)  │
+└─────────────────┘ └───────────┘ └──────────▲───────────┘
+                                             │
+                                    ┌────────┴────────┐
+                                    │  FastAPI (PDF)   │
+                                    │ POST /api/pdf    │
+                                    │ POST /api/users  │
+                                    └─────────────────┘
+```
+
+### Fluxo de dados
+
+| Operação | Caminho |
+|---|---|
+| CRUD (requerentes, prontuários) | Frontend → Supabase SDK → PostgreSQL (RLS valida o JWT do usuário) → resposta direta |
+| Chat | Frontend → INSERT messages → PostgreSQL NOTIFY → Realtime broadcast → todos os participantes |
+| Exportar PDF | Frontend coleta dados → `POST /api/pdf` → FastAPI (ReportLab) → download do PDF |
+| Criar usuário | Frontend → `POST /api/users` → FastAPI → Supabase Admin API → Auth + trigger cria profile |
+
+### Decisões arquiteturais
+
+| Decisão | Escolha | Motivo |
+|---|---|---|
+| Auth | Supabase Auth + JWT, sem middleware | RLS no banco valida permissão em cada consulta |
+| CRUD | Direto do frontend ao Supabase | Evita replicar lógica de negócio no backend |
+| FastAPI | Apenas PDF + admin | Operações que exigem `service_role_key` (não disponível no frontend) |
+| Deploy | Dois projetos Vercel separados | Frontend como S3/CDN, backend como serverless function |
+| Chat | Supabase Realtime | Substitui WebSocket customizado, integrado ao banco |
 
 ## Funcionalidades
 
@@ -19,6 +68,7 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 - **Chat interno** — Mensagens em tempo real entre profissionais
 - **Exportação PDF** — Prontuário completo em PDF formatado
 - **Controle de Acesso** — 5 perfis: assistente social, psicólogo, pedagogo, técnico, gerente
+- **Escopo por CRAS** — Cada profissional vinculado a uma das 12 unidades de Belém; gerentes gerenciam apenas seu próprio CRAS
 - **Dispositivo Móvel** — PWA instalável no celular
 - **Estatísticas** *(futuro)* — Dashboard gerencial com gráficos de atendimentos, prontuários e indicadores da unidade
 
@@ -31,6 +81,27 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 | Pedagogo | Preenche seções educacional/participação/observações |
 | Técnico | Preenche composição familiar/atendimentos/encaminhamentos |
 | Gerente | Acessa tudo, gerencia usuários, auditoria |
+
+## Unidades CRAS
+
+O sistema atende 12 unidades do CRAS em Belém/PA:
+
+| CRAS | Região |
+|---|---|
+| CRAS Aura | |
+| CRAS Barreiro | |
+| CRAS Bengui | |
+| CRAS Cremação | |
+| CRAS Guama | |
+| CRAS Icoaraci | |
+| CRAS Jurunas | |
+| CRAS Mosqueiro | |
+| CRAS Outeiro | |
+| CRAS Pedreira | |
+| CRAS Tapana | |
+| CRAS Terra Firme | |
+
+Cada profissional é vinculado a um CRAS no momento do cadastro. Gerentes só visualizam e gerenciam usuários do seu próprio CRAS.
 
 ## Pré-requisitos
 
@@ -114,8 +185,8 @@ O backend do EloSocial já inclui o arquivo `api/index.py` para funcionar como S
 
 ```
 elosocial/
-├── supabase/migrations/   # Schema SQL + RLS
-├── backend/               # FastAPI (PDF)
+├── supabase/migrations/   # Schema SQL + RLS (00001) + CRAS (00002)
+├── backend/               # FastAPI (PDF + admin de usuários)
 │   └── app/services/pdf_generator.py
 └── frontend/              # React + PWA
     └── src/

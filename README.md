@@ -204,6 +204,35 @@ elosocial/
         └── utils/         # roles, prontuarioSchema, format
 ```
 
+## Fluxo Git
+
+```bash
+# Criar e trocar para uma nova branch
+git checkout -b nome-da-feature
+
+# Verificar arquivos modificados
+git status
+
+# Adicionar arquivos ao stage
+git add .
+git add caminho/do/arquivo   # ou específico
+
+# Commitar com mensagem descritiva
+git commit -m "Descrição do que foi feito"
+
+# Trocar para outra branch já existente
+git checkout nome-da-branch
+
+# Buscar alterações do remoto
+git pull
+
+# Publicar commits no remoto (primeiro push da branch)
+git push -u origin nome-da-branch
+
+# Publicar commits nas próximas vezes
+git push
+```
+
 ## Licença
 
 Projeto interno — uso exclusivo da rede socioassistencial.

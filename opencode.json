@@ -1,7 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "skills": {
-    "paths": [".opencode/skills"],
-    "edit": {"pattern": "*", "action": "allow"} 
+    "paths": [".opencode/skills"]
+  },
+  "permission": {
+    "edit": "allow"
   }
 }

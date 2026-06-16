@@ -9,6 +9,7 @@ import ProntuarioEdit from './pages/ProntuarioEdit'
 import ProntuarioView from './pages/ProntuarioView'
 import Prontuarios from './pages/Prontuarios'
 import Chat from './pages/Chat'
+import Videoconferencia from './pages/Videoconferencia'
 import Admin from './pages/Admin'
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
       <Route path="/prontuarios" element={<ProtectedRoute><Prontuarios /></ProtectedRoute>} />
   <Route path="/prontuarios/:id" element={<ProtectedRoute><ProntuarioView /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+      <Route path="/videoconferencia" element={<ProtectedRoute><Videoconferencia /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute roles={['gerente']}><Admin /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

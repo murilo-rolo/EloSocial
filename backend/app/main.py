@@ -14,8 +14,10 @@ app.add_middleware(
 
 from app.api.reports import router as reports_router
 from app.api.users_admin import router as users_admin_router
+from app.api.video import router as video_router
 app.include_router(reports_router, prefix="/api", tags=["reports"])
 app.include_router(users_admin_router, prefix="/api", tags=["admin"])
+app.include_router(video_router, prefix="/api", tags=["video"])
 
 @app.get("/api/health")
 def health():

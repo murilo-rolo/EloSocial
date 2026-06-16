@@ -11,6 +11,7 @@ export default function Sidebar({ open, onClose }) {
     { to: '/requerentes', label: 'Requerentes', icon: '👥' },
     { to: '/prontuarios', label: 'Prontuários', icon: '📋' },
     { to: '/chat', label: 'Chat', icon: '💬' },
+    { to: '/videoconferencia', label: 'Videoconferência', icon: '📹' },
   ]
 
   if (canManageUsers(profile?.role)) {

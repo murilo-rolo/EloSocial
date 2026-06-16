@@ -14,6 +14,7 @@ description: Contexto completo do projeto EloSocial — Prontuário SUAS para CR
 | Banco + Auth + Realtime | Supabase Cloud |
 | Chat | Supabase Realtime (subscriptions PostgreSQL) |
 | PDF | ReportLab |
+| Videoconferência | Daily.co API + daily-js SDK |
 
 ## Arquitetura
 
@@ -39,6 +40,7 @@ Frontend (React PWA) ←→ Supabase SDK (Auth, DB, Realtime)
 | Deploy | Vercel (frontend + backend serverless) | Monorepo, dois projetos separados |
 | Docker | Não usar | Preferência do usuário |
 | Relatórios | JSON armazenado + PDF exportado | Imutabilidade via hash SHA-256 |
+| Videoconferência | Daily.co (API key no backend) | Chave segura no servidor; frontend usa daily-js |
 
 ## Convenções
 
@@ -59,14 +61,16 @@ elosocial/
 ├── BACKLOG.md                       ← Backlog contínuo
 ├── supabase/migrations/
 │   ├── 00001_schema.sql             ← Schema + RLS + triggers
-│   └── 00002_add_cras.sql           ← CRAS: coluna `cras` + RLS atualizada
+│   ├── 00002_add_cras.sql           ← CRAS: coluna `cras` + RLS atualizada
+│   └── 00003_video_rooms.sql        ← Videoconferência: tabelas + RLS
 ├── backend/                         ← FastAPI (Vercel serverless)
 │   ├── app/
 │   │   ├── main.py                  ← App FastAPI + CORS + rotas
 │   │   ├── config.py                ← SUPABASE_URL, SERVICE_KEY, ALLOWED_ORIGINS
 │   │   ├── api/
 │   │   │   ├── reports.py           ← POST /api/pdf, POST /api/hash
-│   │   │   └── users_admin.py       ← POST/DELETE /api/users
+│   │   │   ├── users_admin.py       ← POST/DELETE /api/users
+│   │   │   └── video.py             ← POST /api/rooms, POST /api/rooms/join
 │   │   └── services/
 │   │       └── pdf_generator.py     ← ReportLab (13 seções + assinatura)
 │   ├── api/index.py                 ← Entry point Vercel
@@ -92,8 +96,9 @@ elosocial/
     │   │   ├── Prontuarios.jsx      ← Lista de prontuários
     │   │   ├── ProntuarioEdit.jsx   ← Formulário 13 seções colapsáveis
     │   │   ├── ProntuarioView.jsx   ← Visualização + exportação PDF/JSON
-    │   │   ├── Chat.jsx            ← Chat em tempo real (Realtime)
-    │   │   └── Admin.jsx           ← Gerenciar usuários + auditoria + CRAS
+│   │   ├── Chat.jsx            ← Chat em tempo real (Realtime)
+│   │   ├── Videoconferencia.jsx ← Salas de vídeo (Daily.co)
+│   │   └── Admin.jsx           ← Gerenciar usuários + auditoria + CRAS
     │   └── utils/
     │       ├── roles.js            ← Perfis, CRAS_LIST (12 unidades)
     │       ├── format.js           ← formatação CPF, data, telefone
@@ -106,7 +111,7 @@ elosocial/
     └── ...
 ```
 
-## Modelo de Dados (Supabase — 6 tabelas)
+## Modelo de Dados (Supabase — 8 tabelas)
 
 ### Tabelas
 
@@ -116,6 +121,8 @@ elosocial/
 4. **atendimentos** — Histórico. Campos: `id` (UUID PK), `prontuario_id` (FK), `profissional_id` (FK), `data_atendimento`, `tipo_atendimento`, `descricao`, `observacoes`, `created_at`
 5. **messages** — Chat. Campos: `id` (UUID PK), `remetente_id` (FK), `destinatario_id` (FK), `grupo`, `conteudo`, `lida`, `created_at`
 6. **audit_logs** — Auditoria. Campos: `id` (UUID PK), `user_id` (FK), `acao`, `detalhes` (JSONB), `ip`, `created_at`
+7. **video_rooms** — Salas de videoconferência. Campos: `id` (UUID PK), `room_name` (unique), `room_url`, `created_by` (FK profiles), `privacy` (public/private), `access_code` (nullable), `expires_at`, `created_at`
+8. **video_participants** — Participantes de salas. Campos: `id` (UUID PK), `room_id` (FK video_rooms), `user_id` (FK profiles), `joined_at`, unique(room_id, user_id)
 
 ### RLS
 
@@ -125,6 +132,8 @@ elosocial/
 - **atendimentos:** SELECT/INSERT autenticados
 - **messages:** SELECT (próprias ou de grupo), INSERT autenticados
 - **audit_logs:** SELECT só gerente, INSERT autenticados
+- **video_rooms:** SELECT (criador ou participante), INSERT (criador), UPDATE (criador)
+- **video_participants:** SELECT/INSERT (próprio)
 
 ### Triggers
 
@@ -163,6 +172,7 @@ CRAS Aura, CRAS Barreiro, CRAS Bengui, CRAS Cremação, CRAS Guama, CRAS Icoarac
 | `/prontuarios/novo/:applicantId` | Novo Prontuário | Autenticado |
 | `/prontuarios/:id` | Ver Prontuário | Autenticado |
 | `/chat` | Chat | Autenticado |
+| `/videoconferencia` | Videoconferência | Autenticado |
 | `/admin` | Admin | Gerente |
 
 ## Endpoints Backend (FastAPI)
@@ -174,6 +184,8 @@ CRAS Aura, CRAS Barreiro, CRAS Bengui, CRAS Cremação, CRAS Guama, CRAS Icoarac
 | POST | `/api/hash` | Gera hash SHA-256 do JSON |
 | POST | `/api/users` | Cria usuário (Admin API + service_role — inclui `cras`) |
 | DELETE | `/api/users/:id` | Exclui usuário (Admin API) |
+| POST | `/api/rooms` | Cria sala no Daily.co (pública ou privada) |
+| POST | `/api/rooms/join` | Valida código e retorna URL da sala privada |
 
 ## Como Executar
 
@@ -217,15 +229,19 @@ Dois projetos separados no mesmo repositório:
 8. Migration `00002_add_cras.sql` adiciona coluna `cras` com CHECK de 12 unidades
 9. Gerentes só gerenciam usuários do mesmo CRAS (RLS + filtro frontend)
 10. Domínios de email aceitos: `%.gov.br` e `%.gov.com.br`
+11. Videoconferência usa Daily.co — `DAILY_API_KEY` no backend `.env`; frontend usa `@daily-co/daily-js`
+12. Salas privadas usam código de 6 dígitos gerado pelo backend ou definido pelo criador
+13. `video_rooms` e `video_participants` têm RLS que restringe acesso a criador e participantes
 
 ## Backlog
 
 ### ✅ Concluído
-- Supabase: migrations 00001 + 00002, RLS, triggers, seed
-- Backend: FastAPI, PDF (ReportLab), admin de usuários com CRAS
+- Supabase: migrations 00001 + 00002 + 00003, RLS, triggers, seed
+- Backend: FastAPI, PDF (ReportLab), admin de usuários com CRAS, Daily.co rooms
 - Frontend: setup, auth, layout PWA, Dashboard, Requerentes CRUD
 - Frontend: Prontuário SUAS (13 seções), PDF/JSON export
 - Frontend: Chat (Realtime), Admin (usuários + CRAS scoping)
+- Frontend: Videoconferência (salas públicas/privadas, código de acesso, Daily.co)
 - Documentação: README, BACKLOG, SKILL.md
 
 ### 🔄 Em andamento

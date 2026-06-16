@@ -11,35 +11,36 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 | Banco + Auth | Supabase (PostgreSQL + Auth + Realtime + RLS) |
 | Chat | Supabase Realtime (WebSocket nativo) |
 | PDF | ReportLab |
+| Videoconferência | Daily.co API + daily-js SDK |
 
 ## Arquitetura
 
 ```
-┌────────────────────────────────────────────────────────────┐
-│                     FRONTEND (React PWA)                    │
-│                                                            │
-│  ┌──────────┐  ┌───────────┐  ┌──────┐  ┌──────────────┐ │
-│  │ Dashboard│  │Requerentes│  │ Chat │  │ Admin/CRAS    │ │
-│  └────┬─────┘  └─────┬─────┘  └──┬───┘  └──────┬───────┘ │
-│       │              │           │              │         │
-│  ┌────▼──────────────▼───────────▼──────────────▼───────┐ │
-│  │               Supabase SDK (supabase-js)              │ │
-│  │       Auth · DB queries · Realtime subscriptions      │ │
-│  └────────────────────┬─────────────────────────────────┘ │
-└───────────────────────┼───────────────────────────────────┘
-                        │
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
-┌─────────────────┐ ┌───────────┐ ┌──────────────────────┐
-│  Supabase Auth   │ │PostgreSQL │ │  Supabase Admin API  │
-│ (email + JWT)    │ │  (RLS)    │ │  (service_role_key)  │
-└─────────────────┘ └───────────┘ └──────────▲───────────┘
-                                             │
-                                    ┌────────┴────────┐
-                                    │  FastAPI (PDF)   │
-                                    │ POST /api/pdf    │
-                                    │ POST /api/users  │
-                                    └─────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      FRONTEND (React PWA)                        │
+│                                                                 │
+│  ┌──────────┐ ┌───────────┐ ┌──────┐ ┌──────────────┐ ┌──────┐│
+│  │ Dashboard│ │Requerentes│ │ Chat │ │Videoconf.    │ │Admin ││
+│  └────┬─────┘ └─────┬─────┘ └──┬───┘ └──────┬───────┘ └──┬───┘│
+│       │              │          │            │            │    │
+│  ┌────▼──────────────▼──────────▼────────────▼────────────▼──┐│
+│  │                Supabase SDK (supabase-js)                  ││
+│  │        Auth · DB queries · Realtime · daily-js            ││
+│  └─────────────────────┬─────────────────────────────────────┘│
+└────────────────────────┼───────────────────────────────────────┘
+                         │
+           ┌─────────────┼──────────────┬──────────────┐
+           ▼             ▼              ▼              ▼
+┌──────────────────┐ ┌───────────┐ ┌──────────────┐ ┌──────────────┐
+│  Supabase Auth    │ │PostgreSQL │ │ Supabase API │ │ Daily.co API │
+│ (email + JWT)     │ │  (RLS)    │ │ (service_key)│ │  (vídeo)     │
+└──────────────────┘ └───────────┘ └──────┬───────┘ └──────▲───────┘
+                                          │                │
+                                 ┌────────┴────────┐       │
+                                 │  FastAPI (PDF +  │       │
+                                 │   admin + rooms) │───────┘
+                                 │ POST /api/rooms  │
+                                 └─────────────────┘
 ```
 
 ### Fluxo de dados
@@ -50,6 +51,7 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 | Chat | Frontend → INSERT messages → PostgreSQL NOTIFY → Realtime broadcast → todos os participantes |
 | Exportar PDF | Frontend coleta dados → `POST /api/pdf` → FastAPI (ReportLab) → download do PDF |
 | Criar usuário | Frontend → `POST /api/users` → FastAPI → Supabase Admin API → Auth + trigger cria profile |
+| Videoconferência | Frontend → `POST /api/rooms` → FastAPI cria sala no Daily.co → frontend entra com daily-js |
 
 ### Decisões arquiteturais
 
@@ -57,7 +59,7 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 |---|---|---|
 | Auth | Supabase Auth + JWT, sem middleware | RLS no banco valida permissão em cada consulta |
 | CRUD | Direto do frontend ao Supabase | Evita replicar lógica de negócio no backend |
-| FastAPI | Apenas PDF + admin | Operações que exigem `service_role_key` (não disponível no frontend) |
+| FastAPI | Apenas PDF + admin + vídeo | Operações que exigem chave secreta (service_role, Daily.co API key) |
 | Deploy | Dois projetos Vercel separados | Frontend como S3/CDN, backend como serverless function |
 | Chat | Supabase Realtime | Substitui WebSocket customizado, integrado ao banco |
 
@@ -66,6 +68,7 @@ Sistema de Prontuário Eletrônico SUAS para CRAS.
 - **Prontuário SUAS** — Registro único padronizado com 13 seções
 - **Busca de Requerentes** — Por CPF ou nome, com prontuários vinculados
 - **Chat interno** — Mensagens em tempo real entre profissionais
+- **Videoconferência** — Salas de vídeo públicas ou privadas (com código de acesso) entre profissionais, via Daily.co
 - **Exportação PDF** — Prontuário completo em PDF formatado
 - **Controle de Acesso** — 5 perfis: assistente social, psicólogo, pedagogo, técnico, gerente
 - **Escopo por CRAS** — Cada profissional vinculado a uma das 12 unidades de Belém; gerentes gerenciam apenas seu próprio CRAS
@@ -108,12 +111,13 @@ Cada profissional é vinculado a um CRAS no momento do cadastro. Gerentes só vi
 - Node.js 18+
 - Python 3.10+
 - Conta gratuita em [supabase.com](https://supabase.com)
+- Conta gratuita em [daily.co](https://daily.co) (para videoconferência)
 
 ## Setup rápido
 
 ### 1. Supabase
 
-Crie um projeto em supabase.com, execute `supabase/migrations/00001_schema.sql` no SQL Editor e configure Authentication.
+Crie um projeto em supabase.com, execute as migrations em ordem no SQL Editor (`00001_schema.sql`, `00002_add_cras.sql`, `00003_video_rooms.sql`) e configure Authentication.
 
 ### 2. Backend (local)
 
@@ -122,6 +126,7 @@ cd backend
 python -m venv venv && venv/Scripts/activate
 pip install -r requirements.txt
 cp .env.example .env
+# Configure SUPABASE_URL, SUPABASE_SERVICE_KEY, ALLOWED_ORIGINS e DAILY_API_KEY no .env
 uvicorn app.main:app --reload
 ```
 
@@ -170,6 +175,7 @@ O backend do EloSocial já inclui o arquivo `api/index.py` para funcionar como S
 | Env: `SUPABASE_URL` | URL do seu Supabase |
 | Env: `SUPABASE_SERVICE_KEY` | Service role key do Supabase |
 | Env: `ALLOWED_ORIGINS` | `https://elosocial.vercel.app` |
+| Env: `DAILY_API_KEY` | API key do Daily.co (videoconferência) |
 
 **Passo a passo:**
 1. Acesse [vercel.com/new](https://vercel.com/new)
@@ -185,12 +191,13 @@ O backend do EloSocial já inclui o arquivo `api/index.py` para funcionar como S
 
 ```
 elosocial/
-├── supabase/migrations/   # Schema SQL + RLS (00001) + CRAS (00002)
-├── backend/               # FastAPI (PDF + admin de usuários)
+├── supabase/migrations/   # Schema SQL + RLS (00001) + CRAS (00002) + Vídeo (00003)
+├── backend/               # FastAPI (PDF + admin + videoconferência)
+│   ├── app/api/video.py   # POST /api/rooms, /api/rooms/join
 │   └── app/services/pdf_generator.py
 └── frontend/              # React + PWA
     └── src/
-        ├── pages/         # Login, Dashboard, Requerentes, Prontuario, Chat, Admin
+        ├── pages/         # Login, Dashboard, Requerentes, Prontuario, Chat, Videoconferencia, Admin
         ├── components/    # Layout, Chat, Prontuario (seções), ProtectedRoute
         ├── hooks/         # useAuth, useRealtime
         ├── lib/supabase.js

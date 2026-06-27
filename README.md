@@ -1,258 +1,134 @@
-# EloSocial
+# EloSocial + IA Copiloto SUAS
 
-Sistema de Prontuário Eletrônico SUAS para CRAS.
+Sistema de Prontuário Eletrônico SUAS para CRAS, agora equipado com Inteligência Artificial avançada (Inspirado no projeto Arcane).
 
-## Stack
+## 🚀 Novas Funcionalidades de IA (Copiloto SUAS)
+
+O sistema foi atualizado com agentes de Inteligência Artificial para acelerar o trabalho dos assistentes sociais e técnicos:
+
+- **Triagem Inteligente:** Ao criar ou visualizar o dossiê de uma família, a IA analisa a renda, composição familiar e histórico, emitindo um Alerta de Vulnerabilidade (Score e Cor: Verde, Amarelo, Vermelho) e um parecer técnico instantâneo.
+- **Resumo Executivo Automático:** A IA lê todos os prontuários e históricos longos de uma família em segundos, gerando um resumo executivo pontual para que novos técnicos entendam o caso sem precisar ler dezenas de páginas.
+- **Assistente Contextual (Chat):** Um chat flutuante embutido dentro do Prontuário. O Copiloto sabe tudo sobre a família que você está visualizando e pode te ajudar a redigir laudos, sugerir políticas públicas e responder dúvidas sobre o caso.
+- **Cérebro Vetorial (RAG):** O sistema possui uma "Base de Conhecimento" onde gerentes podem colar textos de Manuais do SUAS, LOAS e diretrizes. A IA transforma esses textos em vetores matemáticos e, quando o técnico faz uma pergunta no chat, a IA vasculha a lei para dar uma resposta 100% embasada, zerando alucinações.
+
+---
+
+## 🛠️ Stack Tecnológico
 
 | Camada | Tecnologia |
 |---|---|
 | Frontend | React + JavaScript + Vite + PWA |
-| Backend | Python + FastAPI (PDF + admin de usuários) |
-| Banco + Auth | Supabase (PostgreSQL + Auth + Realtime + RLS) |
-| Chat | Supabase Realtime (WebSocket nativo) |
-| PDF | ReportLab |
+| Backend | Python + FastAPI |
+| Inteligência Artificial | Google Gemini API (gemini-2.5-flash e text-embedding-004) |
+| Banco de Dados (IA) | Supabase (PostgreSQL) com extensão `pgvector` |
+| Banco + Auth | Supabase (Auth + Realtime + RLS) |
 | Videoconferência | Daily.co API + daily-js SDK |
-
-## Arquitetura
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      FRONTEND (React PWA)                        │
-│                                                                 │
-│  ┌──────────┐ ┌───────────┐ ┌──────┐ ┌──────────────┐ ┌──────┐│
-│  │ Dashboard│ │Requerentes│ │ Chat │ │Videoconf.    │ │Admin ││
-│  └────┬─────┘ └─────┬─────┘ └──┬───┘ └──────┬───────┘ └──┬───┘│
-│       │              │          │            │            │    │
-│  ┌────▼──────────────▼──────────▼────────────▼────────────▼──┐│
-│  │                Supabase SDK (supabase-js)                  ││
-│  │        Auth · DB queries · Realtime · daily-js            ││
-│  └─────────────────────┬─────────────────────────────────────┘│
-└────────────────────────┼───────────────────────────────────────┘
-                         │
-           ┌─────────────┼──────────────┬──────────────┐
-           ▼             ▼              ▼              ▼
-┌──────────────────┐ ┌───────────┐ ┌──────────────┐ ┌──────────────┐
-│  Supabase Auth    │ │PostgreSQL │ │ Supabase API │ │ Daily.co API │
-│ (email + JWT)     │ │  (RLS)    │ │ (service_key)│ │  (vídeo)     │
-└──────────────────┘ └───────────┘ └──────┬───────┘ └──────▲───────┘
-                                          │                │
-                                 ┌────────┴────────┐       │
-                                 │  FastAPI (PDF +  │       │
-                                 │   admin + rooms) │───────┘
-                                 │ POST /api/rooms  │
-                                 └─────────────────┘
-```
-
-### Fluxo de dados
-
-| Operação | Caminho |
-|---|---|
-| CRUD (requerentes, prontuários) | Frontend → Supabase SDK → PostgreSQL (RLS valida o JWT do usuário) → resposta direta |
-| Chat | Frontend → INSERT messages → PostgreSQL NOTIFY → Realtime broadcast → todos os participantes |
-| Exportar PDF | Frontend coleta dados → `POST /api/pdf` → FastAPI (ReportLab) → download do PDF |
-| Criar usuário | Frontend → `POST /api/users` → FastAPI → Supabase Admin API → Auth + trigger cria profile |
-| Videoconferência | Frontend → `POST /api/rooms` → FastAPI cria sala no Daily.co → frontend entra com daily-js |
-
-### Decisões arquiteturais
-
-| Decisão | Escolha | Motivo |
-|---|---|---|
-| Auth | Supabase Auth + JWT, sem middleware | RLS no banco valida permissão em cada consulta |
-| CRUD | Direto do frontend ao Supabase | Evita replicar lógica de negócio no backend |
-| FastAPI | Apenas PDF + admin + vídeo | Operações que exigem chave secreta (service_role, Daily.co API key) |
-| Deploy | Dois projetos Vercel separados | Frontend como S3/CDN, backend como serverless function |
-| Chat | Supabase Realtime | Substitui WebSocket customizado, integrado ao banco |
-
-## Funcionalidades
-
-- **Prontuário SUAS** — Registro único padronizado com 13 seções
-- **Busca de Requerentes** — Por CPF ou nome, com prontuários vinculados
-- **Chat interno** — Mensagens em tempo real entre profissionais
-- **Videoconferência** — Salas de vídeo públicas ou privadas (com código de acesso) entre profissionais, via Daily.co
-- **Exportação PDF** — Prontuário completo em PDF formatado
-- **Controle de Acesso** — 5 perfis: assistente social, psicólogo, pedagogo, técnico, gerente
-- **Escopo por CRAS** — Cada profissional vinculado a uma das 12 unidades de Belém; gerentes gerenciam apenas seu próprio CRAS
-- **Dispositivo Móvel** — PWA instalável no celular
-- **Estatísticas** *(futuro)* — Dashboard gerencial com gráficos de atendimentos, prontuários e indicadores da unidade
-
-## Perfis
-
-| Perfil | Acesso |
-|---|---|
-| Assistente Social | Cadastra requerentes, preenche seções social/habitacional/trabalho/benefícios/encaminhamentos |
-| Psicólogo | Preenche seções saúde/convivência/violência/observações |
-| Pedagogo | Preenche seções educacional/participação/observações |
-| Técnico | Preenche composição familiar/atendimentos/encaminhamentos |
-| Gerente | Acessa tudo, gerencia usuários, auditoria |
-
-## Unidades CRAS
-
-O sistema atende 12 unidades do CRAS em Belém/PA:
-
-| CRAS | Região |
-|---|---|
-| CRAS Aura | |
-| CRAS Barreiro | |
-| CRAS Bengui | |
-| CRAS Cremação | |
-| CRAS Guama | |
-| CRAS Icoaraci | |
-| CRAS Jurunas | |
-| CRAS Mosqueiro | |
-| CRAS Outeiro | |
-| CRAS Pedreira | |
-| CRAS Tapana | |
-| CRAS Terra Firme | |
-
-Cada profissional é vinculado a um CRAS no momento do cadastro. Gerentes só visualizam e gerenciam usuários do seu próprio CRAS.
-
-## Pré-requisitos
-
-- Node.js 18+
-- Python 3.10+
-- Conta gratuita em [supabase.com](https://supabase.com)
-- Conta gratuita em [daily.co](https://daily.co) (para videoconferência)
-
-## Setup rápido
-
-### 🐳 Rodar com Docker (Recomendado & Mais Simples)
-
-Para rodar com Docker sem precisar instalar Node.js ou Python na sua máquina:
-
-1. **Configurar as variáveis de ambiente:**
-   - No **Linux/macOS**, execute `./run.sh`
-   - No **Windows**, execute `run.bat` (ou dê dois cliques no arquivo)
-2. **Atualizar credenciais:**
-   Abra os arquivos `.env` gerados em `backend/.env` e `frontend/.env` e configure suas chaves do Supabase.
-3. **Acessar:**
-   - Frontend: [http://localhost:5173](http://localhost:5173)
-   - Backend API: [http://localhost:8000](http://localhost:8000)
-
-*Para mais detalhes, confira o guia completo em [DOCKER.md](file:///home/gabriel/Downloads/EloSocial-main/DOCKER.md).*
 
 ---
 
-### 🛠️ Setup Manual (Sem Docker)
+## 📋 Funcionalidades Clássicas do Sistema
 
-#### 1. Supabase
+- **Gestão de Requerentes:** Cadastro completo com filtros inteligentes (Urbano/Rural).
+- **Prontuário SUAS Versionado:** Registro padronizado, seguro e com histórico imutável (Timeline).
+- **Dashboard Analítico:** Visão geral do município com gráficos e métricas.
+- **Agenda de Atendimentos:** Controle de sessões, reuniões e visitas domiciliares com alertas de atraso.
+- **Mensagens da Equipe:** Chat interno em tempo real para comunicação rápida entre técnicos.
+- **Videoconferência:** Salas privadas e seguras para atendimento remoto.
+- **Controles de Acesso (RBAC):** Permissões granulares para Assistentes Sociais, Psicólogos, Pedagogos, Técnicos e Gerentes. Escopo restrito por unidade CRAS.
 
-Crie um projeto em supabase.com, execute as migrations em ordem no SQL Editor (`00001_schema.sql`, `00002_add_cras.sql`, `00003_video_rooms.sql`) e configure Authentication.
+---
 
-#### 2. Backend (local)
+## ⚙️ Como Rodar Localmente (Setup Rápido via Docker)
 
+A maneira mais fácil de rodar o projeto inteiro (Frontend + Backend Python) na sua máquina é utilizando o Docker.
+
+### 1. Preparação
+Você precisará de:
+1. Docker Desktop instalado.
+2. Conta no [Supabase](https://supabase.com).
+3. Chave de API do [Google Gemini (Google AI Studio)](https://aistudio.google.com/app/apikey).
+
+### 2. Configure o Banco de Dados (Supabase)
+No painel do seu projeto no Supabase, abra o "SQL Editor" e rode as _migrations_ na ordem exata para criar o banco e habilitar a IA vetorial:
+1. `supabase/migrations/00001_schema.sql`
+2. `supabase/migrations/00002_add_cras.sql`
+3. `supabase/migrations/00003_video_rooms.sql`
+4. `supabase/migrations/00004_prontuario_anexos.sql`
+5. `supabase/migrations/00005_agendamentos.sql`
+6. `supabase/migrations/00006_triagem_vulnerabilidade.sql`
+7. `supabase/migrations/00007_rag_pgvector.sql` (Crucial para o Cérebro Vetorial da IA)
+
+### 3. Variáveis de Ambiente
+Crie ou edite os arquivos `.env` baseando-se nos `.env.example`:
+
+**No `frontend/.env`:**
+```env
+VITE_SUPABASE_URL=sua_url_do_supabase
+VITE_SUPABASE_ANON_KEY=sua_anon_key_do_supabase
+VITE_API_URL=http://localhost:8000
+```
+
+**No `backend/.env`:**
+```env
+SUPABASE_URL=sua_url_do_supabase
+SUPABASE_SERVICE_KEY=sua_service_role_key_do_supabase
+GEMINI_API_KEY=sua_chave_do_google_ai_studio
+ALLOWED_ORIGINS=http://localhost:5173
+```
+
+### 4. Rodando o Projeto
+Abra o terminal na raiz do projeto e execute:
+- **Windows:** Dê um duplo clique no arquivo `run.bat` ou rode `.\run.bat` no terminal.
+- **Linux/Mac:** Rode `./run.sh` no terminal.
+
+O Docker vai baixar todas as dependências, iniciar o servidor Python na porta `8000` e o painel React na porta `5173`.
+- **Acesse:** `http://localhost:5173`
+
+---
+
+## 🛠️ Como Rodar Manualmente (Sem Docker)
+
+Se preferir rodar sem o Docker:
+
+### 1. Backend (Python)
 ```bash
 cd backend
-python -m venv venv && venv/Scripts/activate
+python -m venv venv
+venv\Scripts\activate  # No Windows
+# source venv/bin/activate # No Linux/Mac
 pip install -r requirements.txt
-cp .env.example .env
-# Configure SUPABASE_URL, SUPABASE_SERVICE_KEY, ALLOWED_ORIGINS e DAILY_API_KEY no .env
+# Certifique-se de ter configurado o backend/.env
 uvicorn app.main:app --reload
 ```
 
-#### 3. Frontend (local)
-
+### 2. Frontend (Node.js)
+Abra outro terminal:
 ```bash
 cd frontend
 npm install
-cp .env.example .env
+# Certifique-se de ter configurado o frontend/.env
 npm run dev
 ```
 
+---
 
-## Deploy no Vercel
-
-O projeto está configurado para deploy como **dois projetos separados** no Vercel (monorepo).
-
-### Frontend (elosocial.vercel.app)
-
-| Config | Valor |
-|---|---|
-| Root Directory | `frontend` |
-| Framework | Vite |
-| Build Command | `npm run build` |
-| Output | `dist` |
-| Env: `VITE_SUPABASE_URL` | URL do seu Supabase |
-| Env: `VITE_SUPABASE_ANON_KEY` | Anon key do Supabase |
-| Env: `VITE_API_URL` | URL do backend (ex: `https://elosocial-api.vercel.app`) |
-
-**Passo a passo:**
-1. Acesse [vercel.com/new](https://vercel.com/new)
-2. Importe o repositório git
-3. Em **Root Directory**, digite `frontend`
-4. Clique em **Deploy**
-5. Vá em **Settings > Environment Variables** e adicione as 3 variáveis acima
-6. Re-deploy
-
-### Backend (elosocial-api.vercel.app)
-
-O backend do EloSocial já inclui o arquivo `api/index.py` para funcionar como Serverless Function no Vercel.
-
-| Config | Valor |
-|---|---|
-| Root Directory | `backend` |
-| Framework | Other |
-| Build | Detectado automaticamente (`@vercel/python`) |
-| Env: `SUPABASE_URL` | URL do seu Supabase |
-| Env: `SUPABASE_SERVICE_KEY` | Service role key do Supabase |
-| Env: `ALLOWED_ORIGINS` | `https://elosocial.vercel.app` |
-| Env: `DAILY_API_KEY` | API key do Daily.co (videoconferência) |
-
-**Passo a passo:**
-1. Acesse [vercel.com/new](https://vercel.com/new)
-2. Importe o **mesmo** repositório
-3. Em **Root Directory**, digite `backend`
-4. Clique em **Deploy**
-5. Vá em **Settings > Environment Variables** e adicione as variáveis
-6. Re-deploy
-
-> **Atenção:** O Vercel tem limite de 10s para serverless functions. Para relatórios PDF muito grandes, considere usar [Render](https://render.com) para o backend (suporta processos longos).
-
-## Estrutura
+## 🏗️ Estrutura do Projeto
 
 ```
-elosocial/
-├── supabase/migrations/   # Schema SQL + RLS (00001) + CRAS (00002) + Vídeo (00003)
-├── backend/               # FastAPI (PDF + admin + videoconferência)
-│   ├── app/api/video.py   # POST /api/rooms, /api/rooms/join
-│   └── app/services/pdf_generator.py
-└── frontend/              # React + PWA
+EloSocial-main/
+├── supabase/migrations/   # Scripts SQL para criar o banco e as funções da IA
+├── backend/               # Motor Python
+│   ├── app/api/ai.py      # Endpoints do Copiloto, Resumo e Triagem (Gemini)
+│   ├── app/api/rag.py     # Endpoints de vetorização e busca na lei (RAG)
+│   └── app/main.py        # Inicialização do FastAPI
+└── frontend/              # Interface React Premium
     └── src/
-        ├── pages/         # Login, Dashboard, Requerentes, Prontuario, Chat, Videoconferencia, Admin
-        ├── components/    # Layout, Chat, Prontuario (seções), ProtectedRoute
-        ├── hooks/         # useAuth, useRealtime
-        ├── lib/supabase.js
-        └── utils/         # roles, prontuarioSchema, format
-```
-
-## Fluxo Git
-
-```bash
-# Criar e trocar para uma nova branch
-git checkout -b nome-da-feature
-
-# Verificar arquivos modificados
-git status
-
-# Adicionar arquivos ao stage
-git add .
-git add caminho/do/arquivo   # ou específico
-
-# Commitar com mensagem descritiva
-git commit -m "Descrição do que foi feito"
-
-# Trocar para outra branch já existente
-git checkout nome-da-branch
-
-# Buscar alterações do remoto
-git pull
-
-# Publicar commits no remoto (primeiro push da branch)
-git push -u origin nome-da-branch
-
-# Publicar commits nas próximas vezes
-git push
+        ├── pages/         # Dashboard, Requerentes, RequerenteDetail, BaseConhecimento
+        ├── components/    # ChatLLM (Chat da IA), Sidebar, SlideOver
+        ├── lib/           # Conexão com Supabase
+        └── utils/         # Utilitários de formatação
 ```
 
 ## Licença
 
-Projeto interno — uso exclusivo da rede socioassistencial.
+Projeto desenvolvido para a rede socioassistencial (Inspirado no case Arcane). Uso interno e governamental.

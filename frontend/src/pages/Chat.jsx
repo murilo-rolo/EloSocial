@@ -73,7 +73,16 @@ export default function Chat() {
   const selectedContact = contacts.find(c => c.id === selectedId)
 
   return (
-    <Layout title="Chat">
+    <Layout title="Mensagens">
+      <div style={{ marginBottom: 32 }}>
+        <h1 className="page-title font-serif">
+          Mensagens <em>da Equipe</em>.
+        </h1>
+        <p className="page-subtitle">
+          Comunique-se com outros profissionais e gerentes do CRAS.
+        </p>
+      </div>
+
       <div className="chat-container">
         <div className="chat-list">
           <div className="chat-list-header">Contatos</div>

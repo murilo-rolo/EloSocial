@@ -41,7 +41,8 @@ def create_user(data: CreateUserRequest):
     )
 
     if resp.status_code != 200 and resp.status_code != 201:
-        raise HTTPException(status_code=resp.status_code, detail=resp.json().get("msg", "Erro ao criar usuário"))
+        error_msg = resp.json().get("message", "Erro ao criar usuário")
+        raise HTTPException(status_code=resp.status_code, detail=error_msg)
 
     return {"ok": True, "user": resp.json()}
 

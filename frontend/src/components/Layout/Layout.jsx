@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import GlobalChat from '../GlobalChat'
 
 export default function Layout({ children, title }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -21,6 +22,7 @@ export default function Layout({ children, title }) {
           {children}
         </main>
       </div>
+      <GlobalChat />
     </div>
   )
 }

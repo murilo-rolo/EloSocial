@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate } from '../utils/format'
+import { Search, Plus, Eye } from 'lucide-react'
 
 export default function Requerentes() {
   const navigate = useNavigate()
   const [requerentes, setRequerentes] = useState([])
   const [search, setSearch] = useState('')
+  const [filtroLocal, setFiltroLocal] = useState('')
+  const [filtroSexo, setFiltroSexo] = useState('')
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({
@@ -22,12 +25,14 @@ export default function Requerentes() {
     if (search) {
       query = query.or(`nome.ilike.%${search}%,cpf.ilike.%${search}%`)
     }
+    if (filtroLocal) query = query.eq('localizacao', filtroLocal)
+    if (filtroSexo) query = query.eq('sexo', filtroSexo)
     const { data } = await query
     setRequerentes(data || [])
     setLoading(false)
   }
 
-  useEffect(() => { loadRequerentes() }, [search])
+  useEffect(() => { loadRequerentes() }, [search, filtroLocal, filtroSexo])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -47,24 +52,45 @@ export default function Requerentes() {
 
   return (
     <Layout title="Requerentes">
-      <div className="card">
-        <div className="card-header">
-          <div className="search-box">
-            <span className="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Buscar por nome ou CPF..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            + Novo Requerente
+      <div style={{ marginBottom: 32 }}>
+        <h1 className="page-title">
+          Requerentes <em>& Famílias</em>.
+        </h1>
+        <p className="page-subtitle">
+          Gerencie os cadastros do município. Use a busca ou os filtros rápidos para encontrar as famílias.
+        </p>
+      </div>
+
+      <div className="toolbar">
+        <div className="search-box">
+          <Search size={18} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Buscar por nome ou CPF..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        
+        <div className="filter-pills">
+          <button className={`pill ${!filtroLocal && !filtroSexo ? 'active' : ''}`} onClick={() => { setFiltroLocal(''); setFiltroSexo('') }}>
+            Todos
+          </button>
+          <button className={`pill ${filtroLocal === 'urbano' ? 'active' : ''}`} onClick={() => setFiltroLocal(filtroLocal === 'urbano' ? '' : 'urbano')}>
+            Zona Urbana
+          </button>
+          <button className={`pill ${filtroLocal === 'rural' ? 'active' : ''}`} onClick={() => setFiltroLocal(filtroLocal === 'rural' ? '' : 'rural')}>
+            Zona Rural
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ marginLeft: 8, padding: '8px 16px', borderRadius: 24 }}>
+            <Plus size={18} /> Novo Requerente
           </button>
         </div>
+      </div>
 
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
-          <div className="loading">Carregando...</div>
+          <div className="loading" style={{ padding: 40 }}>Carregando...</div>
         ) : requerentes.length === 0 ? (
           <div className="empty-state">
             <div className="icon">👥</div>
@@ -75,29 +101,56 @@ export default function Requerentes() {
             <table>
               <thead>
                 <tr>
-                  <th>Nome</th>
-                  <th>CPF</th>
-                  <th>Nascimento</th>
-                  <th>Telefone</th>
-                  <th></th>
+                  <th style={{ paddingLeft: 24 }}>Requerente Principal</th>
+                  <th>Contato</th>
+                  <th>Triagem</th>
+                  <th style={{ textAlign: 'right', paddingRight: 24 }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {requerentes.map((r) => (
                   <tr key={r.id} onClick={() => navigate(`/requerentes/${r.id}`)} style={{ cursor: 'pointer' }}>
-                    <td><strong>{r.nome}</strong></td>
-                    <td>{formatCPF(r.cpf)}</td>
-                    <td>{formatDate(r.data_nascimento)}</td>
-                    <td>{r.telefone || '—'}</td>
+                    <td style={{ paddingLeft: 24 }}>
+                      <div className="cell-inline">
+                        <div className="cell-avatar">{r.nome.charAt(0).toUpperCase()}</div>
+                        <div className="cell-text">
+                          <span className="name">{r.nome}</span>
+                          <span className="meta">{formatCPF(r.cpf) || 'Sem CPF'}</span>
+                        </div>
+                      </div>
+                    </td>
                     <td>
-                      <button className="btn btn-sm btn-outline" onClick={(e) => { e.stopPropagation(); navigate(`/requerentes/${r.id}`) }}>
-                        Ver
+                      <div className="cell-text">
+                        <span>{r.telefone || '—'}</span>
+                        <span className="meta">{formatDate(r.data_nascimento)}</span>
+                      </div>
+                    </td>
+                    <td>
+                      {r.vulnerabilidade_score ? (
+                        <span className={`badge badge-risco-${r.vulnerabilidade_cor === 'vermelho' ? 'alto' : r.vulnerabilidade_cor === 'amarelo' ? 'medio' : 'baixo'}`}>
+                          {r.vulnerabilidade_score}
+                        </span>
+                      ) : (
+                        <span className="badge" style={{ background: '#f1f5f9', color: '#64748b' }}>Triagem Pendente</span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right', paddingRight: 24 }}>
+                      <button 
+                        className="btn btn-outline" 
+                        style={{ padding: '8px', borderRadius: '50%', background: 'transparent', border: 'none', color: 'var(--text-light)' }} 
+                        title="Ver Perfil"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/requerentes/${r.id}`) }}
+                      >
+                        <Eye size={20} />
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', fontSize: 13, color: 'var(--text-light)' }}>
+              {requerentes.length} requerentes listados
+            </div>
           </div>
         )}
       </div>
@@ -106,22 +159,26 @@ export default function Requerentes() {
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 2000, padding: 20,
+          zIndex: 2000, padding: 20, backdropFilter: 'blur(4px)'
         }} onClick={() => setShowModal(false)}>
           <div style={{
-            background: 'white', borderRadius: 12, padding: 24,
+            background: 'white', borderRadius: 16, padding: 32,
             width: '100%', maxWidth: 600, maxHeight: '90vh', overflow: 'auto',
+            boxShadow: 'var(--shadow-lg)'
           }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ marginBottom: 20 }}>Novo Requerente</h3>
+            <div className="eyebrow">NOVO CADASTRO</div>
+            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--primary)' }}>
+              Cadastrar <em>Requerente</em>
+            </h2>
             <form onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
                   <label>Nome completo *</label>
-                  <input className="form-control" value={form.nome} onChange={(e) => setForm({...form, nome: e.target.value})} required />
+                  <input className="form-control" value={form.nome} onChange={(e) => setForm({...form, nome: e.target.value})} required placeholder="Ex: Maria da Silva" />
                 </div>
                 <div className="form-group">
                   <label>CPF</label>
-                  <input className="form-control" value={form.cpf} onChange={(e) => setForm({...form, cpf: e.target.value})} />
+                  <input className="form-control" value={form.cpf} onChange={(e) => setForm({...form, cpf: e.target.value})} placeholder="000.000.000-00" />
                 </div>
               </div>
               <div className="form-row">
@@ -155,7 +212,7 @@ export default function Requerentes() {
                 </div>
                 <div className="form-group">
                   <label>Telefone</label>
-                  <input className="form-control" value={form.telefone} onChange={(e) => setForm({...form, telefone: e.target.value})} />
+                  <input className="form-control" value={form.telefone} onChange={(e) => setForm({...form, telefone: e.target.value})} placeholder="(00) 00000-0000" />
                 </div>
               </div>
               <div className="form-group">
@@ -170,10 +227,10 @@ export default function Requerentes() {
                 <label>Observações</label>
                 <textarea className="form-control" value={form.observacoes} onChange={(e) => setForm({...form, observacoes: e.target.value})} />
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-                <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? 'Salvando...' : 'Salvar'}
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+                <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)} style={{ borderRadius: 20 }}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" disabled={saving} style={{ borderRadius: 20, paddingLeft: 24, paddingRight: 24 }}>
+                  {saving ? 'Salvando...' : 'Salvar cadastro'}
                 </button>
               </div>
             </form>

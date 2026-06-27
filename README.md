@@ -115,11 +115,30 @@ Cada profissional é vinculado a um CRAS no momento do cadastro. Gerentes só vi
 
 ## Setup rápido
 
-### 1. Supabase
+### 🐳 Rodar com Docker (Recomendado & Mais Simples)
+
+Para rodar com Docker sem precisar instalar Node.js ou Python na sua máquina:
+
+1. **Configurar as variáveis de ambiente:**
+   - No **Linux/macOS**, execute `./run.sh`
+   - No **Windows**, execute `run.bat` (ou dê dois cliques no arquivo)
+2. **Atualizar credenciais:**
+   Abra os arquivos `.env` gerados em `backend/.env` e `frontend/.env` e configure suas chaves do Supabase.
+3. **Acessar:**
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend API: [http://localhost:8000](http://localhost:8000)
+
+*Para mais detalhes, confira o guia completo em [DOCKER.md](file:///home/gabriel/Downloads/EloSocial-main/DOCKER.md).*
+
+---
+
+### 🛠️ Setup Manual (Sem Docker)
+
+#### 1. Supabase
 
 Crie um projeto em supabase.com, execute as migrations em ordem no SQL Editor (`00001_schema.sql`, `00002_add_cras.sql`, `00003_video_rooms.sql`) e configure Authentication.
 
-### 2. Backend (local)
+#### 2. Backend (local)
 
 ```bash
 cd backend
@@ -130,7 +149,7 @@ cp .env.example .env
 uvicorn app.main:app --reload
 ```
 
-### 3. Frontend (local)
+#### 3. Frontend (local)
 
 ```bash
 cd frontend
@@ -138,6 +157,7 @@ npm install
 cp .env.example .env
 npm run dev
 ```
+
 
 ## Deploy no Vercel
 

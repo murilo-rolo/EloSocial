@@ -94,6 +94,15 @@ export default function Admin() {
 
   return (
     <Layout title="Administração">
+      <div style={{ marginBottom: 32 }}>
+        <h1 className="page-title font-serif">
+          Administração <em>do Sistema</em>.
+        </h1>
+        <p className="page-subtitle">
+          Gerencie usuários, permissões e consulte o registro de auditoria.
+        </p>
+      </div>
+
       <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
         <button
           className={`btn btn-sm ${tab === 'users' ? 'btn-primary' : 'btn-outline'}`}
@@ -226,18 +235,21 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Modal Novo Usuário */}
       {showAddModal && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 2000, padding: 20,
+          zIndex: 2000, padding: 20, backdropFilter: 'blur(4px)'
         }} onClick={() => setShowAddModal(false)}>
           <div style={{
-            background: 'white', borderRadius: 12, padding: 24,
-            width: '100%', maxWidth: 450,
+            background: 'white', borderRadius: 16, padding: 32,
+            width: '100%', maxWidth: 450, maxHeight: '90vh', overflow: 'auto',
+            boxShadow: 'var(--shadow-lg)'
           }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ marginBottom: 20 }}>Novo Usuário</h3>
+            <div className="eyebrow">NOVO ACESSO</div>
+            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--primary)' }}>
+              Criar <em>Usuário</em>
+            </h2>
             <form onSubmit={handleCreateUser}>
               <div className="form-group">
                 <label>Nome completo *</label>
@@ -275,11 +287,11 @@ export default function Admin() {
                   ))}
                 </select>
               </div>
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-                <button type="button" className="btn btn-outline" onClick={() => setShowAddModal(false)}>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+                <button type="button" className="btn btn-outline" onClick={() => setShowAddModal(false)} style={{ borderRadius: 20 }}>
                   Cancelar
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
+                <button type="submit" className="btn btn-primary" disabled={saving} style={{ borderRadius: 20, paddingLeft: 24, paddingRight: 24 }}>
                   {saving ? 'Criando...' : 'Criar Usuário'}
                 </button>
               </div>

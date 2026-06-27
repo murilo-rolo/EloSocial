@@ -1,21 +1,22 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { ROLE_LABELS, canManageUsers } from '../../utils/roles'
+import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
   const { profile } = useAuth()
-  const location = useLocation()
 
   const links = [
-    { to: '/', label: 'Dashboard', icon: '📊', end: true },
-    { to: '/requerentes', label: 'Requerentes', icon: '👥' },
-    { to: '/prontuarios', label: 'Prontuários', icon: '📋' },
-    { to: '/chat', label: 'Chat', icon: '💬' },
-    { to: '/videoconferencia', label: 'Videoconferência', icon: '📹' },
+    { to: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
+    { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
+    { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
+    { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
+    { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
+    { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
   ]
 
   if (canManageUsers(profile?.role)) {
-    links.push({ to: '/admin', label: 'Admin', icon: '⚙️' })
+    links.push({ to: '/admin', label: 'Admin', icon: <Settings size={20} /> })
   }
 
   return (
@@ -23,8 +24,8 @@ export default function Sidebar({ open, onClose }) {
       <div className={`sidebar-overlay ${open ? 'visible' : ''}`} onClick={onClose} />
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h2>EloSocial</h2>
-          <span>Prontuário SUAS</span>
+          <h2 className="font-serif">EloSocial</h2>
+          <span style={{ letterSpacing: 1 }}>PRONTUÁRIO SUAS</span>
         </div>
         <nav className="sidebar-nav">
           {links.map((link) => (
@@ -35,7 +36,9 @@ export default function Sidebar({ open, onClose }) {
               className={({ isActive }) => isActive ? 'active' : ''}
               onClick={onClose}
             >
-              <span className="nav-icon">{link.icon}</span>
+              <span className="nav-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {link.icon}
+              </span>
               {link.label}
             </NavLink>
           ))}

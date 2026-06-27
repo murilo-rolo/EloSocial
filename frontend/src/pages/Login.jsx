@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function Login() {
@@ -67,7 +67,15 @@ export default function Login() {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+
+        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-light)' }}>
+          Não tem uma conta?{' '}
+          <Link to="/cadastro" style={{ color: 'var(--secondary)', fontWeight: 600 }}>
+            Criar conta
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
+

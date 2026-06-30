@@ -38,37 +38,54 @@ O sistema foi atualizado com agentes de Inteligência Artificial para acelerar o
 
 ---
 
-## ⚙️ Como Rodar Localmente (Setup Rápido via Docker)
+## ⚙️ Setup Inicial (Gerar Arquivos de Configuração)
 
-A maneira mais fácil de rodar o projeto inteiro (Frontend + Backend Python) na sua máquina é utilizando o Docker.
+O repositório não versiona arquivos com credenciais (`.env`) nem arquivos Docker (`docker-compose.yml`, `Dockerfile`) — eles são gerados a partir de templates `.example`.
 
-### 1. Preparação
-Você precisará de:
-1. Docker Desktop instalado.
-2. Conta no [Supabase](https://supabase.com).
-3. Chave de API do [Google Gemini (Google AI Studio)](https://aistudio.google.com/app/apikey).
+Rode o script de setup para criar todos os arquivos de uma vez:
+
+- **Linux/Mac:** `./setup.sh`
+- **Windows:** `setup.bat`
+
+Isso vai gerar (se não existirem):
+- `frontend/.env` ← de `frontend/.env.example`
+- `backend/.env` ← de `backend/.env.example`
+- `docker-compose.yml` ← de `docker-compose.example.yml`
+- `backend/Dockerfile` ← de `backend/Dockerfile.example`
+- `frontend/Dockerfile` ← de `frontend/Dockerfile.example`
+
+Depois, edite os `.env` com suas credenciais reais do Supabase e Google Gemini.
+
+---
+
+## 🐳 Como Rodar com Docker
+
+### 1. Pré-requisitos
+- [Docker Desktop](https://docs.docker.com/products/docker-desktop/) instalado
+- Conta no [Supabase](https://supabase.com)
+- Chave de API do [Google Gemini (Google AI Studio)](https://aistudio.google.com/app/apikey)
 
 ### 2. Configure o Banco de Dados (Supabase)
-No painel do seu projeto no Supabase, abra o "SQL Editor" e rode as _migrations_ na ordem exata para criar o banco e habilitar a IA vetorial:
+No painel do seu projeto no Supabase, abra o "SQL Editor" e rode as _migrations_ na ordem:
 1. `supabase/migrations/00001_schema.sql`
 2. `supabase/migrations/00002_add_cras.sql`
 3. `supabase/migrations/00003_video_rooms.sql`
 4. `supabase/migrations/00004_prontuario_anexos.sql`
 5. `supabase/migrations/00005_agendamentos.sql`
 6. `supabase/migrations/00006_triagem_vulnerabilidade.sql`
-7. `supabase/migrations/00007_rag_pgvector.sql` (Crucial para o Cérebro Vetorial da IA)
+7. `supabase/migrations/00007_rag_pgvector.sql`
 
 ### 3. Variáveis de Ambiente
-Crie ou edite os arquivos `.env` baseando-se nos `.env.example`:
+Edite os arquivos criados pelo `setup.sh`:
 
-**No `frontend/.env`:**
+**`frontend/.env`:**
 ```env
 VITE_SUPABASE_URL=sua_url_do_supabase
 VITE_SUPABASE_ANON_KEY=sua_anon_key_do_supabase
 VITE_API_URL=http://localhost:8000
 ```
 
-**No `backend/.env`:**
+**`backend/.env`:**
 ```env
 SUPABASE_URL=sua_url_do_supabase
 SUPABASE_SERVICE_KEY=sua_service_role_key_do_supabase
@@ -76,19 +93,17 @@ GEMINI_API_KEY=sua_chave_do_google_ai_studio
 ALLOWED_ORIGINS=http://localhost:5173
 ```
 
-### 4. Rodando o Projeto
-Abra o terminal na raiz do projeto e execute:
-- **Windows:** Dê um duplo clique no arquivo `run.bat` ou rode `.\run.bat` no terminal.
-- **Linux/Mac:** Rode `./run.sh` no terminal.
+### 4. Rodar
+- **Windows:** `run.bat` ou duplo clique
+- **Linux/Mac:** `./run.sh`
 
-O Docker vai baixar todas as dependências, iniciar o servidor Python na porta `8000` e o painel React na porta `5173`.
+O script `run.sh`/`run.bat` executa `setup.sh`/`setup.bat` automaticamente e depois sobe os containers com `docker compose up --build`.
+
 - **Acesse:** `http://localhost:5173`
 
 ---
 
 ## 🛠️ Como Rodar Manualmente (Sem Docker)
-
-Se preferir rodar sem o Docker:
 
 ### 1. Backend (Python)
 ```bash
@@ -102,7 +117,6 @@ uvicorn app.main:app --reload
 ```
 
 ### 2. Frontend (Node.js)
-Abra outro terminal:
 ```bash
 cd frontend
 npm install
@@ -116,17 +130,22 @@ npm run dev
 
 ```
 EloSocial-main/
-├── supabase/migrations/   # Scripts SQL para criar o banco e as funções da IA
-├── backend/               # Motor Python
-│   ├── app/api/ai.py      # Endpoints do Copiloto, Resumo e Triagem (Gemini)
-│   ├── app/api/rag.py     # Endpoints de vetorização e busca na lei (RAG)
-│   └── app/main.py        # Inicialização do FastAPI
-└── frontend/              # Interface React Premium
+├── setup.sh / setup.bat        # Gera .env e Dockerfiles a partir dos .example
+├── run.sh / run.bat            # Chama setup + docker compose up --build
+├── docker-compose.example.yml  # Template do docker-compose
+├── supabase/migrations/        # Scripts SQL para criar o banco e as funções da IA
+├── backend/                    # Motor Python
+│   ├── Dockerfile.example      # Template do Dockerfile do backend
+│   ├── app/api/ai.py           # Endpoints do Copiloto, Resumo e Triagem (Gemini)
+│   ├── app/api/rag.py          # Endpoints de vetorização e busca na lei (RAG)
+│   └── app/main.py             # Inicialização do FastAPI
+└── frontend/                   # Interface React Premium
+    ├── Dockerfile.example      # Template do Dockerfile do frontend
     └── src/
-        ├── pages/         # Dashboard, Requerentes, RequerenteDetail, BaseConhecimento
-        ├── components/    # ChatLLM (Chat da IA), Sidebar, SlideOver
-        ├── lib/           # Conexão com Supabase
-        └── utils/         # Utilitários de formatação
+        ├── pages/              # Dashboard, Requerentes, RequerenteDetail, BaseConhecimento
+        ├── components/         # ChatLLM (Chat da IA), Sidebar, SlideOver
+        ├── lib/                # Conexão com Supabase
+        └── utils/              # Utilitários de formatação
 ```
 
 ## Licença

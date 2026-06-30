@@ -2,21 +2,25 @@
 
 ```
 elosocial/
+├── setup.sh / setup.bat              # Gera .env e Dockerfiles a partir dos .example
+├── run.sh / run.bat                  # Chama setup + docker compose up --build
+├── docker-compose.example.yml        # Template do docker-compose (ignorado pelo .gitignore)
+├── .gitignore
 ├── .opencode/
 │   └── skills/elosocial/
 │       ├── SKILL.md
 │       ├── ESTRUTURA.md       ← este arquivo
 │       ├── MODELO_DADOS.md
 │       ├── ROTAS.md
-│       ├── OBSERVACOES.md
-│       └── BACKLOG.md
+│       └── OBSERVACOES.md
 ├── README.md
-├── BACKLOG.md
+├── DOCKER.md
 ├── supabase/migrations/
 │   ├── 00001_schema.sql       ← Schema + RLS + triggers
 │   ├── 00002_add_cras.sql     ← CRAS: coluna `cras` + RLS atualizada
 │   └── 00003_video_rooms.sql  ← Videoconferência: tabelas + RLS
 ├── backend/                   ← FastAPI (Vercel serverless)
+│   ├── Dockerfile.example     ← Template do Dockerfile do backend
 │   ├── app/
 │   │   ├── main.py            ← App FastAPI + CORS + rotas
 │   │   ├── config.py          ← SUPABASE_URL, SERVICE_KEY, ALLOWED_ORIGINS
@@ -29,6 +33,7 @@ elosocial/
 │   ├── api/index.py           ← Entry point Vercel
 │   └── vercel.json
 └── frontend/                  ← React + PWA (Vite)
+    ├── Dockerfile.example     ← Template do Dockerfile do frontend
     ├── src/
     │   ├── main.jsx           ← Entry point
     │   ├── App.jsx            ← React Router (9 rotas)

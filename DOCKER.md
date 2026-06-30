@@ -14,24 +14,25 @@ Antes de iniciar, certifique-se de ter instalado em sua máquina:
 
 ## ⚡ Como Rodar o Projeto
 
-### Passo 1: Preparar as Variáveis de Ambiente (`.env`)
+### Passo 1: Gerar os Arquivos de Configuração
 
-O projeto necessita de chaves do **Supabase** e **Daily.co** para funcionar corretamente. 
-
-Para facilitar, criamos scripts automatizados que criam os arquivos `.env` caso eles não existam:
+Arquivos com credenciais (`.env`) e arquivos Docker (`docker-compose.yml`, `Dockerfile`) **não são versionados** no repositório — eles são gerados a partir de templates `.example` pelo script de setup:
 
 *   **No Linux / macOS:**
-    Abra o terminal na pasta do projeto e execute:
     ```bash
-    ./run.sh
+    ./setup.sh
     ```
 *   **No Windows:**
-    Basta dar dois cliques no arquivo `run.bat` ou executar no prompt de comando:
     ```cmd
-    run.bat
+    setup.bat
     ```
 
-*Os scripts criarão automaticamente os arquivos `backend/.env` e `frontend/.env` copiando a partir dos exemplos.*
+O script cria (se não existirem):
+- `frontend/.env` ← `frontend/.env.example`
+- `backend/.env` ← `backend/.env.example`
+- `docker-compose.yml` ← `docker-compose.example.yml`
+- `backend/Dockerfile` ← `backend/Dockerfile.example`
+- `frontend/Dockerfile` ← `frontend/Dockerfile.example`
 
 ### Passo 2: Configurar as Credenciais
 
@@ -53,9 +54,17 @@ Abra os arquivos `.env` gerados e insira suas credenciais de desenvolvimento:
 
 ### Passo 3: Iniciar a Aplicação
 
-Se você utilizou os scripts do **Passo 1**, o Docker já começará a baixar as imagens e rodar a aplicação automaticamente. 
+O atalho mais rápido é usar o `run.sh` / `run.bat`, que executa o setup automaticamente e já sobe os containers:
 
-Se preferir iniciar manualmente no terminal, basta executar o comando padrão do Docker Compose:
+```bash
+# Linux / macOS
+./run.sh
+
+# Windows
+run.bat
+```
+
+Ou, manualmente, após rodar o setup:
 
 ```bash
 docker compose up --build
@@ -76,9 +85,13 @@ Depois que os containers estiverem em execução:
 
 ## 🛠️ Como Funciona a Estrutura Docker
 
-- **`frontend/Dockerfile`**: Configura um container Node.js rodando o servidor de desenvolvimento do Vite com suporte a Fast Refresh (Hot Module Replacement).
-- **`backend/Dockerfile`**: Configura um container Python com FastAPI rodando sob Uvicorn com live-reload ativo.
-- **`docker-compose.yml`**: Orquestra os dois serviços para rodarem juntos. Ele mapeia os volumes locais para os containers para permitir que qualquer alteração feita no código local reflita instantaneamente no navegador/API.
+O repositório versiona **templates** (`.example`) em vez dos arquivos diretos, para evitar vazar credenciais ou versões locais:
+
+- **`docker-compose.example.yml`** → Template da orquestração dos dois serviços.
+- **`backend/Dockerfile.example`** → Template do container Python com FastAPI + Uvicorn com live-reload.
+- **`frontend/Dockerfile.example`** → Template do container Node.js com Vite dev server + Fast Refresh.
+
+Ao rodar `setup.sh` / `setup.bat`, esses templates são copiados para os nomes reais (sem `.example`), que são ignorados pelo `.gitignore` e ficam apenas no ambiente local.
 
 ---
 

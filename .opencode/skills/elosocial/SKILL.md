@@ -38,7 +38,7 @@ Frontend (React PWA) ←→ Supabase SDK (Auth, DB, Realtime)
 | Domínio email | Trigger SQL | Bloqueia emails fora de `%.gov.br` e `%.gov.com.br` |
 | Escopo CRAS | Coluna `cras` em `profiles` | Gerente gerencia apenas usuários do mesmo CRAS |
 | Deploy | Vercel (frontend + backend serverless) | Monorepo, dois projetos separados |
-| Docker | Não usar | Preferência do usuário |
+| Docker | Setup via `setup.sh` (templates `.example` no git, `.env` e Dockerfiles ignorados) | Evita vazar credenciais; artefatos locais gerados sob demanda |
 | Relatórios | JSON + PDF exportado | Imutabilidade via hash SHA-256 |
 | Videoconferência | Daily.co (chave no backend) | daily-js no frontend |
 
@@ -72,6 +72,9 @@ CRAS Aura, Barreiro, Bengui, Cremação, Guama, Icoaraci, Jurunas, Mosqueiro, Ou
 ## Como Executar
 
 ```bash
+# Setup (cria .env e Dockerfiles a partir dos templates .example)
+./setup.sh
+
 # Frontend
 cd frontend && npm install && npm run dev  # → http://localhost:5173
 # Backend
@@ -79,6 +82,8 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 ```
 
 ## Variáveis de Ambiente
+
+Os arquivos `.env` são gerados a partir dos `.env.example` via `setup.sh` / `setup.bat` e ignorados pelo `.gitignore`.
 
 **Frontend (prefixo `VITE_`):** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
 **Backend:** `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ALLOWED_ORIGINS`

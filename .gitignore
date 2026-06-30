@@ -4,3 +4,8 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+
+# Docker
+docker-compose.yml
+backend/Dockerfile
+frontend/Dockerfile

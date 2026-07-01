@@ -1,6 +1,6 @@
 # EloSocial + IA Copiloto SUAS
 
-Sistema de Prontuário Eletrônico SUAS para CRAS, agora equipado com Inteligência Artificial avançada (Inspirado no projeto Arcane).
+Sistema de Prontuário Eletrônico SUAS para CRAS, agora equipado com Inteligência Artificial avançada.
 
 ## 🚀 Novas Funcionalidades de IA (Copiloto SUAS)
 

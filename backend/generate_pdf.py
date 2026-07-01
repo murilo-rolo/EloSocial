@@ -28,6 +28,7 @@ def create_pdf(output_path):
     
     # Intro
     story.append(Paragraph("Para rodar a aplicação no seu computador, o projeto utiliza uma ferramenta chamada Docker. Com o Docker, voc&ecirc; n&atilde;o precisa instalar o Python, Node.js ou qualquer outra depend&ecirc;ncia. Siga o passo a passo abaixo:", body_style))
+    story.append(Paragraph("Antes de iniciar, rode o script de setup para gerar os arquivos de configura&ccedil;&atilde;o locais: <b>./setup.sh</b> (Linux/Mac) ou <b>setup.bat</b> (Windows).", body_style))
     story.append(Spacer(1, 10))
     
     # Section 1
@@ -39,9 +40,9 @@ def create_pdf(output_path):
     # Section 2
     story.append(Paragraph("2. Como iniciar a aplica&ccedil;&atilde;o", heading_style))
     story.append(Paragraph("Com o projeto descompactado no seu computador:", body_style))
-    story.append(Paragraph("- <b>Se voc&ecirc; usar Windows:</b> D&ecirc; dois cliques no arquivo <b>run.bat</b> que est&aacute; na pasta principal do projeto.", body_style))
-    story.append(Paragraph("- <b>Se voc&ecirc; usar Linux ou macOS:</b> Abra o terminal na pasta do projeto e digite o comando <b>./run.sh</b>", body_style))
-    story.append(Paragraph("Esse script far&aacute; o download das depend&ecirc;ncias isoladamente e iniciar&aacute; tanto a interface (Frontend) quanto a API (Backend). A primeira execu&ccedil;&atilde;o pode demorar alguns minutos pois ele vai baixar as imagens necess&aacute;rias.", body_style))
+    story.append(Paragraph("- <b>Se voc&ecirc; usar Windows:</b> D&ecirc; dois cliques no arquivo <b>run.bat</b> (ou rode <b>setup.bat</b> primeiro e depois <b>docker compose up --build</b>).", body_style))
+    story.append(Paragraph("- <b>Se voc&ecirc; usar Linux ou macOS:</b> Abra o terminal na pasta do projeto e digite o comando <b>./run.sh</b> (ou <b>./setup.sh</b> e depois <b>docker compose up --build</b>).", body_style))
+    story.append(Paragraph("O script <b>run.sh</b> / <b>run.bat</b> executa o setup automaticamente e j&aacute; inicia os containers. A primeira execu&ccedil;&atilde;o pode demorar alguns minutos pois ele vai baixar as imagens necess&aacute;rias.", body_style))
     
     # Section 3
     story.append(Paragraph("3. Acessando o Sistema", heading_style))

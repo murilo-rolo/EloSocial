@@ -6,7 +6,6 @@ export default function ChatLLM({ prontuarioContext }) {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [useRag, setUseRag] = useState(false)
   const endOfMessagesRef = useRef(null)
 
   // Scroll para a última mensagem
@@ -43,21 +42,6 @@ export default function ChatLLM({ prontuarioContext }) {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       let finalContext = { ...prontuarioContext }
-
-      if (useRag) {
-        // Query the vector DB first
-        const ragRes = await fetch(`${apiUrl}/api/rag/query`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: userMessage.content, match_threshold: 0.5, match_count: 3 })
-        })
-        if (ragRes.ok) {
-          const ragData = await ragRes.json()
-          if (ragData.matches && ragData.matches.length > 0) {
-            finalContext.base_conhecimento = ragData.matches.map(m => m.chunk_text)
-          }
-        }
-      }
 
       const response = await fetch(`${apiUrl}/api/chat-ai`, {
         method: 'POST',
@@ -152,18 +136,6 @@ export default function ChatLLM({ prontuarioContext }) {
               >
                 &times;
               </button>
-            </div>
-            
-            <div style={{ padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-              <input 
-                type="checkbox" 
-                id="use-rag-toggle" 
-                checked={useRag}
-                onChange={(e) => setUseRag(e.target.checked)}
-              />
-              <label htmlFor="use-rag-toggle" style={{ color: 'var(--text-light)', cursor: 'pointer' }}>
-                Consultar Manuais do SUAS (Base de Conhecimento)
-              </label>
             </div>
 
             {/* Messages */}

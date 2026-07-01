@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { ROLE_LABELS, canManageUsers } from '../../utils/roles'
-import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
   const { profile } = useAuth()
@@ -11,6 +11,7 @@ export default function Sidebar({ open, onClose }) {
     { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
     { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
     { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
+    { to: '/chat-ia', label: 'Chat IA (Copiloto)', icon: <Bot size={20} /> },
     { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
     { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
   ]

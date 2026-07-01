@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Layout from '../components/Layout/Layout'
-import { BookOpen, Upload, Search, FileText } from 'lucide-react'
+import { BookOpen, Upload, Search, FileText, Trash2, FileUp } from 'lucide-react'
+import { useRef } from 'react'
 
 export default function BaseConhecimento() {
   const [documents, setDocuments] = useState([])
@@ -10,7 +11,9 @@ export default function BaseConhecimento() {
   const [searchTerm, setSearchTerm] = useState('')
   
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [file, setFile] = useState(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef(null)
 
   const fetchDocuments = async () => {
     setLoading(true)
@@ -34,27 +37,50 @@ export default function BaseConhecimento() {
 
   const handleUpload = async (e) => {
     e.preventDefault()
+    if (!file) {
+      alert("Por favor, selecione ou arraste um arquivo PDF/TXT.")
+      return
+    }
+    if (!title) return
     setUploading(true)
+    
+    const formData = new FormData()
+    formData.append('title', title)
+    formData.append('file', file)
+
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-      const res = await fetch(`${apiUrl}/api/rag/upload`, {
+      const res = await fetch(`${apiUrl}/api/rag/upload_file`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content })
+        body: formData
       })
       if (!res.ok) {
         throw new Error('Falha no upload')
       }
       
       setTitle('')
-      setContent('')
+      setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       setShowModal(false)
       fetchDocuments()
-      alert('Documento vetorizado e salvo com sucesso!')
+      alert('Documento processado, vetorizado e salvo com sucesso!')
     } catch (e) {
       alert('Erro ao fazer upload do documento.')
     } finally {
       setUploading(false)
+    }
+  }
+
+  const handleDelete = async (id, titleStr) => {
+    if (!window.confirm(`Tem certeza que deseja apagar o documento "${titleStr}"? Esta ação excluirá todos os vetores associados.`)) return
+    
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const res = await fetch(`${apiUrl}/api/rag/documents/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Erro ao deletar')
+      fetchDocuments()
+    } catch (e) {
+      alert('Erro ao deletar documento.')
     }
   }
 
@@ -118,7 +144,16 @@ export default function BaseConhecimento() {
                     </td>
                     <td>{new Date(d.created_at).toLocaleDateString('pt-BR')}</td>
                     <td style={{ textAlign: 'right', paddingRight: 24 }}>
-                      <span className="badge badge-risco-baixo">Vetorizado</span>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, alignItems: 'center' }}>
+                        <span className="badge badge-risco-baixo" style={{ background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}>Vetorizado</span>
+                        <button 
+                          onClick={() => handleDelete(d.id, d.title)} 
+                          style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+                          title="Remover documento"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -154,14 +189,55 @@ export default function BaseConhecimento() {
                 />
               </div>
               <div className="form-group">
-                <label>Conteúdo em Texto</label>
-                <textarea 
-                  className="form-control" 
-                  value={content} 
-                  onChange={(e) => setContent(e.target.value)} 
-                  required 
-                  style={{ minHeight: 250, fontFamily: 'monospace', fontSize: 13 }}
-                  placeholder="Cole aqui o conteúdo do manual, lei ou normativa. O sistema fará a divisão em pedaços e a vetorização automática."
+                <label>Arquivo (PDF ou TXT)</label>
+                <div 
+                  style={{ 
+                    border: `2px dashed ${isDragging ? 'var(--primary)' : 'var(--border)'}`, 
+                    borderRadius: 12, padding: 40, textAlign: 'center', 
+                    background: isDragging ? '#eff6ff' : '#f8fafc', 
+                    cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                    transition: 'all 0.2s'
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const f = e.dataTransfer.files[0];
+                    if (f && (f.type === 'application/pdf' || f.type === 'text/plain')) {
+                      setFile(f);
+                      if (!title) setTitle(f.name.replace(/\.[^/.]+$/, ""));
+                    } else {
+                      alert("Apenas arquivos PDF ou TXT são suportados.");
+                    }
+                  }}
+                >
+                  <FileUp size={32} color="var(--primary)" opacity={0.7} />
+                  {file ? (
+                    <div>
+                      <strong style={{ display: 'block', color: 'var(--primary)' }}>{file.name}</strong>
+                      <span style={{ fontSize: 13, color: 'var(--text-light)' }}>Arquivo selecionado ({Math.round(file.size / 1024)} KB)</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <strong style={{ display: 'block', color: 'var(--text)' }}>Clique para selecionar ou arraste o arquivo aqui</strong>
+                      <span style={{ fontSize: 13, color: 'var(--text-light)' }}>Suporta .PDF e .TXT</span>
+                    </div>
+                  )}
+                </div>
+                <input 
+                  type="file" 
+                  accept="application/pdf,text/plain"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files[0]
+                    if (f) {
+                      setFile(f)
+                      if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")) // auto-fill title
+                    }
+                  }}
                 />
               </div>
               

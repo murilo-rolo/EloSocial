@@ -13,6 +13,7 @@ import Videoconferencia from './pages/Videoconferencia'
 import Admin from './pages/Admin'
 import Cadastro from './pages/Cadastro'
 import BaseConhecimento from './pages/BaseConhecimento'
+import ChatIA from './pages/ChatIA'
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -38,6 +39,7 @@ export default function App() {
       <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
       <Route path="/videoconferencia" element={<ProtectedRoute><Videoconferencia /></ProtectedRoute>} />
       <Route path="/conhecimento" element={<ProtectedRoute><BaseConhecimento /></ProtectedRoute>} />
+      <Route path="/chat-ia" element={<ProtectedRoute><ChatIA /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute roles={['gerente']}><Admin /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

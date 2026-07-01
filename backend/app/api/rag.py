@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel
 import httpx
+import io
+import pypdf
 from typing import List, Optional
 import google.generativeai as genai
 import os
@@ -36,6 +38,7 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> List[st
 @router.post("/rag/upload")
 async def upload_document(req: DocumentUploadRequest):
     if not GEMINI_API_KEY:
+        print("GEMINI_API_KEY não configurada")
         raise HTTPException(500, "GEMINI_API_KEY não configurada")
 
     headers = {
@@ -57,6 +60,7 @@ async def upload_document(req: DocumentUploadRequest):
             json=doc_payload
         )
         if resp.status_code not in (200, 201):
+            print(f"Erro ao salvar documento no supabase: {resp.text}")
             raise HTTPException(500, f"Erro ao salvar documento: {resp.text}")
         
         doc = resp.json()[0]
@@ -69,9 +73,10 @@ async def upload_document(req: DocumentUploadRequest):
         for c in chunks:
             # Gerar embedding
             emb_resp = genai.embed_content(
-                model="models/text-embedding-004",
+                model="models/gemini-embedding-2",
                 content=c,
-                task_type="retrieval_document"
+                task_type="retrieval_document",
+                output_dimensionality=768
             )
             embedding = emb_resp['embedding']
             
@@ -88,9 +93,48 @@ async def upload_document(req: DocumentUploadRequest):
             json=chunk_payloads
         )
         if resp_chunks.status_code not in (200, 201):
+            print(f"Erro ao salvar chunks no supabase: {resp_chunks.text}")
             raise HTTPException(500, f"Erro ao salvar chunks: {resp_chunks.text}")
             
     return {"message": "Documento vetorizado e salvo com sucesso!", "chunks_count": len(chunks)}
+
+@router.post("/rag/upload_file")
+async def upload_document_file(
+    title: str = Form(...),
+    user_id: Optional[str] = Form(None),
+    file: UploadFile = File(...)
+):
+    if not GEMINI_API_KEY:
+        raise HTTPException(500, "GEMINI_API_KEY não configurada")
+        
+    content = ""
+    file_bytes = await file.read()
+    
+    if file.filename.endswith(".pdf"):
+        try:
+            pdf_reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+            for page in pdf_reader.pages:
+                text = page.extract_text()
+                if text:
+                    content += text + "\n"
+        except Exception as e:
+            print(f"Erro ao ler PDF: {str(e)}")
+            raise HTTPException(400, f"Erro ao ler PDF: {str(e)}")
+    else:
+        try:
+            content = file_bytes.decode('utf-8')
+        except UnicodeDecodeError:
+            raise HTTPException(400, "Apenas arquivos PDF ou texto (.txt) são suportados.")
+            
+    if not content.strip():
+        raise HTTPException(400, "Nenhum texto pôde ser extraído do arquivo.")
+        
+    # Reutiliza o endpoint existente enviando os dados em memória
+    return await upload_document(DocumentUploadRequest(
+        title=title,
+        content=content,
+        user_id=user_id
+    ))
 
 @router.get("/rag/documents")
 async def list_documents():
@@ -110,6 +154,24 @@ async def list_documents():
             
         return resp.json()
 
+@router.delete("/rag/documents/{doc_id}")
+async def delete_document(doc_id: str):
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json",
+    }
+    
+    async with httpx.AsyncClient() as client:
+        resp = await client.delete(
+            f"{SUPABASE_URL}/rest/v1/knowledge_documents?id=eq.{doc_id}",
+            headers=headers
+        )
+        if resp.status_code not in (200, 204):
+            raise HTTPException(500, f"Erro ao deletar documento: {resp.text}")
+            
+    return {"message": "Documento removido com sucesso."}
+
 @router.post("/rag/query")
 async def query_knowledge_base(req: RAGQueryRequest):
     if not GEMINI_API_KEY:
@@ -117,9 +179,10 @@ async def query_knowledge_base(req: RAGQueryRequest):
 
     # 1. Gerar embedding da query
     emb_resp = genai.embed_content(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-2",
         content=req.query,
-        task_type="retrieval_query"
+        task_type="retrieval_query",
+        output_dimensionality=768
     )
     query_embedding = emb_resp['embedding']
     
@@ -129,20 +192,34 @@ async def query_knowledge_base(req: RAGQueryRequest):
         "Content-Type": "application/json",
     }
     
-    # 2. Chamar RPC no Supabase
+    # 2. Chamar RPC Híbrido no Supabase
     async with httpx.AsyncClient() as client:
         rpc_payload = {
+            "query_text": req.query,
             "query_embedding": query_embedding,
             "match_threshold": req.match_threshold,
             "match_count": req.match_count
         }
         resp = await client.post(
-            f"{SUPABASE_URL}/rest/v1/rpc/match_knowledge_chunks",
+            f"{SUPABASE_URL}/rest/v1/rpc/hybrid_search_knowledge",
             headers=headers,
             json=rpc_payload
         )
         if resp.status_code != 200:
-            raise HTTPException(500, f"Erro na busca vetorial: {resp.text}")
+            # Fallback para o match_knowledge_chunks original se a migration 00008 não rodou
+            if "Could not find the function" in resp.text:
+                fallback_payload = {
+                    "query_embedding": query_embedding,
+                    "match_threshold": req.match_threshold,
+                    "match_count": req.match_count
+                }
+                resp = await client.post(
+                    f"{SUPABASE_URL}/rest/v1/rpc/match_knowledge_chunks",
+                    headers=headers,
+                    json=fallback_payload
+                )
+            if resp.status_code != 200:
+                raise HTTPException(500, f"Erro na busca vetorial: {resp.text}")
             
         matches = resp.json()
         

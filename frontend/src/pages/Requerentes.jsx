@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate } from '../utils/format'
-import { Search, Plus, Eye } from 'lucide-react'
+import { Search, Plus, Eye, UploadCloud } from 'lucide-react'
+import { useRef } from 'react'
 
 export default function Requerentes() {
   const navigate = useNavigate()
@@ -18,6 +19,8 @@ export default function Requerentes() {
     nis: '', nome_mae: '', sexo: '', localizacao: '', observacoes: '',
   })
   const [saving, setSaving] = useState(false)
+  const [ocrLoading, setOcrLoading] = useState(false)
+  const fileInputRef = useRef(null)
 
   async function loadRequerentes() {
     setLoading(true)
@@ -47,6 +50,45 @@ export default function Requerentes() {
       setShowModal(false)
       setForm({ nome: '', cpf: '', rg: '', data_nascimento: '', telefone: '', nis: '', nome_mae: '', sexo: '', localizacao: '', observacoes: '' })
       loadRequerentes()
+    }
+  }
+
+  const handleOcrUpload = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setOcrLoading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const res = await fetch(`${apiUrl}/api/ocr/extract_requerente`, {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!res.ok) throw new Error('Falha ao ler o documento com IA.')
+      
+      const data = await res.json()
+      
+      // Auto-preencher o formulário
+      setForm(prev => ({
+        ...prev,
+        nome: data.nome || prev.nome,
+        cpf: data.cpf || prev.cpf,
+        rg: data.rg || prev.rg,
+        data_nascimento: data.data_nascimento || prev.data_nascimento,
+        nome_mae: data.nome_mae || prev.nome_mae,
+        sexo: data.sexo === 'Masculino' ? 'M' : (data.sexo === 'Feminino' ? 'F' : prev.sexo)
+      }))
+
+    } catch (error) {
+      alert(error.message)
+      console.error(error)
+    } finally {
+      setOcrLoading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -167,9 +209,39 @@ export default function Requerentes() {
             boxShadow: 'var(--shadow-lg)'
           }} onClick={(e) => e.stopPropagation()}>
             <div className="eyebrow">NOVO CADASTRO</div>
-            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--primary)' }}>
-              Cadastrar <em>Requerente</em>
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+              <h2 className="font-serif" style={{ margin: 0, fontSize: 24, color: 'var(--primary)' }}>
+                Cadastrar <em>Requerente</em>
+              </h2>
+              <button 
+                type="button" 
+                className="btn btn-sm btn-outline" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={ocrLoading}
+                style={{ borderRadius: 20, background: '#f0f9ff', color: '#0369a1', borderColor: '#bae6fd', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                {ocrLoading ? (
+                  <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <span style={{ animation: 'blink 1.4s infinite both' }}>.</span>
+                    <span style={{ animation: 'blink 1.4s infinite both', animationDelay: '0.2s' }}>.</span>
+                    <span style={{ animation: 'blink 1.4s infinite both', animationDelay: '0.4s' }}>.</span>
+                    Lendo documento...
+                  </span>
+                ) : (
+                  <>
+                    <UploadCloud size={16} />
+                    🪄 Preencher com CNH/RG (OCR)
+                  </>
+                )}
+              </button>
+              <input 
+                type="file" 
+                accept="image/jpeg,image/png,image/webp,application/pdf" 
+                ref={fileInputRef} 
+                onChange={handleOcrUpload} 
+                style={{ display: 'none' }} 
+              />
+            </div>
             <form onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">

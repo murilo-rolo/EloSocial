@@ -148,6 +148,29 @@ EloSocial-main/
         └── utils/              # Utilitários de formatação
 ```
 
+## 🔄 Como Atualizar o Sistema Localmente (Pull e Rebuild)
+
+Sempre que houver código novo no repositório do GitHub (por exemplo, após a Inteligência Artificial ou outro desenvolvedor subir alterações) e você precisar atualizar a sua máquina local para rodar a última versão, siga estes passos:
+
+Abra o **PowerShell** ou Terminal dentro da pasta principal do projeto (`EloSocial-main`) e execute:
+
+```bash
+# 1. Baixa as atualizações do GitHub (Arquivos modificados)
+git pull origin main
+
+# 2. Sincroniza pacotes do Frontend (Baixa bibliotecas que não sobem pro Git)
+cd frontend
+npm install
+cd ..
+
+# 3. Recria o "Cérebro" do Docker com o código novo
+docker compose up --build -d
+```
+
+*(Nota: Se houver problemas com o visual antigo preso na memória, você pode apagar o cache do Vite executando `Remove-Item -Recurse -Force frontend\.vite` no PowerShell antes do Passo 3).*
+
+---
+
 ## Licença
 
 Projeto desenvolvido para a rede socioassistencial (Inspirado no case Arcane). Uso interno e governamental.

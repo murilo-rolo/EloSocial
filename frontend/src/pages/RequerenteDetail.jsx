@@ -240,7 +240,7 @@ export default function RequerenteDetail() {
             <ReactMarkdown
               components={{
                 p: ({node, ...props}) => <p style={{margin: '0 0 16px 0'}} {...props} />,
-                h3: ({node, ...props}) => <h3 style={{margin: '24px 0 12px 0', color: 'var(--primary)', fontSize: 16}} {...props} />,
+                h3: ({node, ...props}) => <h3 style={{margin: '24px 0 12px 0', color: 'var(--text-primary)', fontSize: 16}} {...props} />,
                 ul: ({node, ...props}) => <ul style={{paddingLeft: 20, marginBottom: 16}} {...props} />,
                 li: ({node, ...props}) => <li style={{marginBottom: 8}} {...props} />
               }}

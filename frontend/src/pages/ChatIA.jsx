@@ -180,7 +180,7 @@ export default function ChatIA() {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 15 }}>Copiloto SUAS</div>
                     <div style={{ fontSize: 12, color: 'var(--text-light)' }}>
-                      Foco: <strong style={{ color: 'var(--primary)' }}>{selectedApplicant.nome}</strong>
+                      Foco: <strong style={{ color: 'var(--text-primary)' }}>{selectedApplicant.nome}</strong>
                     </div>
                   </div>
                 </div>
@@ -213,7 +213,7 @@ export default function ChatIA() {
                               p: ({node, ...props}) => <p style={{margin: '0 0 10px 0'}} {...props} />,
                               ul: ({node, ...props}) => <ul style={{margin: '0 0 10px 20px'}} {...props} />,
                               li: ({node, ...props}) => <li style={{marginBottom: 4}} {...props} />,
-                              strong: ({node, ...props}) => <strong style={{color: 'var(--primary)'}} {...props} />,
+                              strong: ({node, ...props}) => <strong style={{color: 'var(--text-primary)'}} {...props} />,
                               a: ({node, ...props}) => <a style={{color: 'var(--secondary)', textDecoration: 'underline'}} target="_blank" {...props} />
                             }}
                           >
@@ -274,7 +274,7 @@ export default function ChatIA() {
               <div className="icon" style={{ fontSize: 56, color: 'var(--secondary)', opacity: 0.8, marginBottom: 16 }}>
                 <Bot size={56} />
               </div>
-              <h3 style={{ fontSize: 18, color: 'var(--primary)', marginBottom: 8 }}>Selecione um Paciente</h3>
+              <h3 style={{ fontSize: 18, color: 'var(--text-primary)', marginBottom: 8 }}>Selecione um Paciente</h3>
               <p style={{ maxWidth: 300, margin: '0 auto', lineHeight: 1.6 }}>
                 Para a IA acessar corretamente os dados, histórico e documentos aplicáveis, selecione o paciente no menu à esquerda.
               </p>

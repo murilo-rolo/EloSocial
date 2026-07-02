@@ -170,12 +170,12 @@ export default function BaseConhecimento() {
           zIndex: 2000, padding: 20, backdropFilter: 'blur(4px)'
         }} onClick={() => setShowModal(false)}>
           <div style={{
-            background: 'white', borderRadius: 16, padding: 32,
+            background: 'var(--card)', borderRadius: 16, padding: 32,
             width: '100%', maxWidth: 700, maxHeight: '90vh', overflow: 'auto',
             boxShadow: 'var(--shadow-lg)'
           }} onClick={(e) => e.stopPropagation()}>
             <div className="eyebrow">UPLOAD PARA A IA</div>
-            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--primary)' }}>
+            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--text-primary)' }}>
               Novo Documento de <em>Referência</em>
             </h2>
             <form onSubmit={handleUpload}>
@@ -192,7 +192,7 @@ export default function BaseConhecimento() {
                 <label>Arquivo (PDF ou TXT)</label>
                 <div 
                   style={{ 
-                    border: `2px dashed ${isDragging ? 'var(--primary)' : 'var(--border)'}`, 
+                    border: `2px dashed ${isDragging ? 'var(--accent)' : 'var(--border)'}`, 
                     borderRadius: 12, padding: 40, textAlign: 'center', 
                     background: isDragging ? '#eff6ff' : '#f8fafc', 
                     cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
@@ -213,10 +213,10 @@ export default function BaseConhecimento() {
                     }
                   }}
                 >
-                  <FileUp size={32} color="var(--primary)" opacity={0.7} />
+                  <FileUp size={32} color="var(--accent)" opacity={0.7} />
                   {file ? (
                     <div>
-                      <strong style={{ display: 'block', color: 'var(--primary)' }}>{file.name}</strong>
+                      <strong style={{ display: 'block', color: 'var(--text-primary)' }}>{file.name}</strong>
                       <span style={{ fontSize: 13, color: 'var(--text-light)' }}>Arquivo selecionado ({Math.round(file.size / 1024)} KB)</span>
                     </div>
                   ) : (

@@ -137,7 +137,7 @@ export default function Topbar({ title, onMenuToggle }) {
 
         <div className="topbar-profile" style={{ marginLeft: 8 }}>
           <div style={{
-            width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', 
+            width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', 
             color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontWeight: 'bold', fontSize: 14
           }}>

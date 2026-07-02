@@ -93,7 +93,7 @@ export default function GlobalChat() {
           width: '60px',
           height: '60px',
           borderRadius: '30px',
-          backgroundColor: 'var(--primary)',
+          backgroundColor: 'var(--accent)',
           color: 'white',
           border: 'none',
           boxShadow: 'var(--shadow-lg)',
@@ -128,7 +128,7 @@ export default function GlobalChat() {
       }}>
         <div style={{
           padding: '16px',
-          background: 'var(--primary)',
+          background: 'var(--accent)',
           color: 'white',
           display: 'flex',
           justifyContent: 'space-between',

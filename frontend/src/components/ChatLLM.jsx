@@ -84,7 +84,7 @@ export default function ChatLLM({ prontuarioContext }) {
             width: 60,
             height: 60,
             borderRadius: '50%',
-            background: 'var(--primary)',
+            background: 'var(--accent)',
             color: 'white',
             border: 'none',
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
@@ -112,7 +112,7 @@ export default function ChatLLM({ prontuarioContext }) {
             {/* Header */}
             <div style={{
               padding: '20px 24px',
-              background: 'var(--primary)',
+              background: 'var(--accent)',
               color: 'white',
               display: 'flex',
               justifyContent: 'space-between',
@@ -143,7 +143,7 @@ export default function ChatLLM({ prontuarioContext }) {
               {messages.map((msg, idx) => (
                 <div key={idx} style={{
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  background: msg.role === 'user' ? 'var(--primary)' : 'white',
+                  background: msg.role === 'user' ? 'var(--accent)' : 'white',
                   color: msg.role === 'user' ? 'white' : 'var(--text)',
                   padding: '12px 16px',
                   borderRadius: 12,

@@ -59,12 +59,7 @@
   --border: #DCE5DE;
   --border-hover: #C8D4CC;
   --border-muted: #E2E8F0;
-  /* EloSocial overrides: sidebar mantém escura no modo claro */
-  --primary: #0B1511;
-  --primary-light: #11211C;
-  --topbar-bg: rgba(234, 240, 236, 0.8);
-  --sidebar-nav-color: rgba(255,255,255,0.6);
-  --sidebar-nav-hover: rgba(255,255,255,0.1);
+  --topbar-bg: rgba(255, 255, 255, 0.8);
 }
 
 /* ═══════════════════════════════════════════
@@ -277,6 +272,26 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+.light .sidebar {
+  color: var(--text-primary);
+}
+.light .sidebar-header {
+  border-bottom: 1px solid var(--border);
+}
+.light .sidebar-nav a {
+  color: var(--text-secondary);
+}
+.light .sidebar-nav a:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+.light .sidebar-nav a.active {
+  color: var(--text-on-accent);
+}
+.light .sidebar-footer {
+  border-top: 1px solid var(--border);
 }
 
 .topbar {
@@ -546,7 +561,7 @@ table tr:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  background: linear-gradient(135deg, #0B1511, #11211C);
   padding: 20px;
 }
 

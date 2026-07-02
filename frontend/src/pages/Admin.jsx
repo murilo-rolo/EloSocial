@@ -242,12 +242,12 @@ export default function Admin() {
           zIndex: 2000, padding: 20, backdropFilter: 'blur(4px)'
         }} onClick={() => setShowAddModal(false)}>
           <div style={{
-            background: 'white', borderRadius: 16, padding: 32,
+            background: 'var(--card)', borderRadius: 16, padding: 32,
             width: '100%', maxWidth: 450, maxHeight: '90vh', overflow: 'auto',
             boxShadow: 'var(--shadow-lg)'
           }} onClick={(e) => e.stopPropagation()}>
             <div className="eyebrow">NOVO ACESSO</div>
-            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--primary)' }}>
+            <h2 className="font-serif" style={{ marginBottom: 24, fontSize: 24, color: 'var(--text-primary)' }}>
               Criar <em>Usuário</em>
             </h2>
             <form onSubmit={handleCreateUser}>

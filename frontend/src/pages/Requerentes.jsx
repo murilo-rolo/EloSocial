@@ -204,13 +204,13 @@ export default function Requerentes() {
           zIndex: 2000, padding: 20, backdropFilter: 'blur(4px)'
         }} onClick={() => setShowModal(false)}>
           <div style={{
-            background: 'white', borderRadius: 16, padding: 32,
+            background: 'var(--card)', borderRadius: 16, padding: 32,
             width: '100%', maxWidth: 600, maxHeight: '90vh', overflow: 'auto',
             boxShadow: 'var(--shadow-lg)'
           }} onClick={(e) => e.stopPropagation()}>
             <div className="eyebrow">NOVO CADASTRO</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
-              <h2 className="font-serif" style={{ margin: 0, fontSize: 24, color: 'var(--primary)' }}>
+              <h2 className="font-serif" style={{ margin: 0, fontSize: 24, color: 'var(--text-primary)' }}>
                 Cadastrar <em>Requerente</em>
               </h2>
               <button 

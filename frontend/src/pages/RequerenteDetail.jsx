@@ -26,7 +26,7 @@ export default function RequerenteDetail() {
       const { data: req } = await supabase.from('applicants').select('*').eq('id', id).single()
       const { data: pro } = await supabase
         .from('prontuarios')
-        .select('id, created_at, created_by, versao, profiles!prontuarios_created_by_fkey(nome, role)')
+        .select('id, created_at, created_by, versao, dados_json, profiles!prontuarios_created_by_fkey(nome, role)')
         .eq('applicant_id', id)
         .order('created_at', { ascending: false })
       setRequerente(req)
@@ -251,7 +251,7 @@ export default function RequerenteDetail() {
         </div>
       </SlideOver>
 
-      <ChatLLM prontuarioContext={{ applicants: requerente }} />
+      <ChatLLM prontuarioContext={{ applicant: requerente, prontuarios: prontuarios }} />
     </Layout>
   )
 }

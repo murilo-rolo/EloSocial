@@ -1,15 +1,15 @@
 # EloSocial + IA Copiloto SUAS
 
-Sistema de Prontuário Eletrônico SUAS para CRAS, agora equipado com Inteligência Artificial avançada (Inspirado no projeto Arcane).
+Sistema de Prontuário Eletrônico SUAS para CRAS, agora equipado com Inteligência Artificial avançada.
 
-## 🚀 Novas Funcionalidades de IA (Copiloto SUAS)
+## 🚀 Novas Funcionalidades de IA (Copiloto SUAS - Nível Enterprise)
 
-O sistema foi atualizado com agentes de Inteligência Artificial para acelerar o trabalho dos assistentes sociais e técnicos:
+Inspirado no projeto Arcane, o sistema foi atualizado com agentes de Inteligência Artificial de nível Enterprise para automatizar e acelerar o fluxo de trabalho dos técnicos:
 
-- **Triagem Inteligente:** Ao criar ou visualizar o dossiê de uma família, a IA analisa a renda, composição familiar e histórico, emitindo um Alerta de Vulnerabilidade (Score e Cor: Verde, Amarelo, Vermelho) e um parecer técnico instantâneo.
-- **Resumo Executivo Automático:** A IA lê todos os prontuários e históricos longos de uma família em segundos, gerando um resumo executivo pontual para que novos técnicos entendam o caso sem precisar ler dezenas de páginas.
-- **Assistente Contextual (Chat):** Um chat flutuante embutido dentro do Prontuário. O Copiloto sabe tudo sobre a família que você está visualizando e pode te ajudar a redigir laudos, sugerir políticas públicas e responder dúvidas sobre o caso.
-- **Cérebro Vetorial (RAG):** O sistema possui uma "Base de Conhecimento" onde gerentes podem colar textos de Manuais do SUAS, LOAS e diretrizes. A IA transforma esses textos em vetores matemáticos e, quando o técnico faz uma pergunta no chat, a IA vasculha a lei para dar uma resposta 100% embasada, zerando alucinações.
+- **ChatIA (Aba Dedicada e Contextual):** Nova aba exclusiva para interação com a IA. Com design *split-view* (lista de requerentes à esquerda e chat à direita), o técnico pode alternar rapidamente entre pacientes. O Copiloto sabe tudo sobre o requerente selecionado e ajuda a redigir laudos, formatar textos técnicos e responder dúvidas sobre o histórico do cidadão. O clássico chat flutuante também foi mantido para acesso rápido dentro do prontuário.
+- **Base de Conhecimento (RAG Enterprise com pgvector):** O sistema possui um "Cérebro Vetorial" alimentado pelos próprios gestores. Permite o upload de arquivos PDF (manuais do SUAS, LOAS, portarias), que são processados, segmentados e transformados em vetores matemáticos (`text-embedding-004`). Quando o técnico faz uma pergunta à IA, o sistema realiza uma "Busca Híbrida" nos PDFs cadastrados para garantir respostas 100% embasadas na documentação oficial, zerando alucinações.
+- **Triagem Inteligente de Vulnerabilidade:** Ao acessar o dossiê de uma família, a IA cruza a renda, a composição familiar e o histórico pregressos, gerando um Alerta de Vulnerabilidade automático (Score e Cor: Verde, Amarelo ou Vermelho) junto com um parecer técnico instantâneo, antes mesmo do técnico ler o processo.
+- **Resumo Executivo Automático:** A IA varre dezenas de páginas de prontuários antigos, evoluções e anotações em segundos, consolidando tudo num resumo executivo dinâmico. Ideal para a passagem de plantão ou para que um novo assistente social entenda o caso instantaneamente.
 
 ---
 

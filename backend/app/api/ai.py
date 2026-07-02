@@ -3,9 +3,77 @@ from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 import os
 import json
+import httpx
 import google.generativeai as genai
 from dotenv import load_dotenv
 from .suas_context import SUAS_BASE_CONTEXT
+from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY
+
+def consultar_base_conhecimento(assunto: str) -> str:
+    """Consulta a base de conhecimento do SUAS (leis, diretrizes, manuais) para responder dúvidas técnicas e procedimentais. 
+    Use SEMPRE que o usuário fizer perguntas sobre leis, requisitos, benefícios, ou como o SUAS funciona.
+    Retorna os parágrafos relevantes e os títulos dos documentos fonte. IMPORTANTE: Sempre cite as fontes na sua resposta final.
+    """
+    try:
+        if not GEMINI_API_KEY:
+            return "Erro: API Key não configurada."
+            
+        emb_resp = genai.embed_content(
+            model="models/gemini-embedding-2",
+            content=assunto,
+            task_type="retrieval_query",
+            output_dimensionality=768
+        )
+        query_embedding = emb_resp['embedding']
+        
+        headers = {
+            "apikey": SUPABASE_SERVICE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+            "Content-Type": "application/json",
+        }
+        
+        with httpx.Client() as client:
+            rpc_payload = {
+                "query_text": assunto,
+                "query_embedding": query_embedding,
+                "match_threshold": 0.5,
+                "match_count": 4
+            }
+            resp = client.post(
+                f"{SUPABASE_URL}/rest/v1/rpc/hybrid_search_knowledge",
+                headers=headers,
+                json=rpc_payload
+            )
+            
+            if resp.status_code != 200:
+                # Fallback to pure semantic search if migration 00008 hasn't run
+                fallback_payload = {
+                    "query_embedding": query_embedding,
+                    "match_threshold": 0.5,
+                    "match_count": 4
+                }
+                resp = client.post(
+                    f"{SUPABASE_URL}/rest/v1/rpc/match_knowledge_chunks",
+                    headers=headers,
+                    json=fallback_payload
+                )
+                
+            if resp.status_code != 200:
+                return "Não foi possível consultar a base de conhecimento no momento."
+                
+            matches = resp.json()
+            if not matches:
+                return "Nenhuma informação relevante encontrada na base de conhecimento sobre este assunto."
+                
+            result_text = "Encontrei as seguintes informações na base de conhecimento oficial:\n\n"
+            for m in matches:
+                title = m.get("title", "Documento Oficial")
+                text = m.get("chunk_text", "")
+                result_text += f"[Fonte: {title}]:\n{text}\n\n"
+                
+            return result_text
+    except Exception as e:
+        return f"Erro ao consultar base: {str(e)}"
 
 load_dotenv()
 
@@ -50,7 +118,8 @@ DADOS DO PRONTUÁRIO (CONTEXTO):
         # Inicializando o modelo
         model = genai.GenerativeModel(
             model_name="gemini-2.5-flash", # Usando modelo rápido e eficiente
-            system_instruction=system_instruction
+            system_instruction=system_instruction,
+            tools=[consultar_base_conhecimento]
         )
         
         # Convertendo histórico para o formato do Gemini
@@ -60,8 +129,11 @@ DADOS DO PRONTUÁRIO (CONTEXTO):
             role = "user" if msg.role == "user" else "model"
             formatted_history.append({"role": role, "parts": [msg.content]})
             
-        # Iniciando sessão de chat
-        chat_session = model.start_chat(history=formatted_history)
+        # Iniciando sessão de chat com tool calling automático
+        chat_session = model.start_chat(
+            history=formatted_history,
+            enable_automatic_function_calling=True
+        )
         
         # Enviando mensagem do usuário
         response = chat_session.send_message(req.message)

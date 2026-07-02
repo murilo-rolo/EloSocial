@@ -124,10 +124,10 @@ export default function ChatIA() {
   const selectedApplicant = applicants.find(a => a.id === selectedId)
 
   return (
-    <Layout title="Chat IA (Copiloto)">
+    <Layout title="Chat IA">
       <div style={{ marginBottom: 32 }}>
         <h1 className="page-title font-serif">
-          Chat <em>IA (Copiloto)</em>.
+          Chat <em>IA</em>.
         </h1>
         <p className="page-subtitle">
           Selecione um requerente para iniciar a análise assistida por Inteligência Artificial.

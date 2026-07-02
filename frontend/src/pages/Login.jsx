@@ -7,6 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [salvar, setSalvar] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -17,6 +18,7 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    localStorage.setItem('rememberMe', salvar ? 'true' : 'false')
     try {
       await login(email, password)
       navigate(from, { replace: true })
@@ -58,6 +60,15 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+          </div>
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input type="checkbox" id="remember" checked={salvar}
+              onChange={(e) => setSalvar(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+            />
+            <label htmlFor="remember" style={{ margin: 0, cursor: 'pointer', fontSize: 13, color: 'var(--text)' }}>
+              Salvar Login
+            </label>
           </div>
           <button
             type="submit"

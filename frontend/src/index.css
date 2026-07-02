@@ -248,24 +248,6 @@ input, select, textarea {
   font-size: 16px;
 }
 
-.sidebar-footer {
-  padding: 16px 20px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 13px;
-}
-
-.sidebar-footer .user-name {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.sidebar-footer .user-role {
-  color: var(--accent);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .main-content {
   flex: 1;
   margin-left: var(--sidebar-width);
@@ -290,10 +272,6 @@ input, select, textarea {
 .light .sidebar-nav a.active {
   color: var(--text-on-accent);
 }
-.light .sidebar-footer {
-  border-top: 1px solid var(--border);
-}
-
 .light .topbar {
   background: rgba(255, 255, 255, 0.8);
 }

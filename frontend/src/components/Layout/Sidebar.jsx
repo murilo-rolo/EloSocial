@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { ROLE_LABELS, canManageUsers } from '../../utils/roles'
+import { canManageUsers } from '../../utils/roles'
 import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
@@ -11,7 +11,7 @@ export default function Sidebar({ open, onClose }) {
     { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
     { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
     { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
-    { to: '/chat-ia', label: 'Chat IA (Copiloto)', icon: <Bot size={20} /> },
+    { to: '/chat-ia', label: 'Chat IA', icon: <Bot size={20} /> },
     { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
     { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
   ]
@@ -44,12 +44,6 @@ export default function Sidebar({ open, onClose }) {
             </NavLink>
           ))}
         </nav>
-        <div className="sidebar-footer">
-          <div className="user-name">{profile?.nome || 'Usuário'}</div>
-          <div className="user-role">
-            {profile?.role ? ROLE_LABELS[profile.role] : ''}
-          </div>
-        </div>
       </aside>
     </>
   )

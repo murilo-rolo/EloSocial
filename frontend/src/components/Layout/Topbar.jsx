@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Link } from 'react-router-dom'
-import { Bell, Menu, Calendar, AlertTriangle } from 'lucide-react'
+import { ROLE_LABELS } from '../../utils/roles'
+import { Bell, Menu, Calendar, AlertTriangle, Settings } from 'lucide-react'
 
 export default function Topbar({ title, onMenuToggle }) {
-  const { profile } = useAuth()
+  const { profile, logout } = useAuth()
+  const navigate = useNavigate()
   const [notifications, setNotifications] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef(null)
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const profileDropdownRef = useRef(null)
 
   useEffect(() => {
     if (!profile) return
@@ -50,10 +54,20 @@ export default function Topbar({ title, onMenuToggle }) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false)
       }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false)
+      }
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  const handleLogout = async () => {
+    setShowProfileDropdown(false)
+    localStorage.removeItem('rememberMe')
+    await logout()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <header className="topbar">
@@ -135,15 +149,61 @@ export default function Topbar({ title, onMenuToggle }) {
           )}
         </div>
 
-        <div className="topbar-profile" style={{ marginLeft: 8 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', 
-            color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 'bold', fontSize: 14
-          }}>
-            {profile?.nome?.charAt(0)}
-          </div>
-          <span style={{ fontWeight: 500 }}>{profile?.nome?.split(' ')[0]}</span>
+        <div className="topbar-profile" ref={profileDropdownRef} style={{ position: 'relative', marginLeft: 8 }}>
+          <button
+            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer', display: 'flex',
+              alignItems: 'center', gap: 8, padding: 4, borderRadius: 8, color: 'inherit'
+            }}
+          >
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', 
+              color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 'bold', fontSize: 14
+            }}>
+              {profile?.nome?.charAt(0)}
+            </div>
+            <span style={{ fontWeight: 500 }}>{profile?.nome?.split(' ')[0]}</span>
+          </button>
+
+          {showProfileDropdown && (
+            <div style={{
+              position: 'absolute', top: '100%', right: 0, marginTop: 4,
+              width: 220, background: 'var(--card)',
+              boxShadow: 'var(--shadow-lg)', borderRadius: 'var(--radius)',
+              border: '1px solid var(--border)', zIndex: 1000, overflow: 'hidden'
+            }}>
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{profile?.nome}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-light)' }}>{profile?.email}</div>
+                {profile?.role && (
+                  <div style={{ fontSize: 11, color: 'var(--accent)', marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    {ROLE_LABELS[profile.role]}
+                  </div>
+                )}
+              </div>
+              <Link to="/perfil" onClick={() => setShowProfileDropdown(false)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
+                  color: 'var(--text)', textDecoration: 'none', fontSize: 13,
+                  transition: 'background 0.2s' }}
+                onMouseOver={e => e.currentTarget.style.background = 'var(--bg-surface-hover)'}
+                onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <Settings size={16} /> Configurações
+              </Link>
+              <button onClick={handleLogout}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
+                  width: '100%', color: 'var(--danger)', background: 'none', border: 'none',
+                  cursor: 'pointer', fontSize: 13, textAlign: 'left',
+                  borderTop: '1px solid var(--border)', transition: 'background 0.2s' }}
+                onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+                onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+              >
+                Sair
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

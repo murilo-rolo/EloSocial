@@ -15,7 +15,7 @@ export default function GlobalChat() {
       const fetchData = async () => {
         const { data } = await supabase
           .from('applicants')
-          .select('id, nome, bairro:endereco->>bairro, localizacao, composicao_familiar')
+          .select('id, nome, bairro:endereco->>bairro, composicao_familiar')
         if (data) {
           setApplicantsContext(data)
         }
@@ -153,7 +153,7 @@ export default function GlobalChat() {
             <div style={{ textAlign: 'center', color: 'var(--text-light)', marginTop: '40px', fontSize: '13px' }}>
               <div style={{ fontSize: '32px', marginBottom: '8px' }}>👋</div>
               Olá! Eu sou o EloBot. Posso analisar todos os requerentes do sistema para você.<br/><br/>
-              Ex: "Quantas pessoas moram na área rural?" ou "Quais requerentes têm 3 ou mais filhos?"
+              Ex: "Quais requerentes têm 3 ou mais filhos?"
             </div>
           )}
           {messages.map((m, i) => (

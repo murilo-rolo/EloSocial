@@ -4,19 +4,13 @@ import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import { formatDateTime } from '../utils/format'
 import { ROLE_LABELS } from '../utils/roles'
-import { 
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid 
-} from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 
 export default function Dashboard() {
   const { profile } = useAuth()
   const [stats, setStats] = useState({ requerentes: 0, prontuarios: 0, atendimentos: 0 })
   const [recentes, setRecentes] = useState([])
-  const [locData, setLocData] = useState([])
   const [loading, setLoading] = useState(true)
-
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
 
   useEffect(() => {
     async function load() {
@@ -44,26 +38,12 @@ export default function Dashboard() {
         })
       )
 
-      // Get location distribution (urbano vs rural)
-      const { data: applicantsData } = await supabase.from('applicants').select('localizacao')
-      const locCounts = (applicantsData || []).reduce((acc, curr) => {
-        const loc = curr.localizacao || 'Não informado'
-        acc[loc] = (acc[loc] || 0) + 1
-        return acc
-      }, {})
-      
-      const pieData = Object.keys(locCounts).map(k => ({
-        name: k.charAt(0).toUpperCase() + k.slice(1),
-        value: locCounts[k]
-      }))
-
       setStats({
         requerentes: req.count || 0,
         prontuarios: pro.count || 0,
         atendimentos: ate.count || 0,
       })
       setRecentes(prontuariosComNomes)
-      setLocData(pieData)
       setLoading(false)
     }
     load()
@@ -105,47 +85,6 @@ export default function Dashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '24px' }}>
         
-        {/* Gráfico */}
-        <div className="card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
-          <div className="card-header">
-            <h3>Distribuição por Localização</h3>
-          </div>
-          <div style={{ flex: 1, minHeight: '250px' }}>
-            {locData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={locData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {locData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => [`${value} pessoas`, 'Total']} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="empty-state" style={{ padding: '20px' }}>Sem dados suficientes</div>
-            )}
-          </div>
-          {locData.length > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '16px' }}>
-              {locData.map((entry, index) => (
-                <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: COLORS[index % COLORS.length] }}></div>
-                  <span>{entry.name}: {entry.value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Tabela de Recentes */}
         <div className="card" style={{ margin: 0 }}>
           <div className="card-header">

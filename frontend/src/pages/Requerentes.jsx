@@ -10,13 +10,12 @@ export default function Requerentes() {
   const navigate = useNavigate()
   const [requerentes, setRequerentes] = useState([])
   const [search, setSearch] = useState('')
-  const [filtroLocal, setFiltroLocal] = useState('')
   const [filtroSexo, setFiltroSexo] = useState('')
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({
     nome: '', cpf: '', rg: '', data_nascimento: '', telefone: '',
-    nis: '', nome_mae: '', sexo: '', localizacao: '', observacoes: '',
+    nis: '', nome_mae: '', sexo: '', observacoes: '',
   })
   const [saving, setSaving] = useState(false)
   const [ocrLoading, setOcrLoading] = useState(false)
@@ -28,14 +27,13 @@ export default function Requerentes() {
     if (search) {
       query = query.or(`nome.ilike.%${search}%,cpf.ilike.%${search}%`)
     }
-    if (filtroLocal) query = query.eq('localizacao', filtroLocal)
     if (filtroSexo) query = query.eq('sexo', filtroSexo)
     const { data } = await query
     setRequerentes(data || [])
     setLoading(false)
   }
 
-  useEffect(() => { loadRequerentes() }, [search, filtroLocal, filtroSexo])
+  useEffect(() => { loadRequerentes() }, [search, filtroSexo])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -48,7 +46,7 @@ export default function Requerentes() {
     setSaving(false)
     if (!error) {
       setShowModal(false)
-      setForm({ nome: '', cpf: '', rg: '', data_nascimento: '', telefone: '', nis: '', nome_mae: '', sexo: '', localizacao: '', observacoes: '' })
+      setForm({ nome: '', cpf: '', rg: '', data_nascimento: '', telefone: '', nis: '', nome_mae: '', sexo: '', observacoes: '' })
       loadRequerentes()
     }
   }
@@ -115,14 +113,8 @@ export default function Requerentes() {
         </div>
         
         <div className="filter-pills">
-          <button className={`pill ${!filtroLocal && !filtroSexo ? 'active' : ''}`} onClick={() => { setFiltroLocal(''); setFiltroSexo('') }}>
+          <button className={`pill ${!filtroSexo ? 'active' : ''}`} onClick={() => { setFiltroSexo('') }}>
             Todos
-          </button>
-          <button className={`pill ${filtroLocal === 'urbano' ? 'active' : ''}`} onClick={() => setFiltroLocal(filtroLocal === 'urbano' ? '' : 'urbano')}>
-            Zona Urbana
-          </button>
-          <button className={`pill ${filtroLocal === 'rural' ? 'active' : ''}`} onClick={() => setFiltroLocal(filtroLocal === 'rural' ? '' : 'rural')}>
-            Zona Rural
           </button>
           <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ marginLeft: 8, padding: '8px 16px', borderRadius: 24 }}>
             <Plus size={18} /> Novo Requerente
@@ -286,14 +278,6 @@ export default function Requerentes() {
                   <label>Telefone</label>
                   <input className="form-control" value={form.telefone} onChange={(e) => setForm({...form, telefone: e.target.value})} placeholder="(00) 00000-0000" />
                 </div>
-              </div>
-              <div className="form-group">
-                <label>Localização</label>
-                <select className="form-control" value={form.localizacao} onChange={(e) => setForm({...form, localizacao: e.target.value})}>
-                  <option value="">Selecione</option>
-                  <option value="urbano">Urbano</option>
-                  <option value="rural">Rural</option>
-                </select>
               </div>
               <div className="form-group">
                 <label>Observações</label>

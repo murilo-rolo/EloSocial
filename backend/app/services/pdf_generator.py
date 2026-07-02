@@ -29,7 +29,7 @@ CAMPO_LABELS = {
     "cpf": "CPF", "rg": "RG", "rg_orgao": "Órgão Emissor", "rg_uf": "UF",
     "rg_data_emissao": "Data de Emissão", "data_nascimento": "Data de Nascimento",
     "sexo": "Sexo", "telefone": "Telefone", "endereco": "Endereço",
-    "localizacao": "Localização", "ponto_referencia": "Ponto de Referência",
+    "ponto_referencia": "Ponto de Referência",
     "composicao_familiar": "Composição Familiar",
     "abastecimento_agua": "Abastecimento de Água",
     "energia_eletrica": "Energia Elétrica",

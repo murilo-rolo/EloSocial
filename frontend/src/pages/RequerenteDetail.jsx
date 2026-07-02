@@ -172,7 +172,6 @@ export default function RequerenteDetail() {
           <div><strong>Nascimento:</strong> {formatDate(requerente.data_nascimento)}</div>
           <div><strong>Sexo:</strong> {requerente.sexo || '—'}</div>
           <div><strong>Telefone:</strong> {requerente.telefone || '—'}</div>
-          <div><strong>Localização:</strong> {requerente.localizacao || '—'}</div>
         </div>
         {requerente.observacoes && (
           <div style={{ marginTop: 12 }}>

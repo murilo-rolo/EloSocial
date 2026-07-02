@@ -21,7 +21,7 @@ export default function ChatIA() {
     async function loadApplicants() {
       const { data, error } = await supabase
         .from('applicants')
-        .select('id, nome, cpf, localizacao')
+        .select('id, nome, cpf')
         .order('nome')
         
       if (!error && data) {
@@ -151,7 +151,7 @@ export default function ChatIA() {
                   {a.nome}
                 </div>
                 <div className="preview">
-                  {a.cpf ? `CPF: ${a.cpf}` : 'Sem CPF'} • {a.localizacao || 'Urbana'}
+                  {a.cpf ? `CPF: ${a.cpf}` : 'Sem CPF'}
                 </div>
               </div>
             ))}

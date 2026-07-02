@@ -294,6 +294,13 @@ input, select, textarea {
   border-top: 1px solid var(--border);
 }
 
+.light .topbar {
+  background: rgba(255, 255, 255, 0.8);
+}
+.light .menu-toggle {
+  color: var(--text-primary);
+}
+
 .topbar {
   height: var(--topbar-height);
   background: var(--topbar-bg, rgba(17, 33, 28, 0.8));

@@ -97,7 +97,7 @@ export default function Topbar({ title, onMenuToggle }) {
               top: '40px',
               right: 0,
               width: '280px',
-              background: 'white',
+              background: 'var(--card)',
               boxShadow: 'var(--shadow-lg)',
               borderRadius: 'var(--radius)',
               border: '1px solid var(--border)',
@@ -120,7 +120,7 @@ export default function Topbar({ title, onMenuToggle }) {
                       borderBottom: '1px solid var(--border)',
                       fontSize: '13px',
                       color: 'var(--text)',
-                      background: n.type === 'danger' ? '#fef2f2' : '#fffbeb',
+                      background: n.type === 'danger' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
                       textDecoration: 'none'
                     }} onClick={() => setShowDropdown(false)}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

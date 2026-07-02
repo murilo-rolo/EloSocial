@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'icon-192x192.png', 'icon-512x512.png'],
@@ -12,7 +14,7 @@ export default defineConfig({
         name: 'EloSocial - Prontuário SUAS',
         short_name: 'EloSocial',
         description: 'Sistema de Prontuário Eletrônico SUAS para CRAS',
-        theme_color: '#2c3e50',
+        theme_color: '#0B1511',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',

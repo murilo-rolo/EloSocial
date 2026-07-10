@@ -91,10 +91,10 @@ Plano detalhado em: `docs/migracao-telemedicina/PLANO-IMPLEMENTACAO.md`
 - [x] Realtime + deduplicação
 - **Teste:** Mensagens em tempo real vinculadas ao caso
 
-#### Marco 5 — Cofre Digital `~2h`
-- [ ] `DocumentosCaso.jsx` — componente compartilhado
-- [ ] `CofreDigital.jsx` — wrapper para requerente
-- [ ] Upload/download/delete com Storage + metadados
+#### Marco 5 — Cofre Digital `~2h` ✅
+- [x] `DocumentosCaso.jsx` — componente compartilhado
+- [x] `CofreDigital.jsx` — wrapper para requerente
+- [x] Upload/download/delete com Storage + metadados
 - **Teste:** Upload de arquivo, download assinado, delete com permissão
 
 #### Marco 6 — Videochamada com Sala de Espera `~3h`

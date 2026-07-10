@@ -1,6 +1,6 @@
 ---
 name: elosocial
-description: Prontuário SUAS para CRAS. Stack, arquitetura, convenções, DB, rotas e endpoints.
+description: Prontuário SUAS para CRAS com IA Copiloto. Stack, arquitetura, convenções, DB, rotas e endpoints.
 ---
 
 # EloSocial — Contexto do Projeto
@@ -9,22 +9,26 @@ description: Prontuário SUAS para CRAS. Stack, arquitetura, convenções, DB, r
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend | React + JavaScript + Vite + PWA |
-| Backend | Python + FastAPI (PDF + admin de usuários) |
+| Frontend | React + JavaScript + Vite + PWA + Tailwind CSS v4 |
+| Backend | Python + FastAPI (PDF, IA, admin de usuários) |
 | Banco + Auth + Realtime | Supabase Cloud |
+| IA / LLM | Google Gemini API (gemini-2.5-flash, gemini-embedding-2) |
+| RAG / Vetores | pgvector (Supabase PostgreSQL) |
 | Chat | Supabase Realtime (subscriptions PostgreSQL) |
 | PDF | ReportLab |
 | Videoconferência | Daily.co API + daily-js SDK |
+| Ícones | lucide-react |
+| Gráficos | recharts |
 
 ## Arquitetura
 
 ```
-Frontend (React PWA) ←→ Supabase SDK (Auth, DB, Realtime)
-                    ←→ FastAPI (POST /api/pdf, /api/hash, /api/users)
+Frontend (React PWA + Tailwind) ←→ Supabase SDK (Auth, DB, Realtime)
+                                ←→ FastAPI (PDF, IA/RAG/OCR, admin)
 ```
 
 - Frontend comunica **diretamente com Supabase** para auth, CRUD e chat
-- FastAPI usado **apenas** para PDF (ReportLab) e admin de usuários (service_role_key)
+- FastAPI usado para: PDF (ReportLab), admin de usuários, **IA (Gemini)**, **RAG (pgvector)**, **OCR**, **geração de pareceres**
 - Permissões via **RLS** no banco Supabase
 
 ## Decisões de Projeto
@@ -41,25 +45,43 @@ Frontend (React PWA) ←→ Supabase SDK (Auth, DB, Realtime)
 | Docker | Setup via `setup.sh` (templates `.example` no git, `.env` e Dockerfiles ignorados) | Evita vazar credenciais; artefatos locais gerados sob demanda |
 | Relatórios | JSON + PDF exportado | Imutabilidade via hash SHA-256 |
 | Videoconferência | Daily.co (chave no backend) | daily-js no frontend |
+| IA | Google Gemini (gemini-2.5-flash) | Cota gratuita, tool calling nativo, multimodal (OCR) |
+| RAG | pgvector + busca híbrida | Embeddings 768d, busca semântica + textual |
+| CSS | Tailwind CSS v4 | Utility-first, tema escuro/claro via CSS custom properties |
 
 ## Convenções
 
 - **Linguagem:** JavaScript (`.jsx` / `.js`), sem TypeScript
-- **CSS:** `index.css` — mobile-first, media queries 768px, CSS custom properties, sem Tailwind/CSS-in-JS
+- **CSS:** Tailwind CSS v4 (`@import "tailwindcss"`) + CSS custom properties para temas (escuro/claro)
 - **Rotas:** React Router v6 em `App.jsx`
 - **Auth:** Supabase Auth via `AuthContext` + hook `useAuth`
 - **Joins no Dashboard:** `Promise.all` manual (Supabase FK joins instáveis)
 - **Escopo CRAS:** Cada usuário vinculado a uma das 12 unidades; gerentes gerenciam só o próprio CRAS
+- **IA Contexto:** Prompt base em `backend/app/api/suas_context.py` (diretrizes SUAS/LOAS)
+- **Ícones:** lucide-react em todas as páginas
 
 ## Perfis de Acesso
 
-| Perfil | Prontuário | Requerentes | Chat | Admin |
-|---|---|---|---|---|
-| Assistente Social | CRUD | CRUD | ✅ | ❌ |
-| Psicólogo | CRUD | CRUD | ✅ | ❌ |
-| Pedagogo | CRUD | CRUD | ✅ | ❌ |
-| Técnico | CRUD | CRUD | ✅ | ❌ |
-| Gerente | CRUD (tudo) | CRUD | ✅ | ✅ |
+| Perfil | Prontuário | Requerentes | Chat | IA | Admin |
+|---|---|---|---|---|---|
+| Assistente Social | CRUD | CRUD | ✅ | ✅ | ❌ |
+| Psicólogo | CRUD | CRUD | ✅ | ✅ | ❌ |
+| Pedagogo | CRUD | CRUD | ✅ | ✅ | ❌ |
+| Técnico | CRUD | CRUD | ✅ | ✅ | ❌ |
+| Gerente | CRUD (tudo) | CRUD | ✅ | ✅ | ✅ |
+
+## Funcionalidades de IA (Copiloto SUAS)
+
+| Funcionalidade | Endpoint | Descrição |
+|---|---|---|
+| ChatIA | `POST /api/chat-ai` | Chat contextual com IA sobre prontuário do requerente |
+| Triagem | `POST /api/triagem` | Análise automática de vulnerabilidade (score + cor) |
+| Resumo | `POST /api/resumo` | Resumo executivo do histórico do requerente |
+| Parecer | `POST /api/generate-parecer` | Geração de relatório (padrão, jurídico, saúde) |
+| Busca Global | `POST /api/search-global` | EloBot: assistente IA gerencial |
+| RAG Upload | `POST /api/rag/upload` / `POST /api/rag/upload_file` | Upload de PDFs para base de conhecimento |
+| RAG Query | `POST /api/rag/query` | Busca híbrida (semântica + textual) |
+| OCR | `POST /api/ocr/extract_requerente` | Extração de dados de documentos (RG, CPF, CNH) |
 
 ## Unidades CRAS (Belém/PA)
 
@@ -86,7 +108,7 @@ cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  
 Os arquivos `.env` são gerados a partir dos `.env.example` via `setup.sh` / `setup.bat` e ignorados pelo `.gitignore`.
 
 **Frontend (prefixo `VITE_`):** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`
-**Backend:** `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `ALLOWED_ORIGINS`
+**Backend:** `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `GEMINI_API_KEY`, `ALLOWED_ORIGINS`
 
 ---
 
@@ -95,7 +117,7 @@ Os arquivos `.env` são gerados a partir dos `.env.example` via `setup.sh` / `se
 Leia estes arquivos **quando necessário** (detalhes não estão no contexto inicial para agilizar a resposta):
 
 - `ESTRUTURA.md` — Árvore completa de diretórios
-- `MODELO_DADOS.md` — Schema das 8 tabelas, RLS e triggers
+- `MODELO_DADOS.md` — Schema das tabelas, migrations, RLS e triggers
 - `ROTAS.md` — Rotas do frontend + endpoints do backend
-- `OBSERVACOES.md` — 13 observações técnicas importantes
+- `OBSERVACOES.md` — Observações técnicas importantes
 - `BACKLOG.md` — Backlog concluído, em andamento e futuro

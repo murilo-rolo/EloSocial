@@ -61,28 +61,28 @@
 
 Plano detalhado em: `docs/migracao-telemedicina/PLANO-IMPLEMENTACAO.md`
 
-#### Marco 1 — Fundação (Auth + Database) `~2-3h`
-- [ ] Migration `00011_requerente.sql` (CHECK role, trigger email, 4 tabelas, RLS, Storage, Realtime)
-- [ ] `roles.js` — adicionar REQUERENTE + helpers
-- [ ] `CadastroRequerente.jsx` — cadastro mínimo com email pessoal
-- [ ] `Login.jsx` — redirect por role (requerente → /acompanhamento)
-- [ ] `Sidebar.jsx` — links condicionais para requerente
-- [ ] `App.jsx` — 6 rotas protegidas
+#### Marco 1 — Fundação (Auth + Database) `~2-3h` ✅
+- [x] Migration `00011_requerente.sql` (CHECK role, trigger email, 4 tabelas, RLS, Storage, Realtime)
+- [x] `roles.js` — adicionar REQUERENTE + helpers
+- [x] `CadastroRequerente.jsx` — cadastro mínimo com email pessoal
+- [x] `Login.jsx` — redirect por role (requerente → /acompanhamento)
+- [x] `Sidebar.jsx` — links condicionais para requerente
+- [x] `App.jsx` — 6 rotas protegidas
 - **Teste:** Requerente cadastra, loga, vê sidebar simplificada
 
-#### Marco 2 — Dashboard do Requerente `~2h`
-- [ ] `DashboardRequerente.jsx` — resumo do caso, status, prioridade, cards de acesso rápido
-- [ ] Realtime na tabela `triagens`
-- [ ] Estado vazio com botão "Iniciar Triagem"
+#### Marco 2 — Dashboard do Requerente `~2h` ✅
+- [x] `DashboardRequerente.jsx` — resumo do caso, status, prioridade, cards de acesso rápido
+- [x] Realtime na tabela `triagens`
+- [x] Estado vazio com botão "Iniciar Triagem"
 - **Teste:** Dashboard exibe caso ativo, atualiza status em tempo real
 
-#### Marco 3 — Triagem Social `~4-5h`
-- [ ] `TriagemSocial.jsx` — componente multi-step principal
-- [ ] 5 etapas: EtapaContato, EtapaFamilia, EtapaMotivo, EtapaUrgencia, EtapaRelato
-- [ ] `triagemScoring.js` — cálculo de pontuação (ALTA ≥70, MEDIA ≥30, BAIXA <30)
-- [ ] `triagemOptions.js` — constantes de opções
-- [ ] Modo edição (`?editar=1`)
-- [ ] Revisão antes de enviar
+#### Marco 3 — Triagem Social `~4-5h` ✅
+- [x] `TriagemSocial.jsx` — componente multi-step principal
+- [x] 5 etapas: EtapaContato, EtapaFamilia, EtapaMotivo, EtapaUrgencia, EtapaRelato
+- [x] `triagemScoring.js` — cálculo de pontuação (ALTA ≥70, MEDIA ≥30, BAIXA <30)
+- [x] `triagemOptions.js` — constantes de opções
+- [x] Modo edição (`?editar=1`)
+- [x] Revisão antes de enviar
 - **Teste:** Fluxo completo com 3 prioridades (ALTA, MEDIA, BAIXA), edição, validação
 
 #### Marco 4 — Chat Caso-a-Caso `~2h`

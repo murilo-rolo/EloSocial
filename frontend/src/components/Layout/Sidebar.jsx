@@ -1,22 +1,31 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { canManageUsers } from '../../utils/roles'
-import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot } from 'lucide-react'
+import { canManageUsers, isRequerente } from '../../utils/roles'
+import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot, ClipboardList, ListTodo, FolderOpen } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
   const { profile } = useAuth()
 
-  const links = [
-    { to: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
-    { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
-    { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
-    { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
-    { to: '/chat-ia', label: 'Chat IA', icon: <Bot size={20} /> },
-    { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
-    { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
-  ]
+  const links = isRequerente(profile?.role)
+    ? [
+        { to: '/acompanhamento', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
+        { to: '/triagem', label: 'Triagem', icon: <ClipboardList size={20} /> },
+        { to: '/chat-atendimento', label: 'Mensagens', icon: <MessageSquare size={20} /> },
+        { to: '/video-atendimento', label: 'Video', icon: <Video size={20} /> },
+        { to: '/plano-acao', label: 'Plano de Acao', icon: <ListTodo size={20} /> },
+        { to: '/cofre-digital', label: 'Cofre Digital', icon: <FolderOpen size={20} /> },
+      ]
+    : [
+        { to: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
+        { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
+        { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
+        { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
+        { to: '/chat-ia', label: 'Chat IA', icon: <Bot size={20} /> },
+        { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
+        { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
+      ]
 
-  if (canManageUsers(profile?.role)) {
+  if (!isRequerente(profile?.role) && canManageUsers(profile?.role)) {
     links.push({ to: '/admin', label: 'Admin', icon: <Settings size={20} /> })
   }
 

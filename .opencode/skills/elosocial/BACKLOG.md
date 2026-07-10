@@ -49,11 +49,71 @@
 - Gráficos: recharts
 
 ## 🔄 Em andamento
+
+### Fluxo existente
 - Testar fluxo completo: cadastro → prontuário → PDF
 - Ajustar responsividade mobile (viewport 360px)
 - Validar RLS policies
 - Deploy: Vercel (frontend + backend)
 - Pastas vazias: components/Chat/, components/Prontuario/, components/ReportViewer/ (componentes estão nas páginas)
+
+### Role Requerente + 7 Features
+
+Plano detalhado em: `docs/migracao-telemedicina/PLANO-IMPLEMENTACAO.md`
+
+#### Marco 1 — Fundação (Auth + Database) `~2-3h`
+- [ ] Migration `00011_requerente.sql` (CHECK role, trigger email, 4 tabelas, RLS, Storage, Realtime)
+- [ ] `roles.js` — adicionar REQUERENTE + helpers
+- [ ] `CadastroRequerente.jsx` — cadastro mínimo com email pessoal
+- [ ] `Login.jsx` — redirect por role (requerente → /acompanhamento)
+- [ ] `Sidebar.jsx` — links condicionais para requerente
+- [ ] `App.jsx` — 6 rotas protegidas
+- **Teste:** Requerente cadastra, loga, vê sidebar simplificada
+
+#### Marco 2 — Dashboard do Requerente `~2h`
+- [ ] `DashboardRequerente.jsx` — resumo do caso, status, prioridade, cards de acesso rápido
+- [ ] Realtime na tabela `triagens`
+- [ ] Estado vazio com botão "Iniciar Triagem"
+- **Teste:** Dashboard exibe caso ativo, atualiza status em tempo real
+
+#### Marco 3 — Triagem Social `~4-5h`
+- [ ] `TriagemSocial.jsx` — componente multi-step principal
+- [ ] 5 etapas: EtapaContato, EtapaFamilia, EtapaMotivo, EtapaUrgencia, EtapaRelato
+- [ ] `triagemScoring.js` — cálculo de pontuação (ALTA ≥70, MEDIA ≥30, BAIXA <30)
+- [ ] `triagemOptions.js` — constantes de opções
+- [ ] Modo edição (`?editar=1`)
+- [ ] Revisão antes de enviar
+- **Teste:** Fluxo completo com 3 prioridades (ALTA, MEDIA, BAIXA), edição, validação
+
+#### Marco 4 — Chat Caso-a-Caso `~2h`
+- [ ] `MensagensCaso.jsx` — componente compartilhado (requerente + assistente)
+- [ ] `ChatCaso.jsx` — wrapper para requerente
+- [ ] Realtime + deduplicação
+- **Teste:** Mensagens em tempo real vinculadas ao caso
+
+#### Marco 5 — Cofre Digital `~2h`
+- [ ] `DocumentosCaso.jsx` — componente compartilhado
+- [ ] `CofreDigital.jsx` — wrapper para requerente
+- [ ] Upload/download/delete com Storage + metadados
+- **Teste:** Upload de arquivo, download assinado, delete com permissão
+
+#### Marco 6 — Videochamada com Sala de Espera `~3h`
+- [ ] `video.py` — modificar endpoint com `caso_id` opcional
+- [ ] `VideoCall.jsx` — wrapper Daily.co compartilhado
+- [ ] `VideoRequerente.jsx` — sala de espera + conexão automática
+- **Teste:** Sala de espera, conexão via Realtime, sala vinculada ao caso
+
+#### Marco 7 — Plano de Ação `~2h`
+- [ ] `PlanoAcaoCaso.jsx` — componente compartilhado
+- [ ] `PlanoAcao.jsx` — wrapper para requerente
+- [ ] Status cycles + permissões por modo
+- **Teste:** Assistente cria tarefas, requerente altera status
+
+#### Checkpoint Final — Validação
+- [ ] Todos os 34 cenários de teste do `10-GUIA-TESTES.md` executados
+- [ ] RLS validado para todas as 4 tabelas novas
+- [ ] Sidebar requerente vs profissional consistentes
+- [ ] Fluxo completo: cadastro → triagem → dashboard → chat → documentos → video → plano
 
 ## 📋 Futuro
 - Dashboard estatístico com gráficos (recharts já instalado)
@@ -61,3 +121,5 @@
 - Filtros avançados (data, profissional, faixa etária, bairro)
 - Exportar estatísticas CSV/PDF
 - Mover componentes de páginas para pastas dedicadas (Chat/, Prontuario/, ReportViewer/)
+- Notificações push para mudanças de status do caso
+- Relatório/pdf do plano de ação para o requerente

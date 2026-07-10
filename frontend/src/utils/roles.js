@@ -4,6 +4,7 @@ export const ROLES = {
   PEDAGOGO: 'pedagogo',
   TECNICO: 'tecnico',
   GERENTE: 'gerente',
+  REQUERENTE: 'requerente',
 }
 
 export const ROLE_LABELS = {
@@ -12,6 +13,7 @@ export const ROLE_LABELS = {
   [ROLES.PEDAGOGO]: 'Pedagogo',
   [ROLES.TECNICO]: 'Técnico',
   [ROLES.GERENTE]: 'Gerente',
+  [ROLES.REQUERENTE]: 'Requerente',
 }
 
 export function canManageUsers(role) {
@@ -20,6 +22,10 @@ export function canManageUsers(role) {
 
 export function canViewAllReports(role) {
   return role === ROLES.GERENTE
+}
+
+export function isRequerente(role) {
+  return role === ROLES.REQUERENTE
 }
 
 export const CRAS_LIST = [

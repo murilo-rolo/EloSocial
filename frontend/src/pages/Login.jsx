@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -20,8 +21,18 @@ export default function Login() {
     setLoading(true)
     localStorage.setItem('rememberMe', salvar ? 'true' : 'false')
     try {
-      await login(email, password)
-      navigate(from, { replace: true })
+      const { data } = await login(email, password)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profile?.role === 'requerente') {
+        navigate('/acompanhamento', { replace: true })
+      } else {
+        navigate(from, { replace: true })
+      }
     } catch (err) {
       setError(err.message || 'Erro ao fazer login')
     } finally {
@@ -80,9 +91,15 @@ export default function Login() {
         </form>
 
         <div style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-light)' }}>
-          Não tem uma conta?{' '}
+          Nao tem uma conta?{' '}
           <Link to="/cadastro" style={{ color: 'var(--secondary)', fontWeight: 600 }}>
             Criar conta
+          </Link>
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 8, fontSize: 13, color: 'var(--text-light)' }}>
+          E usuario?{' '}
+          <Link to="/cadastro-requerente" style={{ color: 'var(--accent)', fontWeight: 600 }}>
+            Cadastre-se aqui
           </Link>
         </div>
       </div>

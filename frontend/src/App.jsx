@@ -12,10 +12,20 @@ import Chat from './pages/Chat'
 import Videoconferencia from './pages/Videoconferencia'
 import Admin from './pages/Admin'
 import Cadastro from './pages/Cadastro'
+import CadastroRequerente from './pages/CadastroRequerente'
 import BaseConhecimento from './pages/BaseConhecimento'
 import ThemeToggle from './components/ThemeToggle'
 import ChatIA from './pages/ChatIA'
 import Perfil from './pages/Perfil'
+
+function Placeholder({ title }) {
+  return (
+    <div style={{ padding: 32, textAlign: 'center' }}>
+      <h1 className="page-title font-serif">{title}</h1>
+      <p className="page-subtitle">Em desenvolvimento</p>
+    </div>
+  )
+}
 
 export default function App() {
   const { user, loading } = useAuth()
@@ -33,6 +43,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/cadastro" element={user ? <Navigate to="/" replace /> : <Cadastro />} />
+        <Route path="/cadastro-requerente" element={user ? <Navigate to="/" replace /> : <CadastroRequerente />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
         <Route path="/requerentes" element={<ProtectedRoute><Requerentes /></ProtectedRoute>} />
@@ -45,6 +56,15 @@ export default function App() {
         <Route path="/chat-ia" element={<ProtectedRoute><ChatIA /></ProtectedRoute>} />
         <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute roles={['gerente']}><Admin /></ProtectedRoute>} />
+
+        {/* Rotas do Requerente */}
+        <Route path="/acompanhamento" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Acompanhamento" /></ProtectedRoute>} />
+        <Route path="/triagem" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Triagem Social" /></ProtectedRoute>} />
+        <Route path="/chat-atendimento" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Chat Atendimento" /></ProtectedRoute>} />
+        <Route path="/video-atendimento" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Video Atendimento" /></ProtectedRoute>} />
+        <Route path="/plano-acao" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Plano de Acao" /></ProtectedRoute>} />
+        <Route path="/cofre-digital" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Cofre Digital" /></ProtectedRoute>} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ThemeToggle />

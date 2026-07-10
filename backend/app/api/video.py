@@ -24,6 +24,7 @@ class CreateRoomRequest(BaseModel):
     privacy: str = "public"
     access_code: str | None = None
     participant_ids: list[str] = []
+    caso_id: str | None = None
 
 class JoinRoomRequest(BaseModel):
     room_id: str
@@ -102,6 +103,21 @@ def create_room(data: CreateRoomRequest):
             f"{SUPABASE_URL}/rest/v1/video_participants",
             headers=HEADERS,
             json=participants_payload,
+        )
+
+    if data.caso_id:
+        daily_expires = int(time.time()) + 7 * 86400  # 7 dias
+        triagem_update = {
+            "daily_room_url": room_url,
+            "daily_room_name": room_name,
+            "daily_room_created_at": "now()",
+            "daily_room_expires_at": daily_expires,
+            "status": "em_atendimento",
+        }
+        httpx.patch(
+            f"{SUPABASE_URL}/rest/v1/triagens?id=eq.{data.caso_id}",
+            headers=HEADERS,
+            json=triagem_update,
         )
 
     return {

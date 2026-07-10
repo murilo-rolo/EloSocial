@@ -97,10 +97,10 @@ Plano detalhado em: `docs/migracao-telemedicina/PLANO-IMPLEMENTACAO.md`
 - [x] Upload/download/delete com Storage + metadados
 - **Teste:** Upload de arquivo, download assinado, delete com permissão
 
-#### Marco 6 — Videochamada com Sala de Espera `~3h`
-- [ ] `video.py` — modificar endpoint com `caso_id` opcional
-- [ ] `VideoCall.jsx` — wrapper Daily.co compartilhado
-- [ ] `VideoRequerente.jsx` — sala de espera + conexão automática
+#### Marco 6 — Videochamada com Sala de Espera `~3h` ✅
+- [x] `video.py` — modificar endpoint com `caso_id` opcional
+- [x] `VideoCall.jsx` — wrapper Daily.co compartilhado
+- [x] `VideoRequerente.jsx` — sala de espera + conexão automática
 - **Teste:** Sala de espera, conexão via Realtime, sala vinculada ao caso
 
 #### Marco 7 — Plano de Ação `~2h`

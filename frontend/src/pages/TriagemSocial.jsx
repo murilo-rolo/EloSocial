@@ -129,6 +129,7 @@ export default function TriagemSocial() {
 
       const payload = {
         user_id: profile.id,
+        applicant_id: profile.id,
         dados_acolhimento: data,
         detalhes,
         sintomas,
@@ -141,6 +142,13 @@ export default function TriagemSocial() {
       } else {
         await supabase.from('triagens').insert(payload)
       }
+
+      await supabase.from('applicants').update({
+        telefone: data.contato.telefone || null,
+        nis: data.contato.cartao_sus_nis || null,
+        ponto_referencia: data.contato.ponto_referencia || null,
+        composicao_familiar: data.familia.composicao_familiar || null,
+      }).eq('id', profile.id)
 
       navigate('/acompanhamento', { replace: true })
     } catch (err) {

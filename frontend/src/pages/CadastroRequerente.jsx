@@ -12,6 +12,13 @@ export default function CadastroRequerente() {
     cpf: '',
     telefone: '',
     cras: '',
+    nome_mae: '',
+    rg: '',
+    rg_orgao: '',
+    rg_uf: '',
+    rg_data_emissao: '',
+    data_nascimento: '',
+    sexo: '',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -59,7 +66,16 @@ export default function CadastroRequerente() {
 
     setLoading(true)
     try {
-      await signup(form.email, form.password, form.nome, 'requerente', form.cras, form.telefone)
+      await signup(form.email, form.password, form.nome, 'requerente', form.cras, form.telefone, {
+        cpf: form.cpf,
+        nome_mae: form.nome_mae,
+        rg: form.rg,
+        rg_orgao: form.rg_orgao,
+        rg_uf: form.rg_uf,
+        rg_data_emissao: form.rg_data_emissao,
+        data_nascimento: form.data_nascimento,
+        sexo: form.sexo,
+      })
       setSuccess(true)
     } catch (err) {
       setError(err.message || 'Erro ao criar conta. Tente novamente.')
@@ -177,6 +193,92 @@ export default function CadastroRequerente() {
               placeholder="(00) 00000-0000"
               value={form.telefone}
               onChange={(e) => setForm({ ...form, telefone: formatarTelefone(e.target.value) })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Nome da Mae</label>
+            <input
+              type="text"
+              name="nome_mae"
+              className="form-control"
+              placeholder="Nome completo da mae"
+              value={form.nome_mae}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Data de Nascimento</label>
+            <input
+              type="date"
+              name="data_nascimento"
+              className="form-control"
+              value={form.data_nascimento}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Sexo</label>
+            <select
+              name="sexo"
+              className="form-control"
+              value={form.sexo}
+              onChange={handleChange}
+            >
+              <option value="">Selecione</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div className="form-group" style={{ flex: 2 }}>
+              <label>RG</label>
+              <input
+                type="text"
+                name="rg"
+                className="form-control"
+                placeholder="Numero do RG"
+                value={form.rg}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group" style={{ flex: 2 }}>
+              <label>Orgao Emissor</label>
+              <input
+                type="text"
+                name="rg_orgao"
+                className="form-control"
+                placeholder="Ex: SSP"
+                value={form.rg_orgao}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label>UF</label>
+              <input
+                type="text"
+                name="rg_uf"
+                className="form-control"
+                maxLength={2}
+                placeholder="UF"
+                value={form.rg_uf}
+                onChange={(e) => setForm({ ...form, rg_uf: e.target.value.toUpperCase() })}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Data de Emissao do RG</label>
+            <input
+              type="date"
+              name="rg_data_emissao"
+              className="form-control"
+              value={form.rg_data_emissao}
+              onChange={handleChange}
             />
           </div>
 

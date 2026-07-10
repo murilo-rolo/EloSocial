@@ -103,10 +103,10 @@ Plano detalhado em: `docs/migracao-telemedicina/PLANO-IMPLEMENTACAO.md`
 - [x] `VideoRequerente.jsx` — sala de espera + conexão automática
 - **Teste:** Sala de espera, conexão via Realtime, sala vinculada ao caso
 
-#### Marco 7 — Plano de Ação `~2h`
-- [ ] `PlanoAcaoCaso.jsx` — componente compartilhado
-- [ ] `PlanoAcao.jsx` — wrapper para requerente
-- [ ] Status cycles + permissões por modo
+#### Marco 7 — Plano de Ação `~2h` ✅
+- [x] `PlanoAcaoCaso.jsx` — componente compartilhado
+- [x] `PlanoAcao.jsx` — wrapper para requerente
+- [x] Status cycles + permissões por modo
 - **Teste:** Assistente cria tarefas, requerente altera status
 
 #### Checkpoint Final — Validação

@@ -19,6 +19,21 @@ export default function CadastroRequerente() {
   const { signup } = useAuth()
   const navigate = useNavigate()
 
+  function formatarTelefone(valor) {
+    const digitos = valor.replace(/\D/g, '').slice(0, 11)
+    if (digitos.length <= 2) return digitos.replace(/(\d{0,2})/, '($1')
+    if (digitos.length <= 7) return digitos.replace(/(\d{2})(\d{0,5})/, '($1) $2')
+    return digitos.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+  }
+
+  function formatarCpf(valor) {
+    const digitos = valor.replace(/\D/g, '').slice(0, 11)
+    if (digitos.length <= 3) return digitos
+    if (digitos.length <= 6) return digitos.replace(/(\d{3})(\d{0,3})/, '$1.$2')
+    if (digitos.length <= 9) return digitos.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3')
+    return digitos.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4')
+  }
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
@@ -44,7 +59,7 @@ export default function CadastroRequerente() {
 
     setLoading(true)
     try {
-      await signup(form.email, form.password, form.nome, 'requerente', form.cras)
+      await signup(form.email, form.password, form.nome, 'requerente', form.cras, form.telefone)
       setSuccess(true)
     } catch (err) {
       setError(err.message || 'Erro ao criar conta. Tente novamente.')
@@ -149,8 +164,7 @@ export default function CadastroRequerente() {
               className="form-control"
               placeholder="000.000.000-00"
               value={form.cpf}
-              onChange={handleChange}
-              maxLength={14}
+              onChange={(e) => setForm({ ...form, cpf: formatarCpf(e.target.value) })}
             />
           </div>
 
@@ -162,8 +176,7 @@ export default function CadastroRequerente() {
               className="form-control"
               placeholder="(00) 00000-0000"
               value={form.telefone}
-              onChange={handleChange}
-              maxLength={15}
+              onChange={(e) => setForm({ ...form, telefone: formatarTelefone(e.target.value) })}
             />
           </div>
 

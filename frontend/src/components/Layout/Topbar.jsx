@@ -64,7 +64,6 @@ export default function Topbar({ title, onMenuToggle }) {
 
   const handleLogout = async () => {
     setShowProfileDropdown(false)
-    localStorage.removeItem('rememberMe')
     await logout()
     navigate('/login', { replace: true })
   }

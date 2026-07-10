@@ -56,12 +56,12 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
-  const signup = async (email, password, nome, role, cras) => {
+  const signup = async (email, password, nome, role, cras, telefone) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { nome, role, cras },
+        data: { nome, role, cras, telefone },
       },
     })
     if (error) throw error

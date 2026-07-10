@@ -6,12 +6,6 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import App from './App'
 import './index.css'
 
-// Se "Salvar Login" não foi marcado, limpa sessão ao abrir
-const rememberMe = localStorage.getItem('rememberMe') === 'true'
-if (!rememberMe) {
-  localStorage.removeItem('supabase.auth.token')
-}
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

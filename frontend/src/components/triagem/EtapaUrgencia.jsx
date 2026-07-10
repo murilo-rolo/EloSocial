@@ -46,7 +46,7 @@ export default function EtapaUrgencia({ data, onChange, errors }) {
                 onChange={(e) => onChange({ ...data, urgencia: { ...urgencia, nivel: e.target.value } })}
                 style={{ accentColor: 'var(--accent)', width: 16, height: 16 }}
               />
-              <span style={{ fontSize: 14, color: 'var(--text-primary)' }}>{n.label}</span>
+              <span style={{ fontSize: 14, color: urgencia.nivel === n.value ? '#fff' : 'var(--text-primary)' }}>{n.label}</span>
             </label>
           ))}
         </div>
@@ -77,7 +77,7 @@ export default function EtapaUrgencia({ data, onChange, errors }) {
               cursor: 'pointer',
               transition: 'all 0.2s',
               fontSize: 14,
-              color: 'var(--text-primary)',
+              color: (urgencia.situacoes || []).includes(s) ? '#fff' : 'var(--text-primary)',
             }}
           >
             <input
@@ -101,23 +101,23 @@ export default function EtapaUrgencia({ data, onChange, errors }) {
             background: showOutra ? 'var(--accent-muted)' : 'transparent',
             cursor: 'pointer',
             transition: 'all 0.2s',
-            fontSize: 14,
-            color: 'var(--text-primary)',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={showOutra}
-            onChange={() => {
-              setShowOutra(!showOutra)
-              if (showOutra) {
-                setOutraSituacao('')
-                onChange({ ...data, urgencia: { ...urgencia, outra_situacao: '' } })
-              }
+              fontSize: 14,
+              color: showOutra ? '#fff' : 'var(--text-primary)',
             }}
-            style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
-          />
-          Outra situacao
+          >
+            <input
+              type="checkbox"
+              checked={showOutra}
+              onChange={() => {
+                setShowOutra(!showOutra)
+                if (showOutra) {
+                  setOutraSituacao('')
+                  onChange({ ...data, urgencia: { ...urgencia, outra_situacao: '' } })
+                }
+              }}
+              style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+            />
+            Outra situacao
         </label>
       </div>
 

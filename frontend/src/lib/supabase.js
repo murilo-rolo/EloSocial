@@ -7,4 +7,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY são obrigatórias')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const tabId = sessionStorage.getItem('supabase-tab-id') || crypto.randomUUID()
+sessionStorage.setItem('supabase-tab-id', tabId)
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: sessionStorage,
+    storageKey: `supabase.auth.token.${tabId}`
+  }
+})

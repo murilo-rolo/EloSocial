@@ -3,6 +3,13 @@ import { CRAS_LIST } from '../../utils/roles'
 export default function EtapaContato({ data, onChange, errors }) {
   const contato = data?.contato || {}
 
+  function formatarTelefone(valor) {
+    const digitos = valor.replace(/\D/g, '').slice(0, 11)
+    if (digitos.length <= 2) return digitos.replace(/(\d{0,2})/, '($1')
+    if (digitos.length <= 7) return digitos.replace(/(\d{2})(\d{0,5})/, '($1) $2')
+    return digitos.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
+  }
+
   function update(field, value) {
     onChange({ ...data, contato: { ...contato, [field]: value } })
   }
@@ -20,7 +27,7 @@ export default function EtapaContato({ data, onChange, errors }) {
           className="form-control"
           placeholder="(00) 00000-0000"
           value={contato.telefone || ''}
-          onChange={(e) => update('telefone', e.target.value)}
+          onChange={(e) => update('telefone', formatarTelefone(e.target.value))}
         />
         {errors?.telefone && <span style={{ color: 'var(--danger)', fontSize: 12 }}>{errors.telefone}</span>}
       </div>

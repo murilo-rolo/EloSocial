@@ -37,8 +37,8 @@ export default function EtapaMotivo({ data, onChange, errors }) {
                 textAlign: 'center',
               }}
             >
-              <Icon size={24} style={{ color: selected ? 'var(--accent)' : 'var(--text-secondary)' }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: selected ? 'var(--accent)' : 'var(--text-primary)' }}>
+              <Icon size={24} style={{ color: selected ? '#fff' : 'var(--text-secondary)' }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: selected ? '#fff' : 'var(--text-primary)' }}>
                 {d.label}
               </span>
             </div>

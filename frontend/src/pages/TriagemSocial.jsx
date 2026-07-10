@@ -11,43 +11,45 @@ import EtapaMotivo from '../components/triagem/EtapaMotivo'
 import EtapaUrgencia from '../components/triagem/EtapaUrgencia'
 import EtapaRelato from '../components/triagem/EtapaRelato'
 
-const INITIAL_DATA = {
-  contato: {
-    telefone: '',
-    idade: '',
-    cartao_sus_nis: '',
-    bairro_localidade: '',
-    ponto_referencia: '',
-    territorio_cras: '',
-  },
-  familia: {
-    composicao_familiar: '',
-    renda_familiar: '',
-    beneficios_sociais: [],
-    outros_beneficios: '',
-  },
-  motivo: {
-    demanda_principal: '',
-    outra_demanda: '',
-  },
-  urgencia: {
-    nivel: '',
-    situacoes: [],
-    outra_situacao: '',
-  },
-  relato: '',
+function getInitialData(profile, user) {
+  return {
+    contato: {
+      telefone: user?.user_metadata?.telefone || '',
+      idade: '',
+      cartao_sus_nis: '',
+      bairro_localidade: '',
+      ponto_referencia: '',
+      territorio_cras: profile?.cras || '',
+    },
+    familia: {
+      composicao_familiar: '',
+      renda_familiar: '',
+      beneficios_sociais: [],
+      outros_beneficios: '',
+    },
+    motivo: {
+      demanda_principal: '',
+      outra_demanda: '',
+    },
+    urgencia: {
+      nivel: '',
+      situacoes: [],
+      outra_situacao: '',
+    },
+    relato: '',
+  }
 }
 
 const STEP_COMPONENTS = [EtapaContato, EtapaFamilia, EtapaMotivo, EtapaUrgencia, EtapaRelato]
 
 export default function TriagemSocial() {
-  const { profile } = useAuth()
+  const { profile, user } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isEditing = searchParams.get('editar') === '1'
 
   const [step, setStep] = useState(0)
-  const [data, setData] = useState(INITIAL_DATA)
+  const [data, setData] = useState(() => getInitialData(profile, user))
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [initialLoad, setInitialLoad] = useState(true)
@@ -71,13 +73,14 @@ export default function TriagemSocial() {
       .maybeSingle()
 
     if (existing?.dados_acolhimento && Object.keys(existing.dados_acolhimento).length > 0) {
+      const initialData = getInitialData(profile, user)
       setData({
-        ...INITIAL_DATA,
+        ...initialData,
         ...existing.dados_acolhimento,
-        contato: { ...INITIAL_DATA.contato, ...(existing.dados_acolhimento.contato || {}) },
-        familia: { ...INITIAL_DATA.familia, ...(existing.dados_acolhimento.familia || {}) },
-        motivo: { ...INITIAL_DATA.motivo, ...(existing.dados_acolhimento.motivo || {}) },
-        urgencia: { ...INITIAL_DATA.urgencia, ...(existing.dados_acolhimento.urgencia || {}) },
+        contato: { ...initialData.contato, ...(existing.dados_acolhimento.contato || {}) },
+        familia: { ...initialData.familia, ...(existing.dados_acolhimento.familia || {}) },
+        motivo: { ...initialData.motivo, ...(existing.dados_acolhimento.motivo || {}) },
+        urgencia: { ...initialData.urgencia, ...(existing.dados_acolhimento.urgencia || {}) },
       })
       setTriagemId(existing.id)
     }

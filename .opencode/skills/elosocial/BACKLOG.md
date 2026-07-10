@@ -85,10 +85,10 @@ Plano detalhado em: `docs/migracao-telemedicina/PLANO-IMPLEMENTACAO.md`
 - [x] Revisão antes de enviar
 - **Teste:** Fluxo completo com 3 prioridades (ALTA, MEDIA, BAIXA), edição, validação
 
-#### Marco 4 — Chat Caso-a-Caso `~2h`
-- [ ] `MensagensCaso.jsx` — componente compartilhado (requerente + assistente)
-- [ ] `ChatCaso.jsx` — wrapper para requerente
-- [ ] Realtime + deduplicação
+#### Marco 4 — Chat Caso-a-Caso `~2h` ✅
+- [x] `MensagensCaso.jsx` — componente compartilhado (requerente + assistente)
+- [x] `ChatCaso.jsx` — wrapper para requerente
+- [x] Realtime + deduplicação
 - **Teste:** Mensagens em tempo real vinculadas ao caso
 
 #### Marco 5 — Cofre Digital `~2h`

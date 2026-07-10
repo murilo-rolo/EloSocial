@@ -15,6 +15,7 @@ import Cadastro from './pages/Cadastro'
 import CadastroRequerente from './pages/CadastroRequerente'
 import DashboardRequerente from './pages/DashboardRequerente'
 import TriagemSocial from './pages/TriagemSocial'
+import ChatCaso from './pages/ChatCaso'
 import BaseConhecimento from './pages/BaseConhecimento'
 import ThemeToggle from './components/ThemeToggle'
 import ChatIA from './pages/ChatIA'
@@ -62,7 +63,7 @@ export default function App() {
         {/* Rotas do Requerente */}
         <Route path="/acompanhamento" element={<ProtectedRoute roles={['requerente']}><DashboardRequerente /></ProtectedRoute>} />
         <Route path="/triagem" element={<ProtectedRoute roles={['requerente']}><TriagemSocial /></ProtectedRoute>} />
-        <Route path="/chat-atendimento" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Chat Atendimento" /></ProtectedRoute>} />
+        <Route path="/chat-atendimento" element={<ProtectedRoute roles={['requerente']}><ChatCaso /></ProtectedRoute>} />
         <Route path="/video-atendimento" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Video Atendimento" /></ProtectedRoute>} />
         <Route path="/plano-acao" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Plano de Acao" /></ProtectedRoute>} />
         <Route path="/cofre-digital" element={<ProtectedRoute roles={['requerente']}><Placeholder title="Cofre Digital" /></ProtectedRoute>} />

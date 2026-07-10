@@ -3,6 +3,8 @@
 -- Prontuário Eletrônico SUAS
 -- =============================================
 
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- =============================================
 -- 1. TABELAS
 -- =============================================
@@ -251,13 +253,7 @@ CREATE INDEX idx_documentos_caso_caso ON public.documentos_caso(caso_id);
 CREATE INDEX idx_knowledge_chunks_fts ON public.knowledge_chunks USING GIN (fts);
 
 -- =============================================
--- 3. EXTENSÕES
--- =============================================
-
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- =============================================
--- 4. RLS
+-- 3. RLS
 -- =============================================
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -478,10 +474,10 @@ CREATE POLICY "knowledge_chunks_insert" ON public.knowledge_chunks
   FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- =============================================
--- 5. FUNÇÕES E TRIGGERS
+-- 4. FUNÇÕES E TRIGGERS
 -- =============================================
 
--- 5.1 Criar profile automaticamente após signup
+-- 4.1 Criar profile automaticamente após signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -510,7 +506,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 5.2 Validação de email institucional (pula para requerente)
+-- 4.2 Validação de email institucional (pula para requerente)
 CREATE OR REPLACE FUNCTION public.validate_institutional_email()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -536,7 +532,7 @@ CREATE TRIGGER on_auth_user_email_validation
   BEFORE INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.validate_institutional_email();
 
--- 5.3 Criar applicants para requerentes (copia de profiles)
+-- 4.3 Criar applicants para requerentes (copia de profiles)
 CREATE OR REPLACE FUNCTION public.handle_new_requerente()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -552,7 +548,7 @@ CREATE TRIGGER on_profile_created
   AFTER INSERT ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_requerente();
 
--- 5.4 RPC: busca semântica RAG
+-- 4.4 RPC: busca semântica RAG
 CREATE OR REPLACE FUNCTION public.match_knowledge_chunks(
   query_embedding VECTOR(768),
   match_threshold FLOAT,
@@ -577,7 +573,7 @@ AS $$
   LIMIT match_count;
 $$;
 
--- 5.5 RPC: busca híbrida RAG (semântica + lexical)
+-- 4.5 RPC: busca híbrida RAG (semântica + lexical)
 CREATE OR REPLACE FUNCTION public.hybrid_search_knowledge(
   query_text TEXT,
   query_embedding VECTOR(768),
@@ -627,7 +623,7 @@ AS $$
 $$;
 
 -- =============================================
--- 6. REALTIME
+-- 5. REALTIME
 -- =============================================
 
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;

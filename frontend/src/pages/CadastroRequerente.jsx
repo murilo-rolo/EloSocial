@@ -33,6 +33,12 @@ export default function CadastroRequerente() {
     return digitos.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3')
   }
 
+  function formatarRg(valor) {
+    const digitos = valor.replace(/\D/g, '').slice(0, 8)
+    if (digitos.length <= 7) return digitos
+    return digitos.replace(/(\d{7})(\d{0,1})/, '$1-$2')
+  }
+
   function formatarCpf(valor) {
     const digitos = valor.replace(/\D/g, '').slice(0, 11)
     if (digitos.length <= 3) return digitos
@@ -241,9 +247,9 @@ export default function CadastroRequerente() {
                 type="text"
                 name="rg"
                 className="form-control"
-                placeholder="Numero do RG"
+                placeholder="0000000-0"
                 value={form.rg}
-                onChange={handleChange}
+                onChange={(e) => setForm({ ...form, rg: formatarRg(e.target.value) })}
               />
             </div>
             <div className="form-group" style={{ flex: 2 }}>

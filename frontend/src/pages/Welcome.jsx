@@ -6,9 +6,17 @@ export default function Welcome() {
 
   return (
     <Layout title="Início">
-      <h1 className="page-title font-serif">
-        Bem vindo, <em>{profile?.nome}</em>!
-      </h1>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh',
+        textAlign: 'center',
+      }}>
+        <h1 className="page-title font-serif" style={{ fontSize: 36 }}>
+          Bem vindo, <em>{profile?.nome}</em>!
+        </h1>
+      </div>
     </Layout>
   )
 }

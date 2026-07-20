@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import ALLOWED_ORIGINS
 
-app = FastAPI(title="EloSocial - PDF Generator", version="1.0.0")
+app = FastAPI(title="EloSocial", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,

@@ -16,7 +16,7 @@ export default function Sidebar({ open, onClose }) {
         { to: '/cofre-digital', label: 'Cofre Digital', icon: <FolderOpen size={20} /> },
       ]
     : [
-        { to: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
+        { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
         { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
         { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
         { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },

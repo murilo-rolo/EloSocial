@@ -35,6 +35,7 @@ Inspirado no projeto Arcane, o sistema foi atualizado com agentes de Inteligênc
 - **Mensagens da Equipe:** Chat interno em tempo real para comunicação rápida entre técnicos.
 - **Videoconferência:** Salas privadas e seguras para atendimento remoto.
 - **Controles de Acesso (RBAC):** Permissões granulares para Assistentes Sociais, Psicólogos, Pedagogos, Técnicos e Gerentes. Escopo restrito por unidade CRAS.
+- **Central de Ajuda:** Página com seções colapsáveis descrevendo cada funcionalidade do sistema, filtrada por role (profissional vs. requerente).
 
 ---
 

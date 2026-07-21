@@ -71,7 +71,7 @@ elosocial/
     ├── package.json               ← dependencies: tailwindcss, recharts, lucide-react, react-markdown
     ├── src/
     │   ├── main.jsx               ← Entry point
-    │   ├── App.jsx                ← React Router (14 rotas)
+    │   ├── App.jsx                ← React Router (15 rotas)
     │   ├── index.css              ← @import "tailwindcss" + CSS custom properties (tema escuro/claro)
     │   ├── lib/
     │   │   └── supabase.js        ← Cliente Supabase
@@ -103,6 +103,7 @@ elosocial/
     │   │   ├── Videoconferencia.jsx ← Salas de vídeo (Daily.co)
     │   │   ├── BaseConhecimento.jsx ← Upload/gestão de PDFs RAG
     │   │   ├── Perfil.jsx         ← Perfil do usuário logado
+    │   │   ├── Ajuda.jsx          ← Central de Ajuda (accordion por role)
     │   │   └── Admin.jsx          ← Gerenciar usuários + auditoria + CRAS
     │   └── utils/
     │       ├── roles.js           ← Perfis, CRAS_LIST (12 unidades)

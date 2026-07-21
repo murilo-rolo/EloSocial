@@ -15,6 +15,7 @@
 | `/videoconferencia` | Videoconferência | Autenticado |
 | `/conhecimento` | Base de Conhecimento RAG | Autenticado |
 | `/perfil` | Perfil do Usuário | Autenticado |
+| `/ajuda` | Central de Ajuda (accordion por role) | Autenticado |
 | `/admin` | Admin (usuários + CRAS) | Gerente |
 
 # Endpoints Backend (FastAPI)

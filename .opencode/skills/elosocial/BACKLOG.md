@@ -40,6 +40,7 @@
 - Agenda de atendimentos
 - Perfil do usuário
 - Base de Conhecimento RAG
+- Central de Ajuda (accordion por role, 10 seções profissionais + 6 requerentes)
 
 ### Design
 - Tailwind CSS v4 (migrou do CSS puro)

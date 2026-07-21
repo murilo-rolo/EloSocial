@@ -1,5 +1,7 @@
 # Plano de Implementação — Chat Requerente com Direcionamento
 
+## Status: CONCLUÍDO
+
 ## Visão Geral
 
 Reescrever a interface de chat do requerente (`/chat-atendimento`) para exibir uma lista de contatos (profissionais que já enviaram mensagem ao caso) com chat filtrado por profissional. Mensagens do requerente são direcionadas implicitamente ao profissional cujo chat está selecionado — não aparecem em todos os chats.
@@ -24,9 +26,10 @@ WHERE caso_id = :id
 
 ## Tarefas
 
-### Tarefa 1 — Migration
+### Tarefa 1 — Migration ✅
 
 **Arquivo:** `supabase/migrations/00003_chat_requerente_rls.sql`
+**Commit:** `b71839a`
 
 - Adicionar coluna `destinatario_id UUID REFERENCES profiles(id) ON DELETE SET NULL` na tabela `mensagens_caso`
 - Criar índice `idx_mensagens_caso_destinatario` na coluna `destinatario_id`
@@ -36,9 +39,10 @@ WHERE caso_id = :id
   - **UPDATE:** permitir a qualquer profissional autenticado atualizar mensagens de casos
 - Manter as políticas existentes para o requerente (vinculado ao caso via `triagens.user_id`)
 
-### Tarefa 2 — ChatCaso.jsx
+### Tarefa 2 — ChatCaso.jsx ✅
 
 **Arquivo:** `frontend/src/pages/ChatCaso.jsx`
+**Commit:** `34f169c`
 
 Reescrever completamente o componente com layout similar ao `Chat.jsx` do profissional.
 
@@ -53,12 +57,15 @@ Reescrever completamente o componente com layout similar ao `Chat.jsx` do profis
 - **UI:** seguir padrão `chat-container` / `chat-list` / `chat-window` do `Chat.jsx`
 - **Mensagens recebidas:** mostrar nome e cargo do profissional (`nome · ROLE_LABELS[role]`)
 
-### Tarefa 3 — Atualização do Spec
+### Tarefa 3 — Atualização do Spec ✅
 
 **Arquivo:** `docs/features/06_chat_requerente_contatos/spec.md`
+**Commit:** `f17f8fa`
 
 - Atualizar D1: refletir nova lógica de filtro com `destinatario_id`
 - Atualizar D2: mencionar `destinatario_id` na consulta de contatos
+- Adicionar D3: explicação do direcionamento de mensagens
+- Renumerar D3 → D4: Realtime
 - Atualizar REQ-03: query atualizada com filtro por `destinatario_id`
 - Atualizar "Arquivos Afetados" para incluir a migration
 
@@ -72,7 +79,7 @@ Reescrever completamente o componente com layout similar ao `Chat.jsx` do profis
 
 ## Fora do Escopo
 
-- Alterações em `MensagensCaso.jsx` (lado profissional continua com `destinatario_id` igual a `NULL`)
+- Alterações em `MensagensCaso.jsx` — componente usado pelo lado profissional (`RequerenteDetail.jsx`), que não precisa de `destinatario_id` (mensagens ficam com `NULL`)
 - Alterações em `RequerenteDetail.jsx`
 - Indicador de mensagem não lida
 - Notificações de novas mensagens

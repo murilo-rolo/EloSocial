@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { canManageUsers, isRequerente } from '../../utils/roles'
-import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot, ClipboardList, ListTodo, FolderOpen } from 'lucide-react'
+import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot, ClipboardList, ListTodo, FolderOpen, HelpCircle } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
   const { profile } = useAuth()
@@ -14,6 +14,7 @@ export default function Sidebar({ open, onClose }) {
         { to: '/video-atendimento', label: 'Video', icon: <Video size={20} /> },
         { to: '/plano-acao', label: 'Plano de Acao', icon: <ListTodo size={20} /> },
         { to: '/cofre-digital', label: 'Cofre Digital', icon: <FolderOpen size={20} /> },
+        { to: '/ajuda', label: 'Ajuda', icon: <HelpCircle size={20} /> },
       ]
     : [
         { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
@@ -23,6 +24,7 @@ export default function Sidebar({ open, onClose }) {
         { to: '/chat-ia', label: 'Chat IA', icon: <Bot size={20} /> },
         { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
         { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
+        { to: '/ajuda', label: 'Ajuda', icon: <HelpCircle size={20} /> },
       ]
 
   if (!isRequerente(profile?.role) && canManageUsers(profile?.role)) {

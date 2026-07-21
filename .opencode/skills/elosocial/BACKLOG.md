@@ -15,7 +15,6 @@
 - Backend: Triagem de vulnerabilidade automática (score + cor)
 - Backend: Resumo executivo de prontuários
 - Backend: Gerador de pareceres (padrão, jurídico, saúde)
-- Backend: EloBot — busca global com IA
 - Backend: OCR — extração de dados de documentos (Gemini Vision)
 - Frontend: ChatIA (split-view: requerentes à esquerda, chat à direita)
 

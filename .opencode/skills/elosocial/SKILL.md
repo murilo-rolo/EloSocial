@@ -78,7 +78,6 @@ Frontend (React PWA + Tailwind) ←→ Supabase SDK (Auth, DB, Realtime)
 | Triagem | `POST /api/triagem` | Análise automática de vulnerabilidade (score + cor) |
 | Resumo | `POST /api/resumo` | Resumo executivo do histórico do requerente |
 | Parecer | `POST /api/generate-parecer` | Geração de relatório (padrão, jurídico, saúde) |
-| Busca Global | `POST /api/search-global` | EloBot: assistente IA gerencial |
 | RAG Upload | `POST /api/rag/upload` / `POST /api/rag/upload_file` | Upload de PDFs para base de conhecimento |
 | RAG Query | `POST /api/rag/query` | Busca híbrida (semântica + textual) |
 | OCR | `POST /api/ocr/extract_requerente` | Extração de dados de documentos (RG, CPF, CNH) |

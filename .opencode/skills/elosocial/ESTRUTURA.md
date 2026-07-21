@@ -57,7 +57,6 @@ elosocial/
 │   │   │   ├── video.py           ← POST /api/rooms, POST /api/rooms/join
 │   │   │   ├── ai.py              ← POST /api/chat-ai, /api/triagem, /api/resumo
 │   │   │   ├── report_generator.py ← POST /api/generate-parecer
-│   │   │   ├── search_global.py   ← POST /api/search-global (EloBot)
 │   │   │   ├── rag.py             ← POST /api/rag/upload, /rag/query, /rag/documents
 │   │   │   ├── ocr.py             ← POST /api/ocr/extract_requerente
 │   │   │   └── suas_context.py    ← Contexto base SUAS/LOAS para prompts IA
@@ -84,9 +83,8 @@ elosocial/
     │   ├── components/
     │   │   ├── ProtectedRoute.jsx ← Rota protegida por role
     │   │   ├── ThemeToggle.jsx    ← Toggle tema escuro/claro
-    │   │   ├── ChatLLM.jsx        ← Chat flutuante da IA
-    │   │   ├── GlobalChat.jsx     ← Chat global
-    │   │   ├── SlideOver.jsx      ← Painel lateral
+│   │   ├── ChatLLM.jsx        ← Chat flutuante da IA
+│   │   ├── SlideOver.jsx      ← Painel lateral
     │   │   ├── Layout/            ← Layout, Sidebar, Topbar
     │   │   ├── Chat/              ← (vazio, componentes em página)
     │   │   ├── Prontuario/        ← (vazio, componentes em página)

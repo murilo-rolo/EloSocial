@@ -750,15 +750,7 @@ table tr:hover {
   padding: 16px;
 }
 
-.global-chat-position {
-  left: calc(var(--sidebar-width) + 24px);
-}
-
 @media (max-width: 768px) {
-  .global-chat-position {
-    left: 24px;
-  }
-
   .sidebar {
     transform: translateX(-100%);
   }

@@ -49,7 +49,6 @@
 | POST | `/api/triagem` | Triagem de vulnerabilidade automática (score + cor) |
 | POST | `/api/resumo` | Resumo executivo do histórico do requerente |
 | POST | `/api/generate-parecer` | Geração de parecer (formato: padrao_suas, juridico, saude) |
-| POST | `/api/search-global` | EloBot: assistente IA gerencial (busca global) |
 
 ## RAG — Base de Conhecimento
 

@@ -27,7 +27,7 @@ Adicionar um novo role `requerente` (cidadão que busca atendimento no CRAS) ao 
 | Chat entre profissionais | `Chat.jsx` | `messages` | DM 1:1 entre profissionais com Realtime |
 | Videoconferência | `Videoconferencia.jsx` | `video_rooms`, `video_participants` | Criar/entrar salas Daily.co com código de acesso |
 | Anexos de prontuário | `ProntuarioView.jsx` | `prontuario_anexos`, Storage `prontuario_anexos` | Upload/download de PDFs vinculados a prontuário |
-| Layout principal | `Layout.jsx` | — | Sidebar + Topbar + GlobalChat |
+| Layout principal | `Layout.jsx` | — | Sidebar + Topbar |
 | Hook Realtime | `useRealtime.js` | — | Subscription genérica a eventos PostgreSQL |
 | Chat com IA | `ChatIA.jsx`, `ChatLLM.jsx` | — | Chat contextual com Gemini |
 

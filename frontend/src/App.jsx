@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import ProtectedRoute from './components/ProtectedRoute'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Welcome from './pages/Welcome'
@@ -49,10 +50,16 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/cadastro" element={user ? <Navigate to="/" replace /> : <Cadastro />} />
-        <Route path="/cadastro-requerente" element={user ? <Navigate to="/" replace /> : <CadastroRequerente />} />
-        <Route path="/" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
+        {/* Rota pública — Landing Page */}
+        <Route path="/" element={user ? <Navigate to="/sistema" replace /> : <Landing />} />
+
+        {/* Auth routes */}
+        <Route path="/login" element={user ? <Navigate to="/sistema" replace /> : <Login />} />
+        <Route path="/cadastro" element={user ? <Navigate to="/sistema" replace /> : <Cadastro />} />
+        <Route path="/cadastro-requerente" element={user ? <Navigate to="/sistema" replace /> : <CadastroRequerente />} />
+
+        {/* Rota autenticada — Bem vindo */}
+        <Route path="/sistema" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
         <Route path="/requerentes" element={<ProtectedRoute><Requerentes /></ProtectedRoute>} />
@@ -75,7 +82,7 @@ export default function App() {
         <Route path="/plano-acao" element={<ProtectedRoute roles={['requerente']}><PlanoAcao /></ProtectedRoute>} />
         <Route path="/cofre-digital" element={<ProtectedRoute roles={['requerente']}><CofreDigital /></ProtectedRoute>} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/sistema" replace />} />
       </Routes>
       <ThemeToggle />
     </>

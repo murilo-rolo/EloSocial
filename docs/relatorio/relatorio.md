@@ -83,7 +83,9 @@ O sistema adota uma arquitetura client-server com comunicação direta entre o f
 
 O frontend se comunica com dois backends:
 
-1. **Supabase SDK (direto)** — Para operações de autenticação, CRUD de dados, chat em tempo real, upload/download de arquivos e subscriptions de banco. Todas as queries passam pelo motor RLS (Row Level Security) do PostgreSQL.
+1. **Landing Page (estática)** — A página pública em `/` é renderizada inteiramente no cliente, sem chamadas ao backend. Serve como ponto de entrada e apresentação do sistema.
+
+2. **Supabase SDK (direto)** — Para operações de autenticação, CRUD de dados, chat em tempo real, upload/download de arquivos e subscriptions de banco. Todas as queries passam pelo motor RLS (Row Level Security) do PostgreSQL.
 
 2. **Backend FastAPI (via `VITE_API_URL`)** — Para operações que exigem processamento externo:
    - Geração de PDF (ReportLab)
@@ -494,6 +496,7 @@ Trigger `validate_institutional_email()` garante que apenas emails com domínio 
 
 | Rota | Página |
 |------|--------|
+| `/` | Landing Page pública com hover menu, feature cards e seção "Quem Somos" |
 | `/login` | Login com email institucional |
 | `/cadastro` | Cadastro de novos usuários |
 | `/cadastro-requerente` | Cadastro de requerentes (email pessoal) |
@@ -502,6 +505,7 @@ Trigger `validate_institutional_email()` garante que apenas emails com domínio 
 
 | Rota | Página |
 |------|--------|
+| `/sistema` | Página de boas-vindas "Bem vindo, {nome}!" |
 | `/dashboard` | Dashboard analítico com KPIs |
 | `/agenda` | Agenda de atendimentos |
 | `/requerentes` | Lista de requerentes (CRUD + busca) |
@@ -562,7 +566,7 @@ Cada profissional é vinculado a uma unidade via campo `cras` na tabela `profile
 ### 13.1 Fluxo Principal (Profissional)
 
 ```
-1. Login (email @gov.br) → Supabase Auth → JWT
+1. Acessa / (landing pública) → Clica "Acessar Sistema" → Login (email @gov.br) → /sistema
 2. Dashboard → Visualiza KPIs e prontuários recentes
 3. Requerentes → Busca/cadastra requerente
 4. RequerenteDetail → Visualiza dados + executa Triagem IA
@@ -661,6 +665,7 @@ O EloSocial representa uma solução completa para a gestão de prontuários ele
 - **IA**: Funcional (ChatIA, triagem, resumo, pareceres, OCR)
 - **RAG**: Funcional (upload, chunking, embedding, busca híbrida)
 - **Requerente**: Implementado (cadastro, dashboard, triagem social multi-step, chat de caso, videochamada com sala de espera, plano de ação, cofre digital)
+- **Landing Page**: Implementada (página pública com hover menu, 6 feature cards, seção "Quem Somos")
 - **Deploy**: Frontend e backend configurados para Vercel (serverless)
 
 ### Próximos Passos

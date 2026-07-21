@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children, roles }) {
   }
 
   if (roles && profile && !roles.includes(profile.role)) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/sistema" replace />
   }
 
   return children

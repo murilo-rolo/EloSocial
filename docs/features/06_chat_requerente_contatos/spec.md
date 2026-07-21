@@ -20,7 +20,7 @@ Ao selecionar um profissional, o requerente vê apenas as mensagens daquele prof
 
 - 1 requerente → 1 caso (`triagens.applicant_id` é UNIQUE) → N mensagens em `mensagens_caso`
 - Com nova RLS, qualquer profissional pode enviar mensagens ao caso
-- Mensagens têm `remetente_id` (quem enviou) e `caso_id` (qual caso)
+- Mensagens têm `remetente_id` (quem enviou), `destinatario_id` (para quem, nullable) e `caso_id` (qual caso)
 
 ## Requisitos
 
@@ -36,9 +36,9 @@ Ao selecionar um profissional, o requerente vê apenas as mensagens daquele prof
 - **Dados**: Buscar `remetente_id` únicos de `mensagens_caso` onde `caso_id = :caso_id` e `remetente_id != :requerente_id`, depois buscar perfis
 
 ### REQ-03: Chat filtrado por profissional
-- **Critério**: Ao selecionar um profissional, mostrar apenas mensagens daquele profissional + mensagens do próprio requerente
+- **Critério**: Ao selecionar um profissional, mostrar apenas mensagens daquele profissional + mensagens do próprio requerente direcionadas ao profissional
 - **Arquivo**: `frontend/src/pages/ChatCaso.jsx`
-- **Query**: `mensagens_caso WHERE caso_id = :caso_id AND (remetente_id = :selectedId OR remetente_id = :requerente_id)`
+- **Query**: `mensagens_caso WHERE caso_id = :caso_id AND (remetente_id = :selectedId OR (remetente_id = :requerente_id AND destinatario_id = :selectedId))`
 
 ### REQ-04: Requerente pode enviar mensagens
 - **Critério**: Input de texto + botão Enviar funcional
@@ -53,7 +53,7 @@ Ao selecionar um profissional, o requerente vê apenas as mensagens daquele prof
 ### REQ-06: Realtime funciona
 - **Critério**: Mensagens de profissionais aparecem em tempo real
 - **Arquivo**: `frontend/src/pages/ChatCaso.jsx`
-- **Hook**: `useRealtime('chat-caso', 'mensagens_caso', 'INSERT', callback)`
+- **Hook**: `useRealtime('chat-caso-${casoId}', 'mensagens_caso', 'INSERT', callback)`
 - **Callback**: Se msg é do profissional selecionado → adicionar a messages; se profissional não está em contacts → buscar perfil e adicionar
 
 ### REQ-07: RLS permite qualquer profissional
@@ -65,17 +65,18 @@ Ao selecionar um profissional, o requerente vê apenas as mensagens daquele prof
 
 ### D1: Como filtrar mensagens por profissional?
 
-**Opção A (Escolhida)**: Chat privado por profissional
-- Ao selecionar profissional, filtrar: `(remetente_id = :selectedId OR remetente_id = :requerente_id)`
-- Vantagem: Experiência similar a chat privado
-- Contras: Mensagens do requerente aparecem em todos os chats
+**Opção A (Escolhida)**: Chat privado por profissional com direcionamento
+- Ao selecionar profissional, filtrar: `(remetente_id = :selectedId OR (remetente_id = :requerente_id AND destinatario_id = :selectedId))`
+- Mensagens do requerente usam `destinatario_id` para indicar o profissional de destino
+- Quando o requerente está no chat do Profissional A e envia uma mensagem, `destinatario_id` recebe o ID do Profissional A
+- Mensagens de profissionais para o requerente ficam com `destinatario_id` igual a `NULL`
 
 **Opção B**: Chat compartilhado
 - Mostrar todas as mensagens do caso independente do profissional selecionado
 - Vantagem: Mais simples
 - Contras: Não oferece privacidade por profissional
 
-**Decisão**: Opção A (chat privado) - conforme solicitado pelo usuário.
+**Decisão**: Opção A (chat privado com direcionamento) - conforme solicitado pelo usuário.
 
 ### D2: Como buscar contatos do requerente?
 
@@ -90,7 +91,14 @@ Query em duas etapas:
    SELECT * FROM profiles WHERE id IN (...ids)
    ```
 
-### D3: Realtime - como atualizar contatos?
+### D3: Como funciona o direcionamento de mensagens?
+
+- Campo `destinatario_id` na tabela `mensagens_caso` (UUID, nullable)
+- Requerente envia → `destinatario_id` recebe o ID do profissional selecionado no chat
+- Profissional envia → `destinatario_id` fica `NULL` (visível ao requerente no chat)
+- Filtro de mensagens: `remetente_id = :selected OR (remetente_id = :requerente AND destinatario_id = :selected)`
+
+### D4: Realtime - como atualizar contatos?
 
 Quando uma nova mensagem chega via realtime:
 - Se `msg.remetente_id == selectedId` → adicionar a `messages`
@@ -100,8 +108,8 @@ Quando uma nova mensagem chega via realtime:
 
 | Arquivo | Mudança |
 |---------|---------|
-| `supabase/migrations/00003_chat_requerente_rls.sql` | Novo — Atualizar RLS de `mensagens_caso` |
-| `frontend/src/pages/ChatCaso.jsx` | Reescrita completa — Nova interface com lista de contatos |
+| `supabase/migrations/00003_chat_requerente_rls.sql` | Nova — Coluna `destinatario_id` + RLS atualizada para qualquer profissional |
+| `frontend/src/pages/ChatCaso.jsx` | Reescrita completa — Nova interface com lista de contatos e chat filtrado por destinatário |
 
 ## Fora do Escopo
 

@@ -46,9 +46,9 @@
 3. Adicionar nova rota `/dashboard` → `<Dashboard />`
 
 ### Verificação
-- [ ] Rota `/` renderiza Welcome
-- [ ] Rota `/dashboard` renderiza Dashboard
-- [ ] Rota `/login` redireciona para `/` (Welcome) quando logado
+- [x] Rota `/` renderiza Welcome
+- [x] Rota `/dashboard` renderiza Dashboard
+- [x] Rota `/login` redireciona para `/` (Welcome) quando logado
 
 ### Critério de Aceite
 ```jsx
@@ -68,8 +68,8 @@
 1. Na array `links` para não-requerentes (linha 19), trocar `to: '/'` para `to: '/dashboard'`
 
 ### Verificação
-- [ ] Sidebar profissional: link "Dashboard" aponta para `/dashboard`
-- [ ] Sidebar requerente: link "Dashboard" continua apontando para `/acompanhamento`
+- [x] Sidebar profissional: link "Dashboard" aponta para `/dashboard`
+- [x] Sidebar requerente: link "Dashboard" continua apontando para `/acompanhamento`
 
 ### Critério de Aceite
 ```javascript

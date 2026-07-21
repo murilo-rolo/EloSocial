@@ -16,9 +16,9 @@
 1. Adicionar `.neq('role', 'requerente')` na query de `loadContacts()` (linha 20-24)
 
 ### Verificação
-- [ ] Usuários com `role = 'requerente'` não aparecem na lista de contatos em `/chat`
-- [ ] Profissionais continuam aparecendo normalmente
-- [ ] A query não quebra (sem erros de console)
+- [x] Usuários com `role = 'requerente'` não aparecem na lista de contatos em `/chat`
+- [x] Profissionais continuam aparecendo normalmente
+- [x] A query não quebra (sem erros de console)
 
 ### Critério de Aceite
 ```javascript

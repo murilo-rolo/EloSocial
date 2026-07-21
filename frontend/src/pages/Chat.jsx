@@ -21,6 +21,7 @@ export default function Chat() {
         .from('profiles')
         .select('*')
         .neq('id', profile?.id)
+        .neq('role', 'requerente')
         .order('nome')
       setContacts(data || [])
       setLoading(false)

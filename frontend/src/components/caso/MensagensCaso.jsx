@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useRealtime } from '../../hooks/useRealtime'
 import { timeAgo } from '../../utils/format'
+import { ROLE_LABELS } from '../../utils/roles'
 
 export default function MensagensCaso({ casoId, modo }) {
   const { profile } = useAuth()
@@ -21,7 +22,7 @@ export default function MensagensCaso({ casoId, modo }) {
     setLoading(true)
     const { data } = await supabase
       .from('mensagens_caso')
-      .select('*')
+      .select('*, profiles!mensagens_caso_remetente_id_fkey(role)')
       .eq('caso_id', casoId)
       .order('created_at', { ascending: true })
 
@@ -110,6 +111,11 @@ export default function MensagensCaso({ casoId, modo }) {
                 {!isOwn && msg.remetente_nome && (
                   <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent)', marginBottom: 2 }}>
                     {msg.remetente_nome}
+                    {msg.profiles?.role && (
+                      <span style={{ fontWeight: 400, marginLeft: 6, opacity: 0.7 }}>
+                        · {ROLE_LABELS[msg.profiles.role] || msg.profiles.role}
+                      </span>
+                    )}
                   </div>
                 )}
                 <div>{msg.conteudo}</div>

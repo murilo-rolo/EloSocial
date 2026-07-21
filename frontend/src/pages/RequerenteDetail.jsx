@@ -7,7 +7,9 @@ import { ROLE_LABELS } from '../utils/roles'
 import SlideOver from '../components/SlideOver'
 import ProntuarioView from './ProntuarioView'
 import ChatLLM from '../components/ChatLLM'
+import MensagensCaso from '../components/caso/MensagensCaso'
 import ReactMarkdown from 'react-markdown'
+import { MessageSquare } from 'lucide-react'
 
 export default function RequerenteDetail() {
   const { id } = useParams()
@@ -20,6 +22,7 @@ export default function RequerenteDetail() {
   const [generatingResumo, setGeneratingResumo] = useState(false)
   const [resumoText, setResumoText] = useState(null)
   const [showResumo, setShowResumo] = useState(false)
+  const [caso, setCaso] = useState(null)
 
   useEffect(() => {
     async function load() {
@@ -31,6 +34,16 @@ export default function RequerenteDetail() {
         .order('created_at', { ascending: false })
       setRequerente(req)
       setProntuarios(pro || [])
+
+      const { data: casoData } = await supabase
+        .from('triagens')
+        .select('*')
+        .eq('applicant_id', id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      setCaso(casoData)
+
       setLoading(false)
     }
     load()
@@ -213,6 +226,24 @@ export default function RequerenteDetail() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h3><MessageSquare size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Mensagens</h3>
+        </div>
+        {caso ? (
+          <div style={{ padding: 0, height: 400, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <MensagensCaso casoId={caso.id} modo="assistente" />
+          </div>
+        ) : (
+          <div className="empty-state">
+            <p>Nenhum caso vinculado a este requerente.</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+              Crie um caso na triagem para iniciar o chat.
+            </p>
           </div>
         )}
       </div>

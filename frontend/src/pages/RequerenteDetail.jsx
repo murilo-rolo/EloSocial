@@ -337,7 +337,7 @@ export default function RequerenteDetail() {
         </div>
         {caso ? (
           <div style={{ padding: 0, height: 400, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <MensagensCaso casoId={caso.id} modo="assistente" />
+            <MensagensCaso casoId={caso.id} modo="assistente" applicantUserId={caso.user_id} />
           </div>
         ) : (
           <div className="empty-state">

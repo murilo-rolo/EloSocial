@@ -29,7 +29,7 @@ function Avatar({ name, size }) {
   )
 }
 
-export default function MensagensCaso({ casoId, modo }) {
+export default function MensagensCaso({ casoId, modo, applicantUserId }) {
   const { profile } = useAuth()
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
@@ -44,11 +44,17 @@ export default function MensagensCaso({ casoId, modo }) {
 
   async function loadMessages() {
     setLoading(true)
-    const { data } = await supabase
+    const profileId = profile?.id
+    let query = supabase
       .from('mensagens_caso')
       .select('*, profiles!mensagens_caso_remetente_id_fkey(role)')
       .eq('caso_id', casoId)
-      .order('created_at', { ascending: true })
+
+    if (profileId) {
+      query = query.or(`remetente_id.eq.${profileId},destinatario_id.eq.${profileId}`)
+    }
+
+    const { data } = await query.order('created_at', { ascending: true })
 
     setMessages(data || [])
     sentIdsRef.current = new Set((data || []).map(m => m.id))
@@ -74,6 +80,7 @@ export default function MensagensCaso({ casoId, modo }) {
       remetente_id: profile?.id,
       remetente_nome: profile?.nome,
       remetente_tipo: modo,
+      destinatario_id: modo === 'assistente' ? applicantUserId : null,
       conteudo: newMessage.trim(),
       created_at: new Date().toISOString(),
     }
@@ -88,6 +95,7 @@ export default function MensagensCaso({ casoId, modo }) {
       remetente_id: profile?.id,
       remetente_nome: profile?.nome,
       remetente_tipo: modo,
+      destinatario_id: modo === 'assistente' ? applicantUserId : null,
       conteudo: newMessage.trim(),
     }).select().single()
 

@@ -155,9 +155,9 @@ export default function ChatLLM({ prontuarioContext }) {
                 <h3 style={{ margin: 0, fontSize: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
                   ✨ Copiloto SUAS
                 </h3>
-                {prontuarioContext?.applicants && (
+                {prontuarioContext?.applicant && (
                   <span style={{ fontSize: 12, opacity: 0.8, display: 'block', marginTop: 4 }}>
-                    Contexto: {prontuarioContext.applicants.nome}
+                    Contexto: {prontuarioContext.applicant.nome}
                   </span>
                 )}
               </div>

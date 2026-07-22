@@ -139,6 +139,29 @@ export function emptyMembro() {
   return { nome: '', parentesco: '', sexo: '', data_nascimento: '', pessoa_com_deficiencia: false, documentacao: [] }
 }
 
+export function calcularPerfilEtario(membros) {
+  const faixas = { '0_a_6': 0, '7_a_14': 0, '15_a_17': 0, '18_a_29': 0, '30_a_59': 0, '60_a_64': 0, '65_a_69': 0, '70_mais': 0 }
+  const hoje = new Date()
+  for (const m of membros) {
+    if (!m.data_nascimento) continue
+    const nasc = new Date(m.data_nascimento)
+    if (isNaN(nasc.getTime())) continue
+    let idade = hoje.getFullYear() - nasc.getFullYear()
+    const mes = hoje.getMonth() - nasc.getMonth()
+    if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) idade--
+    if (idade <= 6) faixas['0_a_6']++
+    else if (idade <= 14) faixas['7_a_14']++
+    else if (idade <= 17) faixas['15_a_17']++
+    else if (idade <= 29) faixas['18_a_29']++
+    else if (idade <= 59) faixas['30_a_59']++
+    else if (idade <= 64) faixas['60_a_64']++
+    else if (idade <= 69) faixas['65_a_69']++
+    else faixas['70_mais']++
+  }
+  faixas.total = membros.length
+  return faixas
+}
+
 export const DOCUMENTACAO_OPCOES = ['CN', 'RG', 'CTPS', 'CPF', 'TE']
 
 export const LOCALIZACAO_DOMICILIO_OPCOES = ['Urbano', 'Rural', 'Abrigo']

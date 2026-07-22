@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
-import { emptyProntuario, SECOES, PARENTESCO_OPCOES } from '../utils/prontuarioSchema'
+import {
+  emptyProntuario, emptyMembro, calcularPerfilEtario,
+  SECOES, PARENTESCO_OPCOES, DOCUMENTACAO_OPCOES,
+  LOCALIZACAO_DOMICILIO_OPCOES, TIPO_UNIDADE_OPCOES,
+  FORMA_INGRESSO_OPCOES, PROGRAMAS_SOCIAIS_LISTA, SIM_NAO_OPCOES,
+} from '../utils/prontuarioSchema'
 import { auditLog } from '../utils/audit'
 
 export default function ProntuarioEdit() {
@@ -39,23 +44,22 @@ export default function ProntuarioEdit() {
   }
 
   function addMembro() {
-    const novo = { nome: '', parentesco: '', sexo: '', data_nascimento: '', documentacao: '' }
-    setProntuario(prev => ({
-      ...prev,
-      composicao_familiar: [...(prev.composicao_familiar || []), novo],
-    }))
+    setProntuario(prev => {
+      const membros = [...(prev.composicao_familiar || []), emptyMembro()]
+      return { ...prev, composicao_familiar: membros, perfil_etario: calcularPerfilEtario(membros) }
+    })
   }
 
   function updateMembro(index, field, value) {
     const list = [...(prontuario.composicao_familiar || [])]
     list[index] = { ...list[index], [field]: value }
-    setProntuario(prev => ({ ...prev, composicao_familiar: list }))
+    setProntuario(prev => ({ ...prev, composicao_familiar: list, perfil_etario: calcularPerfilEtario(list) }))
   }
 
   function removeMembro(index) {
     const list = [...(prontuario.composicao_familiar || [])]
     list.splice(index, 1)
-    setProntuario(prev => ({ ...prev, composicao_familiar: list }))
+    setProntuario(prev => ({ ...prev, composicao_familiar: list, perfil_etario: calcularPerfilEtario(list) }))
   }
 
   function addEncaminhamento() {
@@ -76,6 +80,56 @@ export default function ProntuarioEdit() {
     const list = [...(prontuario.encaminhamentos || [])]
     list.splice(index, 1)
     setProntuario(prev => ({ ...prev, encaminhamentos: list }))
+  }
+
+  function togglePrograma(key) {
+    setProntuario(prev => ({
+      ...prev,
+      identificacao: {
+        ...prev.identificacao,
+        programas_sociais: {
+          ...prev.identificacao.programas_sociais,
+          [key]: { ...prev.identificacao.programas_sociais[key], ativo: !prev.identificacao.programas_sociais[key]?.ativo },
+        },
+      },
+    }))
+  }
+
+  function updateProgramaValor(key, valor) {
+    setProntuario(prev => ({
+      ...prev,
+      identificacao: {
+        ...prev.identificacao,
+        programas_sociais: {
+          ...prev.identificacao.programas_sociais,
+          [key]: { ...prev.identificacao.programas_sociais[key], valor },
+        },
+      },
+    }))
+  }
+
+  function updateProgramaDescricao(descricao) {
+    setProntuario(prev => ({
+      ...prev,
+      identificacao: {
+        ...prev.identificacao,
+        programas_sociais: {
+          ...prev.identificacao.programas_sociais,
+          outros: { ...prev.identificacao.programas_sociais.outros, descricao },
+        },
+      },
+    }))
+  }
+
+  function toggleDocumentacao(membroIndex, doc) {
+    const list = [...(prontuario.composicao_familiar || [])]
+    const docs = list[membroIndex].documentacao || []
+    const idx = docs.indexOf(doc)
+    list[membroIndex] = {
+      ...list[membroIndex],
+      documentacao: idx >= 0 ? docs.filter(d => d !== doc) : [...docs, doc],
+    }
+    setProntuario(prev => ({ ...prev, composicao_familiar: list }))
   }
 
   const handleSave = async () => {
@@ -174,6 +228,83 @@ export default function ProntuarioEdit() {
                         onChange={(e) => updateSection('identificacao', { cep: e.target.value })} />
                     </div>
                   </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Apelido</label>
+                      <input className="form-control" value={prontuario.identificacao.apelido || ''}
+                        onChange={(e) => updateSection('identificacao', { apelido: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Localização do Domicílio</label>
+                      <select className="form-control" value={prontuario.identificacao.localizacao_domicilio || ''}
+                        onChange={(e) => updateSection('identificacao', { localizacao_domicilio: e.target.value })}>
+                        <option value="">Selecione</option>
+                        {LOCALIZACAO_DOMICILIO_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Tipo de Unidade</label>
+                      <select className="form-control" value={prontuario.identificacao.tipo_unidade || ''}
+                        onChange={(e) => updateSection('identificacao', { tipo_unidade: e.target.value })}>
+                        <option value="">Selecione</option>
+                        {TIPO_UNIDADE_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Nome da Unidade</label>
+                      <input className="form-control" value={prontuario.identificacao.nome_unidade || ''}
+                        onChange={(e) => updateSection('identificacao', { nome_unidade: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Forma de Ingresso</label>
+                    <div className="radio-group">
+                      {FORMA_INGRESSO_OPCOES.map(o => (
+                        <label key={o} className="radio-label" style={{ display: 'block', marginBottom: 4 }}>
+                          <input type="radio" name="forma_ingresso" value={o}
+                            checked={prontuario.identificacao.forma_ingresso === o}
+                            onChange={(e) => updateSection('identificacao', { forma_ingresso: e.target.value })} />
+                          {' '}{o}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Motivo do Primeiro Atendimento</label>
+                    <textarea className="form-control" rows={3} value={prontuario.identificacao.motivo_primeiro_atendimento || ''}
+                      onChange={(e) => updateSection('identificacao', { motivo_primeiro_atendimento: e.target.value })} />
+                  </div>
+                  <div className="form-group">
+                    <label>Órgão Encaminhador</label>
+                    <input className="form-control" value={prontuario.identificacao.orgao_encaminhador || ''}
+                      onChange={(e) => updateSection('identificacao', { orgao_encaminhador: e.target.value })} />
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <strong>Programas Sociais</strong>
+                    {PROGRAMAS_SOCIAIS_LISTA.map(p => (
+                      <div key={p.key} style={{ marginTop: 8 }}>
+                        <label className="checkbox-label">
+                          <input type="checkbox" checked={prontuario.identificacao.programas_sociais[p.key]?.ativo || false}
+                            onChange={() => togglePrograma(p.key)} />
+                          {' '}{p.label}
+                        </label>
+                        {prontuario.identificacao.programas_sociais[p.key]?.ativo && (
+                          <div style={{ marginLeft: 24, marginTop: 4 }}>
+                            <input className="form-control" placeholder="Valor (R$)" style={{ width: 200 }}
+                              value={prontuario.identificacao.programas_sociais[p.key]?.valor || ''}
+                              onChange={(e) => updateProgramaValor(p.key, e.target.value)} />
+                            {p.key === 'outros' && (
+                              <input className="form-control" placeholder="Descrição" style={{ width: 300, marginTop: 4 }}
+                                value={prontuario.identificacao.programas_sociais.outros?.descricao || ''}
+                                onChange={(e) => updateProgramaDescricao(e.target.value)} />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -214,9 +345,29 @@ export default function ProntuarioEdit() {
                           <label>Data de Nascimento</label>
                           <input type="date" className="form-control" value={membro.data_nascimento} onChange={(e) => updateMembro(i, 'data_nascimento', e.target.value)} />
                         </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Pessoa com Deficiência</label>
+                          <div>
+                            <label className="checkbox-label">
+                              <input type="checkbox" checked={membro.pessoa_com_deficiencia || false}
+                                onChange={(e) => updateMembro(i, 'pessoa_com_deficiencia', e.target.checked)} />
+                              {' '}Sim
+                            </label>
+                          </div>
+                        </div>
                         <div className="form-group">
                           <label>Documentação</label>
-                          <input className="form-control" value={membro.documentacao} onChange={(e) => updateMembro(i, 'documentacao', e.target.value)} />
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {DOCUMENTACAO_OPCOES.map(doc => (
+                              <label key={doc} className="checkbox-label">
+                                <input type="checkbox" checked={(membro.documentacao || []).includes(doc)}
+                                  onChange={() => toggleDocumentacao(i, doc)} />
+                                {' '}{doc}
+                              </label>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -224,6 +375,102 @@ export default function ProntuarioEdit() {
                   <button className="btn btn-outline btn-sm" onClick={addMembro}>
                     + Adicionar Membro
                   </button>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Perfil Etário</strong>
+                    <table className="table" style={{ width: '100%', marginTop: 8 }}>
+                      <thead>
+                        <tr>
+                          <th>0 a 6</th>
+                          <th>7 a 14</th>
+                          <th>15 a 17</th>
+                          <th>18 a 29</th>
+                          <th>30 a 59</th>
+                          <th>60 a 64</th>
+                          <th>65 a 69</th>
+                          <th>70+</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{prontuario.perfil_etario?.['0_a_6'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['7_a_14'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['15_a_17'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['18_a_29'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['30_a_59'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['60_a_64'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['65_a_69'] ?? 0}</td>
+                          <td>{prontuario.perfil_etario?.['70_mais'] ?? 0}</td>
+                          <td><strong>{prontuario.perfil_etario?.total ?? 0}</strong></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Especificidades Sociais</strong>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+                      <label className="checkbox-label">
+                        <input type="checkbox" checked={prontuario.especificidades_sociais?.situacao_rua || false}
+                          onChange={(e) => setProntuario(prev => ({ ...prev, especificidades_sociais: { ...prev.especificidades_sociais, situacao_rua: e.target.checked } }))} />
+                        {' '}Situação de Rua
+                      </label>
+                      <label className="checkbox-label">
+                        <input type="checkbox" checked={prontuario.especificidades_sociais?.quilombola || false}
+                          onChange={(e) => setProntuario(prev => ({ ...prev, especificidades_sociais: { ...prev.especificidades_sociais, quilombola: e.target.checked } }))} />
+                        {' '}Quilombola
+                      </label>
+                      <label className="checkbox-label">
+                        <input type="checkbox" checked={prontuario.especificidades_sociais?.ribeirinha || false}
+                          onChange={(e) => setProntuario(prev => ({ ...prev, especificidades_sociais: { ...prev.especificidades_sociais, ribeirinha: e.target.checked } }))} />
+                        {' '}Ribeirinha
+                      </label>
+                      <label className="checkbox-label">
+                        <input type="checkbox" checked={prontuario.especificidades_sociais?.cigana || false}
+                          onChange={(e) => setProntuario(prev => ({ ...prev, especificidades_sociais: { ...prev.especificidades_sociais, cigana: e.target.checked } }))} />
+                        {' '}Cigana
+                      </label>
+                      <label className="checkbox-label">
+                        <input type="checkbox" checked={prontuario.especificidades_sociais?.indigena_aldeia?.ativo || false}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev, especificidades_sociais: {
+                              ...prev.especificidades_sociais,
+                              indigena_aldeia: { ...prev.especificidades_sociais?.indigena_aldeia, ativo: e.target.checked },
+                            },
+                          }))} />
+                        {' '}Indígena em Aldeia
+                      </label>
+                      {prontuario.especificidades_sociais?.indigena_aldeia?.ativo && (
+                        <input className="form-control" placeholder="Etnia" value={prontuario.especificidades_sociais?.indigena_aldeia?.etnia || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev, especificidades_sociais: {
+                              ...prev.especificidades_sociais,
+                              indigena_aldeia: { ...prev.especificidades_sociais?.indigena_aldeia, etnia: e.target.value },
+                            },
+                          }))} />
+                      )}
+                      <label className="checkbox-label">
+                        <input type="checkbox" checked={prontuario.especificidades_sociais?.indigena_nao_aldeia?.ativo || false}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev, especificidades_sociais: {
+                              ...prev.especificidades_sociais,
+                              indigena_nao_aldeia: { ...prev.especificidades_sociais?.indigena_nao_aldeia, ativo: e.target.checked },
+                            },
+                          }))} />
+                        {' '}Indígena Fora de Aldeia
+                      </label>
+                      {prontuario.especificidades_sociais?.indigena_nao_aldeia?.ativo && (
+                        <input className="form-control" placeholder="Etnia" value={prontuario.especificidades_sociais?.indigena_nao_aldeia?.etnia || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev, especificidades_sociais: {
+                              ...prev.especificidades_sociais,
+                              indigena_nao_aldeia: { ...prev.especificidades_sociais?.indigena_nao_aldeia, etnia: e.target.value },
+                            },
+                          }))} />
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 

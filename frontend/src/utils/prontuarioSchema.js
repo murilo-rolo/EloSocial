@@ -48,14 +48,35 @@ export function emptyProntuario() {
       conflito_violencia: '',
     },
     educacional: {
-      escolaridade: '', situacao_educacional: '',
+      vulnerabilidades: {
+        '0_a_5_sem_creche': 0,
+        '6_a_14_sem_escola': 0,
+        '15_a_17_sem_escola': 0,
+        '10_a_17_nao_alfabetizado': 0,
+        '18_a_59_nao_alfabetizado': 0,
+        '60_mais_nao_alfabetizado': 0,
+      },
+      condicionalidades_bf: [],
+      membros: [],
     },
     trabalho_renda: {
-      ocupacao: '', renda_familiar: '', beneficios: '',
+      renda_total_sem_programas: '',
+      renda_per_capita_sem_programas: '',
+      renda_total_com_programas: '',
+      renda_per_capita_com_programas: '',
+      aposentados: '',
+      membros: [],
     },
     saude: {
-      condicoes_saude: '', doencas: '', deficiencias: '',
-      acompanhamento_medico: '',
+      deficiencias: [],
+      pessoa_necessita_cuidados: { resposta: '', nomes: '', responsavel: '' },
+      inseguranca_alimentar: { resposta: '', data: '' },
+      doencas_graves: { resposta: '', descricao: '' },
+      remedios_controlados: { resposta: '', nomes: '' },
+      uso_alcool: { resposta: '', nomes: '', data: '' },
+      uso_drogas: { resposta: '', nomes_substancias: '', data: '' },
+      gestantes: [],
+      condicionalidades_bf: [],
     },
     beneficios: {
       beneficios_eventuais: '',
@@ -139,4 +160,43 @@ export const PROGRAMAS_SOCIAIS_LISTA = [
   { key: 'bpc', label: 'BPC' },
   { key: 'peti', label: 'PETI' },
   { key: 'outros', label: 'Outros' },
+]
+
+export const ESCOLARIDADE_OPCOES = [
+  'Educação Infantil/creche',
+  '1º ano E. Fundamental',
+  '2º ano E. Fundamental',
+  '3º ano E. Fundamental',
+  '4º ano E. Fundamental',
+  '5º ano E. Fundamental',
+  '6º ano E. Fundamental',
+  '7º ano E. Fundamental',
+  '8º ano E. Fundamental',
+  '9º ano E. Fundamental',
+  '1º ano E. Médio',
+  '2º ano E. Médio',
+  '3º ano E. Médio',
+  'EJA',
+  'Nunca frequentou escola',
+  'Ensino Superior',
+]
+
+export const CONDICAO_OCUPACAO_OPCOES = [
+  'Não trabalha',
+  'Desempregado',
+  'Conta própria/autônomo/bico',
+  'Empregado com Carteira',
+  'Empregado sem Carteira',
+  'Empregador',
+  'Estagiário/Aprendiz',
+]
+
+export const TIPO_DEFICIENCIA_OPCOES = [
+  'Deficiência visual',
+  'Deficiência auditiva',
+  'Deficiência física',
+  'Deficiência mental/intelectual',
+  'Síndrome de Down',
+  'Transtorno/doença mental',
+  'Deficiências múltiplas',
 ]

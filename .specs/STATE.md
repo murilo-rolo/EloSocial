@@ -53,6 +53,37 @@
 
 ---
 
+### AD-003: Auditoria de Ações
+
+**Date:** 2026-07-22
+**Status:** Implemented ✅
+
+**Problem:** A aba "Auditoria" em `/admin` consultava a tabela `audit_logs` mas nenhum código escrevia nela — auditoria vazia e sem função.
+
+**Decision:**
+- Abordagem híbrida: função utilitária `auditLog()` no frontend via Supabase client + inserts via service key nos endpoints backend
+- 9 ações auditadas: criação/exclusão de usuário, status de triagem, atribuição de caso, upload de documento base IA, criação/edição de triagem, conclusão de agendamento, geração de prontuário, conclusão de tarefa
+- Fire-and-forget: erros de log não interrompem a ação original
+- Ações do frontend disparam `auditLog()` após sucesso; endpoints backend (users_admin, rag) usam `httpx.post` para Supabase REST
+
+**Files changed:**
+- `frontend/src/utils/audit.js`
+- `frontend/src/utils/__tests__/audit.test.js`
+- `frontend/src/pages/Admin.jsx`
+- `frontend/src/pages/RequerenteDetail.jsx`
+- `frontend/src/pages/TriagemSocial.jsx`
+- `frontend/src/pages/ProntuarioEdit.jsx`
+- `frontend/src/components/caso/PlanoAcaoCaso.jsx`
+- `backend/app/api/users_admin.py`
+- `backend/app/api/rag.py`
+- `.specs/features/auditoria-acoes/spec.md`
+- `.specs/features/auditoria-acoes/tasks.md`
+- `.specs/features/auditoria-acoes/validation.md`
+
+**Evidence:** Build passes, 32/32 tests pass, 9/9 ACs verified by independent Verifier.
+
+---
+
 ## Handoff
 
 No active work. All features complete.

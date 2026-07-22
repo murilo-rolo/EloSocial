@@ -106,7 +106,8 @@ export default function DashboardRequerente() {
   const status = STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente
   const dados = getDados(caso.dados_acolhimento, caso.detalhes)
   const isConcluido = caso.status === 'concluido'
-  const isPendente = caso.status === 'pendente'
+  const isCancelado = caso.status === 'cancelado'
+  const showEditarTriagem = !isConcluido && !isCancelado
 
   const motivo = dados?.motivo?.demanda_principal || dados?.motivo || '—'
   const urgencia = dados?.urgencia?.nivel || dados?.urgencia || '—'
@@ -132,7 +133,7 @@ export default function DashboardRequerente() {
           >
             {status.label}
           </span>
-          {isPendente && (
+          {showEditarTriagem && (
             <button
               className="btn btn-outline btn-sm"
               onClick={() => navigate('/acompanhamento/triagem?editar=1')}

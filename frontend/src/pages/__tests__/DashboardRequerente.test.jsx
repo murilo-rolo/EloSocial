@@ -139,14 +139,38 @@ describe('RIR-10: PlanoAcaoCaso — sem caso', () => {
 
 // ─── RIR-12: botões de triagem apontam para /acompanhamento/triagem ──────────
 describe('RIR-12: botões de triagem — URLs atualizadas', () => {
-  it('botão "Editar Triagem" existe quando caso está pendente', async () => {
-    const casoPendente = { ...mockCaso, status: 'pendente' }
-    mockMaybeSingle.mockResolvedValueOnce({ data: casoPendente, error: null })
+  const STATUS_ATIVOS = ['pendente', 'em_analise', 'em_atendimento', 'em_acompanhamento']
+
+  it.each(STATUS_ATIVOS)('botão "Editar Triagem" existe quando status é %s', async (status) => {
+    const casoAtivo = { ...mockCaso, status }
+    mockMaybeSingle.mockResolvedValueOnce({ data: casoAtivo, error: null })
 
     renderDashboard()
     await waitFor(() => {
       expect(screen.getByText('Editar Triagem')).toBeInTheDocument()
     })
+  })
+
+  it('botão "Editar Triagem" NÃO existe quando caso está concluido', async () => {
+    const casoConcluido = { ...mockCaso, status: 'concluido' }
+    mockMaybeSingle.mockResolvedValueOnce({ data: casoConcluido, error: null })
+
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Concluido')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Editar Triagem')).not.toBeInTheDocument()
+  })
+
+  it('botão "Editar Triagem" NÃO existe quando caso está cancelado', async () => {
+    const casoCancelado = { ...mockCaso, status: 'cancelado' }
+    mockMaybeSingle.mockResolvedValueOnce({ data: casoCancelado, error: null })
+
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Cancelado')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Editar Triagem')).not.toBeInTheDocument()
   })
 
   it('botão "Iniciar Triagem" existe quando não há caso', async () => {

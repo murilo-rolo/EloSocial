@@ -206,7 +206,7 @@ export default function DashboardRequerente() {
 
       <div className="card">
         <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
-          Plano de Acao
+          Plano de Ação
         </h2>
         <PlanoAcaoCaso casoId={caso.id} modo="requerente" />
       </div>

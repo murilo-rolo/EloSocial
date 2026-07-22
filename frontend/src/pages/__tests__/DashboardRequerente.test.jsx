@@ -73,18 +73,35 @@ describe('RIR-09: DashboardRequerente — quickLinks removidos', () => {
     vi.clearAllMocks()
   })
 
-  it('NÃO exibe botão/card "Video Atendimento"', () => {
+  it('NÃO exibe botão/card "Video Atendimento" (após carregamento)', async () => {
     renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
+    })
     expect(screen.queryByText('Video Atendimento')).not.toBeInTheDocument()
   })
 
-  it('NÃO exibe botão/card "Plano de Acao"', () => {
+  it('NÃO exibe botão/card "Mensagens" (após carregamento)', async () => {
     renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Mensagens')).not.toBeInTheDocument()
+  })
+
+  it('NÃO exibe botão/card "Plano de Acao" (após carregamento)', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
+    })
     expect(screen.queryByText('Plano de Acao')).not.toBeInTheDocument()
   })
 
-  it('NÃO exibe botão/card "Cofre Digital"', () => {
+  it('NÃO exibe botão/card "Cofre Digital" (após carregamento)', async () => {
     renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
+    })
     expect(screen.queryByText('Cofre Digital')).not.toBeInTheDocument()
   })
 
@@ -107,21 +124,35 @@ describe('RIR-09: DashboardRequerente — quickLinks removidos', () => {
   })
 })
 
+// ─── RIR-10: PlanoAcaoCaso como seção — sem caso ────────────────────────────
+describe('RIR-10: PlanoAcaoCaso — sem caso', () => {
+  it('NÃO renderiza PlanoAcaoCaso quando não há caso', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Nenhum caso em andamento.')).toBeInTheDocument()
+    })
+    expect(screen.queryByTestId('plano-acao-caso')).not.toBeInTheDocument()
+  })
+})
+
 // ─── RIR-12: botões de triagem apontam para /acompanhamento/triagem ──────────
 describe('RIR-12: botões de triagem — URLs atualizadas', () => {
-  it('botão "Editar Triagem" navega para /acompanhamento/triagem?editar=1 quando status é pendente', async () => {
-    // Mock com caso pendente
+  it('botão "Editar Triagem" existe quando caso está pendente', async () => {
     const casoPendente = { ...mockCaso, status: 'pendente' }
     mockMaybeSingle.mockResolvedValueOnce({ data: casoPendente, error: null })
 
     renderDashboard()
     await waitFor(() => {
-      const btn = screen.getByText('Editar Triagem')
-      expect(btn).toBeInTheDocument()
+      expect(screen.getByText('Editar Triagem')).toBeInTheDocument()
     })
+  })
 
-    // Verificar que o botão existe — navegação testada indiretamente via navigate mock
-    const btn = screen.getByText('Editar Triagem')
-    expect(btn).toBeInTheDocument()
+  it('botão "Iniciar Triagem" existe quando não há caso', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({ data: null, error: null })
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByText('Iniciar Triagem')).toBeInTheDocument()
+    })
   })
 })

@@ -98,6 +98,10 @@ vi.mock('../../components/caso/PlanoAcaoCaso', () => ({
   default: () => <div data-testid="plano-acao-caso" />,
 }))
 
+vi.mock('../../components/caso/DocumentosCaso', () => ({
+  default: () => <div data-testid="documentos-caso" />,
+}))
+
 import RequerenteDetail from '../RequerenteDetail'
 
 function renderDetail() {
@@ -185,5 +189,21 @@ describe('TS-03: Requerente nao ve icones de edicao', () => {
       expect(screen.getByText('Prioridade ALTA')).toBeInTheDocument()
     })
     expect(screen.queryByTitle('Alterar prioridade')).not.toBeInTheDocument()
+  })
+})
+
+describe('BD-02: Seção Documentos no detalhe', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    casoData = mockCaso
+    mockRole = 'assistente'
+  })
+
+  it('exibe seção Documentos quando caso existe', async () => {
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('Documentos')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('documentos-caso')).toBeInTheDocument()
   })
 })

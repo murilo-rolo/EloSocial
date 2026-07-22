@@ -11,7 +11,8 @@ import ProntuarioView from './ProntuarioView'
 import ChatLLM from '../components/ChatLLM'
 import MensagensCaso from '../components/caso/MensagensCaso'
 import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
-import { MessageSquare, ClipboardList, Pencil } from 'lucide-react'
+import DocumentosCaso from '../components/caso/DocumentosCaso'
+import { MessageSquare, ClipboardList, Pencil, FileText } from 'lucide-react'
 
 const STATUS_CONFIG = {
   pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
@@ -327,6 +328,21 @@ export default function RequerenteDetail() {
             <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
               Crie um caso na triagem para gerenciar o plano de ação.
             </p>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h3><FileText size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Documentos</h3>
+        </div>
+        {caso ? (
+          <div style={{ padding: 16 }}>
+            <DocumentosCaso casoId={caso.id} modo="assistente" filtroTipo="requerente" />
+          </div>
+        ) : (
+          <div className="empty-state">
+            <p>Nenhum caso vinculado a este requerente.</p>
           </div>
         )}
       </div>

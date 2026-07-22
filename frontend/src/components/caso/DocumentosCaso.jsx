@@ -23,7 +23,7 @@ function getFileIcon(tipo) {
   return <File size={20} style={{ color: 'var(--text-secondary)' }} />
 }
 
-export default function DocumentosCaso({ casoId, modo }) {
+export default function DocumentosCaso({ casoId, modo, filtroTipo }) {
   const { profile } = useAuth()
   const [documentos, setDocumentos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -35,21 +35,27 @@ export default function DocumentosCaso({ casoId, modo }) {
   useEffect(() => {
     if (!casoId) return
     loadDocuments()
-  }, [casoId])
+  }, [casoId, filtroTipo])
 
   async function loadDocuments() {
     setLoading(true)
-    const { data } = await supabase
+    let query = supabase
       .from('documentos_caso')
       .select('*')
       .eq('caso_id', casoId)
-      .order('created_at', { ascending: false })
+
+    if (filtroTipo) {
+      query = query.eq('uploaded_by_tipo', filtroTipo)
+    }
+
+    const { data } = await query.order('created_at', { ascending: false })
     setDocumentos(data || [])
     setLoading(false)
   }
 
   useRealtime(`docs-caso-${casoId}`, 'documentos_caso', '*', (payload) => {
     if (payload.eventType === 'INSERT') {
+      if (filtroTipo && payload.new.uploaded_by_tipo !== filtroTipo) return
       setDocumentos(prev => [payload.new, ...prev])
     } else if (payload.eventType === 'DELETE') {
       setDocumentos(prev => prev.filter(d => d.id !== payload.old?.id))

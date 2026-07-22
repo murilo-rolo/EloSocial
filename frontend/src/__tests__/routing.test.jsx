@@ -84,3 +84,11 @@ describe('RIR-08: redirect /triagem → /acompanhamento/triagem', () => {
     expect(screen.getByText('TriagemSocial')).toBeInTheDocument()
   })
 })
+
+// ─── RIR-11: /plano-acao redireciona para /acompanhamento ────────────────────
+describe('RIR-11: redirect /plano-acao → /acompanhamento', () => {
+  it('redireciona /plano-acao para /acompanhamento e renderiza DashboardRequerente', () => {
+    renderAt('/plano-acao')
+    expect(screen.getByText('DashboardRequerente')).toBeInTheDocument()
+  })
+})

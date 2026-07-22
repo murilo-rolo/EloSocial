@@ -68,3 +68,19 @@ describe('RIR-06: redirect /cofre-digital → /documentos', () => {
     expect(screen.getByText('CofreDigital')).toBeInTheDocument()
   })
 })
+
+// ─── RIR-07: /acompanhamento/triagem renderiza TriagemSocial ──────────────────
+describe('RIR-07: rota /acompanhamento/triagem', () => {
+  it('renderiza TriagemSocial quando requerente acessa /acompanhamento/triagem', () => {
+    renderAt('/acompanhamento/triagem')
+    expect(screen.getByText('TriagemSocial')).toBeInTheDocument()
+  })
+})
+
+// ─── RIR-08: /triagem redireciona para /acompanhamento/triagem ────────────────
+describe('RIR-08: redirect /triagem → /acompanhamento/triagem', () => {
+  it('redireciona /triagem para /acompanhamento/triagem e renderiza TriagemSocial', () => {
+    renderAt('/triagem')
+    expect(screen.getByText('TriagemSocial')).toBeInTheDocument()
+  })
+})

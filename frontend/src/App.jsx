@@ -76,7 +76,8 @@ export default function App() {
 
         {/* Rotas do Requerente */}
         <Route path="/acompanhamento" element={<ProtectedRoute roles={['requerente']}><DashboardRequerente /></ProtectedRoute>} />
-        <Route path="/triagem" element={<ProtectedRoute roles={['requerente']}><TriagemSocial /></ProtectedRoute>} />
+        <Route path="/acompanhamento/triagem" element={<ProtectedRoute roles={['requerente']}><TriagemSocial /></ProtectedRoute>} />
+        <Route path="/triagem" element={<Navigate to="/acompanhamento/triagem" replace />} />
         <Route path="/chat-atendimento" element={<ProtectedRoute roles={['requerente']}><ChatCaso /></ProtectedRoute>} />
         <Route path="/video-atendimento" element={<ProtectedRoute roles={['requerente']}><VideoRequerente /></ProtectedRoute>} />
         <Route path="/plano-acao" element={<ProtectedRoute roles={['requerente']}><PlanoAcao /></ProtectedRoute>} />

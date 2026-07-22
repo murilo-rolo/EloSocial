@@ -5,21 +5,21 @@ import { isRequerente } from '../utils/roles'
 import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, ClipboardList, FolderOpen, Video as VideoIcon } from 'lucide-react'
 
 const professionalSections = [
-  { title: 'Usuários', icon: Users, description: 'Busque, cadastre e gerencie usuários. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.' },
-  { title: 'Prontuário', icon: FileText, description: 'Fichas de atendimento com 13 seções detalhadas (identificação, composição familiar, habitacional, educação, trabalho, saúde, benefícios, convivência, participação, violência, encaminhamentos, observações). Exporte em PDF ou JSON.' },
-  { title: 'Mensagens', icon: MessageSquare, description: 'Chat em tempo real entre profissionais da equipe. Comunique-se sobre casos, compartilhe informações e coordene atendimentos.' },
-  { title: 'Videoconferência', icon: VideoIcon, description: 'Realize atendimentos por vídeo com requerentes ou equipe técnica. Salas públicas ou privadas com código de acesso.' },
-  { title: 'Base de Conhecimento', icon: BookOpen, description: 'Upload e gestão de documentos (PDFs) para a base de conhecimento da IA. Quanto mais documentos, melhor as respostas do Copiloto.' },
+  { title: 'Usuários', icon: Users, description: 'Busque, cadastre e gerencie usuários. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.', screenshot: '/screenshots/usuarios.jpg' },
+  { title: 'Prontuário', icon: FileText, description: 'Fichas de atendimento com 13 seções detalhadas (identificação, composição familiar, habitacional, educação, trabalho, saúde, benefícios, convivência, participação, violência, encaminhamentos, observações). Exporte em PDF ou JSON.', screenshot: '/screenshots/prontuario.jpg' },
+  { title: 'Mensagens', icon: MessageSquare, description: 'Chat em tempo real entre profissionais da equipe. Comunique-se sobre casos, compartilhe informações e coordene atendimentos.', screenshot: '/screenshots/mensagens.jpg' },
+  { title: 'Videoconferência', icon: VideoIcon, description: 'Realize atendimentos por vídeo com requerentes ou equipe técnica. Salas públicas ou privadas com código de acesso.', screenshot: '/screenshots/videoconferencia.jpg' },
+  { title: 'Base de Conhecimento', icon: BookOpen, description: 'Upload e gestão de documentos (PDFs) para a base de conhecimento da IA. Quanto mais documentos, melhor as respostas do Copiloto.', screenshot: '/screenshots/base-conhecimento.jpg' },
 ]
 
 const requesterSections = [
-  { title: 'Acompanhamento', icon: LayoutDashboard, description: 'Acompanhe o status do seu atendimento, veja próximas ações e receba notificações importantes da equipe técnica.' },
-  { title: 'Triagem', icon: ClipboardList, description: 'Visualize sua avaliação de vulnerabilidade. A IA analisa suas respostas e indica o nível de prioridade do seu caso.' },
-  { title: 'Video', icon: VideoIcon, description: 'Participe de videochamadas com profissionais. Acesse salas de atendimento por vídeo de forma segura e simples.' },
-  { title: 'Documentos', icon: FolderOpen, description: 'Armazene e acesse seus documentos de forma segura. Anexe RG, CPF, comprovantes e outros arquivos importantes ao seu prontuário.' },
+  { title: 'Acompanhamento', icon: LayoutDashboard, description: 'Acompanhe o status do seu atendimento, veja próximas ações e receba notificações importantes da equipe técnica.', screenshot: '/screenshots/acompanhamento.jpg' },
+  { title: 'Triagem', icon: ClipboardList, description: 'Visualize sua avaliação de vulnerabilidade. A IA analisa suas respostas e indica o nível de prioridade do seu caso.', screenshot: '/screenshots/triagem.jpg' },
+  { title: 'Video', icon: VideoIcon, description: 'Participe de videochamadas com profissionais. Acesse salas de atendimento por vídeo de forma segura e simples.', screenshot: '/screenshots/video.jpg' },
+  { title: 'Documentos', icon: FolderOpen, description: 'Armazene e acesse seus documentos de forma segura. Anexe RG, CPF, comprovantes e outros arquivos importantes ao seu prontuário.', screenshot: '/screenshots/documentos.jpg' },
 ]
 
-function AccordionItem({ title, icon: Icon, description, isOpen, onToggle }) {
+function AccordionItem({ title, icon: Icon, description, screenshot, isOpen, onToggle }) {
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: 12 }}>
       <button
@@ -40,12 +40,7 @@ function AccordionItem({ title, icon: Icon, description, isOpen, onToggle }) {
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--text-light)' }}>
             {description}
           </p>
-          <div style={{
-            marginTop: 16, border: '2px dashed var(--border)', borderRadius: 8,
-            padding: 32, textAlign: 'center', color: 'var(--text-light)', fontSize: 13,
-          }}>
-            Screenshot da página aqui
-          </div>
+          <img src={screenshot} alt={title} style={{ width: '100%', borderRadius: 8, marginTop: 16 }} />
         </div>
       )}
     </div>
@@ -81,6 +76,7 @@ export default function Ajuda() {
             title={section.title}
             icon={section.icon}
             description={section.description}
+            screenshot={section.screenshot}
             isOpen={openIndex === index}
             onToggle={() => handleToggle(index)}
           />

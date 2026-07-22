@@ -14,6 +14,7 @@ import {
   CONDICAO_OCUPACAO_OPCOES,
   TIPO_DEFICIENCIA_OPCOES,
   TIPO_BENEFICIO_OPCOES,
+  AVALIACAO_RELACAO_OPCOES,
 } from '../utils/prontuarioSchema'
 import { auditLog } from '../utils/audit'
 
@@ -70,7 +71,7 @@ export default function ProntuarioEdit() {
   }
 
   function addEncaminhamento() {
-    const novo = { destino: '', motivo: '', data: new Date().toISOString().split('T')[0] }
+    const novo = { area: '', orgao_destino: '', objetivo_motivo: '', data: new Date().toISOString().split('T')[0], contra_referencia: '' }
     setProntuario(prev => ({
       ...prev,
       encaminhamentos: [...(prev.encaminhamentos || []), novo],
@@ -1146,15 +1147,360 @@ export default function ProntuarioEdit() {
                 </div>
               )}
 
-              {['convivencia', 'participacao', 'violencia'].includes(secao.key) && (
+              {secao.key === 'convivencia' && (
                 <div>
-                  {Object.entries(prontuario[secao.key] || {}).map(([field, value]) => (
-                    <div className="form-group" key={field}>
-                      <label>{field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</label>
-                      <input className="form-control" value={value || ''}
-                        onChange={(e) => updateSection(secao.key, { [field]: e.target.value })} />
+                  {[
+                    { key: 'dependentes_sozinhos', label: 'Dependentes ficam sozinhos' },
+                    { key: 'discriminacao', label: 'Discriminação na comunidade' },
+                    { key: 'rede_apoio_parentes', label: 'Rede de apoio (parentes)' },
+                    { key: 'rede_apoio_vizinhos', label: 'Rede de apoio (vizinhos)' },
+                    { key: 'grupos_religiosos_comunitarios', label: 'Grupos religiosos/comunitários' },
+                  ].map(({ key, label }) => (
+                    <div key={key} style={{ marginTop: 12 }}>
+                      <label>{label}</label>
+                      <div className="radio-group">
+                        {SIM_NAO_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                            <input type="radio" name={`conv_${key}`} value={o}
+                              checked={prontuario.convivencia?.[key]?.resposta === o}
+                              onChange={(e) => setProntuario(prev => ({
+                                ...prev,
+                                convivencia: {
+                                  ...prev.convivencia,
+                                  [key]: { ...prev.convivencia?.[key], resposta: e.target.value },
+                                },
+                              }))} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                      {prontuario.convivencia?.[key]?.resposta === 'Sim' && (
+                        <div className="form-group" style={{ marginTop: 4 }}>
+                          <textarea className="form-control" rows={2} placeholder="Observação"
+                            value={prontuario.convivencia?.[key]?.observacao || ''}
+                            onChange={(e) => setProntuario(prev => ({
+                              ...prev,
+                              convivencia: {
+                                ...prev.convivencia,
+                                [key]: { ...prev.convivencia?.[key], observacao: e.target.value },
+                              },
+                            }))} />
+                        </div>
+                      )}
                     </div>
                   ))}
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Tempo de Residência</strong>
+                    {['estado', 'municipio', 'bairro'].map(local => (
+                      <div key={local} className="form-row" style={{ marginTop: 8 }}>
+                        <div className="form-group">
+                          <label>{local.charAt(0).toUpperCase() + local.slice(1)} (anos)</label>
+                          <input type="number" className="form-control" min={0}
+                            value={prontuario.convivencia?.tempo_residencia?.[local]?.anos ?? ''}
+                            onChange={(e) => setProntuario(prev => ({
+                              ...prev,
+                              convivencia: {
+                                ...prev.convivencia,
+                                tempo_residencia: {
+                                  ...prev.convivencia?.tempo_residencia,
+                                  [local]: { ...prev.convivencia?.tempo_residencia?.[local], anos: Number(e.target.value) },
+                                },
+                              },
+                            }))} />
+                        </div>
+                        <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                          <label className="checkbox-label">
+                            <input type="checkbox"
+                              checked={prontuario.convivencia?.tempo_residencia?.[local]?.sempre || false}
+                              onChange={(e) => setProntuario(prev => ({
+                                ...prev,
+                                convivencia: {
+                                  ...prev.convivencia,
+                                  tempo_residencia: {
+                                    ...prev.convivencia?.tempo_residencia,
+                                    [local]: { ...prev.convivencia?.tempo_residencia?.[local], sempre: e.target.checked },
+                                  },
+                                },
+                              }))} />
+                            {' '}Sempre morou
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    {[
+                      { key: 'lazer_crianca', label: 'Lazer para crianças' },
+                      { key: 'lazer_idoso', label: 'Lazer para idosos' },
+                    ].map(({ key, label }) => (
+                      <div key={key} style={{ marginTop: 12 }}>
+                        <label>{label}</label>
+                        <div className="radio-group">
+                          {['Sim', 'Não', 'Não se aplica'].map(o => (
+                            <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                              <input type="radio" name={`conv_${key}`} value={o}
+                                checked={prontuario.convivencia?.[key]?.resposta === o}
+                                onChange={(e) => setProntuario(prev => ({
+                                  ...prev,
+                                  convivencia: {
+                                    ...prev.convivencia,
+                                    [key]: { ...prev.convivencia?.[key], resposta: e.target.value },
+                                  },
+                                }))} />
+                              {' '}{o}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Relações Intrafamiliares</strong>
+                    {[
+                      { key: 'relacoes_conjugais', label: 'Relações Conjugais' },
+                      { key: 'relacoes_pais_filhos', label: 'Relações Pais/Filhos' },
+                      { key: 'relacoes_irmaos', label: 'Relações entre Irmãos' },
+                    ].map(({ key, label }) => (
+                      <div key={key} style={{ marginTop: 12 }}>
+                        <strong>{label}</strong>
+                        {(prontuario.convivencia?.[key] || []).map((rel, i) => (
+                          <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                            <button onClick={() => {
+                              const list = [...(prontuario.convivencia?.[key] || [])]
+                              list.splice(i, 1)
+                              setProntuario(prev => ({ ...prev, convivencia: { ...prev.convivencia, [key]: list } }))
+                            }} style={{
+                              position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                              color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                            }}>×</button>
+                            <div className="form-row">
+                              <div className="form-group">
+                                <label>Técnico</label>
+                                <input className="form-control" value={rel.tecnico || ''}
+                                  onChange={(e) => {
+                                    const list = [...(prontuario.convivencia?.[key] || [])]
+                                    list[i] = { ...list[i], tecnico: e.target.value }
+                                    setProntuario(prev => ({ ...prev, convivencia: { ...prev.convivencia, [key]: list } }))
+                                  }} />
+                              </div>
+                              <div className="form-group">
+                                <label>Data</label>
+                                <input type="date" className="form-control" value={rel.data || ''}
+                                  onChange={(e) => {
+                                    const list = [...(prontuario.convivencia?.[key] || [])]
+                                    list[i] = { ...list[i], data: e.target.value }
+                                    setProntuario(prev => ({ ...prev, convivencia: { ...prev.convivencia, [key]: list } }))
+                                  }} />
+                              </div>
+                            </div>
+                            <div className="form-group">
+                              <label>Avaliação</label>
+                              <select className="form-control" value={rel.avaliacao || ''}
+                                onChange={(e) => {
+                                  const list = [...(prontuario.convivencia?.[key] || [])]
+                                  list[i] = { ...list[i], avaliacao: e.target.value }
+                                  setProntuario(prev => ({ ...prev, convivencia: { ...prev.convivencia, [key]: list } }))
+                                }}>
+                                <option value="">Selecione</option>
+                                {AVALIACAO_RELACAO_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <button className="btn btn-outline btn-sm" onClick={() => {
+                        const list = [...(prontuario.convivencia?.[key] || []), { tecnico: '', data: '', avaliacao: '' }]
+                        setProntuario(prev => ({ ...prev, convivencia: { ...prev.convivencia, [key]: list } }))
+                      }}>
+                        + Adicionar {label}
+                      </button>
+                    </div>
+                  ))}
+
+                  <div style={{ marginTop: 16 }}>
+                    <label>Outros Conflitos</label>
+                    <select className="form-control" value={prontuario.convivencia?.outros_conflitos || ''}
+                      onChange={(e) => setProntuario(prev => ({
+                        ...prev,
+                        convivencia: { ...prev.convivencia, outros_conflitos: e.target.value },
+                      }))}>
+                      <option value="">Selecione</option>
+                      <option value="Sim com violência">Sim com violência</option>
+                      <option value="Sim sem violência">Sim sem violência</option>
+                      <option value="Não">Não</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {secao.key === 'violencia' && (
+                <div>
+                  <strong>Quadro 1 — Tipos de Violência</strong>
+                  {[
+                    'Violência Física', 'Violência Psicológica', 'Violência Sexual',
+                    'Violência Patrimonial', 'Negligência/Abandono', 'Trabalho Infantil',
+                    'Violência Institucional', 'Discriminação', 'Tráfico de Pessoas',
+                    'Outras Violações',
+                  ].map((tipo, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                      <div className="form-row">
+                        <div className="form-group" style={{ flex: 2 }}>
+                          <label>Tipo</label>
+                          <input className="form-control" value={tipo} readOnly style={{ background: '#f5f5f5' }} />
+                        </div>
+                        <div className="form-group">
+                          <label>Persiste?</label>
+                          <select className="form-control"
+                            value={prontuario.violencia?.quadro1?.[i]?.persiste || ''}
+                            onChange={(e) => {
+                              const list = [...(prontuario.violencia?.quadro1 || [])]
+                              if (!list[i]) list[i] = { tipo, persiste: '', data_anotacao: '' }
+                              list[i] = { ...list[i], persiste: e.target.value }
+                              setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro1: list } }))
+                            }}>
+                            <option value="">Selecione</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Não">Não</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label>Data da Anotação</label>
+                          <input type="date" className="form-control"
+                            value={prontuario.violencia?.quadro1?.[i]?.data_anotacao || ''}
+                            onChange={(e) => {
+                              const list = [...(prontuario.violencia?.quadro1 || [])]
+                              if (!list[i]) list[i] = { tipo, persiste: '', data_anotacao: '' }
+                              list[i] = { ...list[i], data_anotacao: e.target.value }
+                              setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro1: list } }))
+                            }} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Quadro 2 — Acompanhamento CREAS (exclusivo CRAS)</strong>
+                    {(prontuario.violencia?.quadro2_creas || []).map((q, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => {
+                          const list = [...(prontuario.violencia?.quadro2_creas || [])]
+                          list.splice(i, 1)
+                          setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro2_creas: list } }))
+                        }} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Data de Início</label>
+                            <input type="date" className="form-control" value={q.data_inicio || ''}
+                              onChange={(e) => {
+                                const list = [...(prontuario.violencia?.quadro2_creas || [])]
+                                list[i] = { ...list[i], data_inicio: e.target.value }
+                                setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro2_creas: list } }))
+                              }} />
+                          </div>
+                          <div className="form-group">
+                            <label>Data de Fim</label>
+                            <input type="date" className="form-control" value={q.data_fim || ''}
+                              onChange={(e) => {
+                                const list = [...(prontuario.violencia?.quadro2_creas || [])]
+                                list[i] = { ...list[i], data_fim: e.target.value }
+                                setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro2_creas: list } }))
+                              }} />
+                          </div>
+                          <div className="form-group">
+                            <label>Identificação do CREAS</label>
+                            <input className="form-control" value={q.identificacao_creas || ''}
+                              onChange={(e) => {
+                                const list = [...(prontuario.violencia?.quadro2_creas || [])]
+                                list[i] = { ...list[i], identificacao_creas: e.target.value }
+                                setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro2_creas: list } }))
+                              }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={() => {
+                      const list = [...(prontuario.violencia?.quadro2_creas || []), { data_inicio: '', data_fim: '', identificacao_creas: '' }]
+                      setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro2_creas: list } }))
+                    }}>
+                      + Adicionar Acompanhamento CREAS
+                    </button>
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Quadro 3 — Situações (CREAS)</strong>
+                    {(prontuario.violencia?.quadro3_creas || []).map((q, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => {
+                          const list = [...(prontuario.violencia?.quadro3_creas || [])]
+                          list.splice(i, 1)
+                          setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro3_creas: list } }))
+                        }} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Ordem/Pessoa</label>
+                            <input className="form-control" value={q.ordem_pessoa || ''}
+                              onChange={(e) => {
+                                const list = [...(prontuario.violencia?.quadro3_creas || [])]
+                                list[i] = { ...list[i], ordem_pessoa: e.target.value }
+                                setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro3_creas: list } }))
+                              }} />
+                          </div>
+                          <div className="form-group">
+                            <label>Código da Situação</label>
+                            <input className="form-control" value={q.codigo_situacao || ''}
+                              onChange={(e) => {
+                                const list = [...(prontuario.violencia?.quadro3_creas || [])]
+                                list[i] = { ...list[i], codigo_situacao: e.target.value }
+                                setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro3_creas: list } }))
+                              }} />
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Tipo</label>
+                            <div className="radio-group">
+                              {['Indício', 'Confirmada'].map(o => (
+                                <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                                  <input type="radio" name={`quadro3_tipo_${i}`} value={o}
+                                    checked={q.tipo === o}
+                                    onChange={(e) => {
+                                      const list = [...(prontuario.violencia?.quadro3_creas || [])]
+                                      list[i] = { ...list[i], tipo: e.target.value }
+                                      setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro3_creas: list } }))
+                                    }} />
+                                  {' '}{o}
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="form-group">
+                            <label>Data do Registro</label>
+                            <input type="date" className="form-control" value={q.data_registro || ''}
+                              onChange={(e) => {
+                                const list = [...(prontuario.violencia?.quadro3_creas || [])]
+                                list[i] = { ...list[i], data_registro: e.target.value }
+                                setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro3_creas: list } }))
+                              }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={() => {
+                      const list = [...(prontuario.violencia?.quadro3_creas || []), { ordem_pessoa: '', codigo_situacao: '', tipo: '', data_registro: '' }]
+                      setProntuario(prev => ({ ...prev, violencia: { ...prev.violencia, quadro3_creas: list } }))
+                    }}>
+                      + Adicionar Situação
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1171,17 +1517,37 @@ export default function ProntuarioEdit() {
                       }}>×</button>
                       <div className="form-row">
                         <div className="form-group">
-                          <label>Destino</label>
-                          <input className="form-control" value={enc.destino} onChange={(e) => updateEncaminhamento(i, 'destino', e.target.value)} />
+                          <label>Área</label>
+                          <select className="form-control" value={enc.area || ''} onChange={(e) => updateEncaminhamento(i, 'area', e.target.value)}>
+                            <option value="">Selecione</option>
+                            <option value="Outra Unidade/Serviço Assist. Social">Outra Unidade/Serviço Assist. Social</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Educação">Educação</option>
+                            <option value="INSS">INSS</option>
+                            <option value="Habitação">Habitação</option>
+                            <option value="Defensoria Pública">Defensoria Pública</option>
+                            <option value="Outra">Outra</option>
+                          </select>
                         </div>
                         <div className="form-group">
-                          <label>Motivo</label>
-                          <input className="form-control" value={enc.motivo} onChange={(e) => updateEncaminhamento(i, 'motivo', e.target.value)} />
+                          <label>Órgão Destino</label>
+                          <input className="form-control" value={enc.orgao_destino || ''} onChange={(e) => updateEncaminhamento(i, 'orgao_destino', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Objetivo/Motivo</label>
+                          <input className="form-control" value={enc.objetivo_motivo || ''} onChange={(e) => updateEncaminhamento(i, 'objetivo_motivo', e.target.value)} />
                         </div>
                         <div className="form-group">
                           <label>Data</label>
                           <input type="date" className="form-control" value={enc.data} onChange={(e) => updateEncaminhamento(i, 'data', e.target.value)} />
                         </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Contra-Referência</label>
+                        <textarea className="form-control" rows={2} value={enc.contra_referencia || ''}
+                          onChange={(e) => updateEncaminhamento(i, 'contra_referencia', e.target.value)} />
                       </div>
                     </div>
                   ))}

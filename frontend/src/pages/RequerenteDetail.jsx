@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate, formatDateTime } from '../utils/format'
 import { ROLE_LABELS, isRequerente } from '../utils/roles'
+import { auditLog } from '../utils/audit'
 import SlideOver from '../components/SlideOver'
 import ProntuarioView from './ProntuarioView'
 import ChatLLM from '../components/ChatLLM'
@@ -86,10 +87,12 @@ export default function RequerenteDetail() {
       setShowStatusDropdown(false)
       return
     }
+    const oldStatus = caso?.status
     setShowStatusDropdown(false)
     setUpdating(true)
     const { error } = await supabase.from('triagens').update({ status: newStatus }).eq('id', caso.id)
     if (error) console.error('Erro ao atualizar status:', error)
+    if (!error) auditLog(profile.id, 'alterou_status_triagem', { triagem_id: caso.id, status_anterior: oldStatus, status_novo: newStatus })
     setUpdating(false)
   }
 
@@ -97,6 +100,7 @@ export default function RequerenteDetail() {
     setAssigning(true)
     const { error } = await supabase.from('triagens').update({ assistente_social_id: profile.id }).eq('id', caso.id)
     if (error) console.error('Erro ao assumir caso:', error)
+    if (!error) auditLog(profile.id, 'assumiu_caso', { triagem_id: caso.id })
     setAssigning(false)
   }
 
@@ -104,14 +108,17 @@ export default function RequerenteDetail() {
     setAssigning(true)
     const { error } = await supabase.from('triagens').update({ assistente_social_id: null }).eq('id', caso.id)
     if (error) console.error('Erro ao soltar caso:', error)
+    if (!error) auditLog(profile.id, 'soltou_caso', { triagem_id: caso.id })
     setAssigning(false)
   }
 
   async function confirmUpdate() {
     if (!confirmAction) return
+    const oldStatus = caso?.status
     setUpdating(true)
     const { error } = await supabase.from('triagens').update({ status: confirmAction.value }).eq('id', caso.id)
     if (error) console.error('Erro ao confirmar atualizacao:', error)
+    if (!error) auditLog(profile.id, 'alterou_status_triagem', { triagem_id: caso.id, status_anterior: oldStatus, status_novo: confirmAction.value })
     setUpdating(false)
     setConfirmAction(null)
   }

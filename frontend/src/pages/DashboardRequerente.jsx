@@ -99,7 +99,7 @@ export default function DashboardRequerente() {
           <p style={{ fontSize: 16, marginBottom: 16 }}>Nenhum caso em andamento.</p>
           <button
             className="btn btn-primary"
-            onClick={() => navigate('/triagem')}
+            onClick={() => navigate('/acompanhamento/triagem')}
           >
             Iniciar Triagem
           </button>
@@ -149,7 +149,7 @@ export default function DashboardRequerente() {
           {isPendente && (
             <button
               className="btn btn-outline btn-sm"
-              onClick={() => navigate('/triagem?editar=1')}
+              onClick={() => navigate('/acompanhamento/triagem?editar=1')}
               style={{ marginLeft: 'auto', fontSize: 12, padding: '4px 12px' }}
             >
               Editar Triagem

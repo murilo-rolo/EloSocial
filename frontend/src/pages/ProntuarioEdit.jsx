@@ -7,6 +7,10 @@ import {
   SECOES, PARENTESCO_OPCOES, DOCUMENTACAO_OPCOES,
   LOCALIZACAO_DOMICILIO_OPCOES, TIPO_UNIDADE_OPCOES,
   FORMA_INGRESSO_OPCOES, PROGRAMAS_SOCIAIS_LISTA, SIM_NAO_OPCOES,
+  TIPO_RESIDENCIA_OPCOES, MATERIAL_PAREDES_OPCOES,
+  ENERGIA_OPCOES, ABASTECIMENTO_AGUA_OPCOES,
+  ESCOAMENTO_OPCOES, COLETA_LIXO_OPCOES,
+  ESCOLARIDADE_OPCOES,
 } from '../utils/prontuarioSchema'
 import { auditLog } from '../utils/audit'
 
@@ -130,6 +134,50 @@ export default function ProntuarioEdit() {
       documentacao: idx >= 0 ? docs.filter(d => d !== doc) : [...docs, doc],
     }
     setProntuario(prev => ({ ...prev, composicao_familiar: list }))
+  }
+
+  function addEducando() {
+    setProntuario(prev => ({
+      ...prev,
+      educacional: {
+        ...prev.educacional,
+        membros: [...(prev.educacional?.membros || []), { ordem: (prev.educacional?.membros?.length || 0) + 1, nome: '', idade: '', sabe_ler: '', frequenta_escola: '', escolaridade: '' }],
+      },
+    }))
+  }
+
+  function updateEducando(index, field, value) {
+    const list = [...(prontuario.educacional?.membros || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, educacional: { ...prev.educacional, membros: list } }))
+  }
+
+  function removeEducando(index) {
+    const list = [...(prontuario.educacional?.membros || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, educacional: { ...prev.educacional, membros: list } }))
+  }
+
+  function addCondicionalidadeBF() {
+    setProntuario(prev => ({
+      ...prev,
+      educacional: {
+        ...prev.educacional,
+        condicionalidades_bf: [...(prev.educacional?.condicionalidades_bf || []), { mes_ano: '', efeito: '' }],
+      },
+    }))
+  }
+
+  function updateCondicionalidadeBF(index, field, value) {
+    const list = [...(prontuario.educacional?.condicionalidades_bf || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, educacional: { ...prev.educacional, condicionalidades_bf: list } }))
+  }
+
+  function removeCondicionalidadeBF(index) {
+    const list = [...(prontuario.educacional?.condicionalidades_bf || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, educacional: { ...prev.educacional, condicionalidades_bf: list } }))
   }
 
   const handleSave = async () => {
@@ -474,7 +522,246 @@ export default function ProntuarioEdit() {
                 </div>
               )}
 
-              {['habitacional', 'educacional', 'trabalho_renda', 'saude', 'beneficios', 'convivencia', 'participacao', 'violencia'].includes(secao.key) && (
+              {secao.key === 'habitacional' && (
+                <div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Tipo de Residência</label>
+                      <div className="radio-group">
+                        {TIPO_RESIDENCIA_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'block', marginBottom: 2 }}>
+                            <input type="radio" name="tipo_residencia" value={o}
+                              checked={prontuario.habitacional.tipo_residencia === o}
+                              onChange={(e) => updateSection('habitacional', { tipo_residencia: e.target.value })} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Material das Paredes</label>
+                      <div className="radio-group">
+                        {MATERIAL_PAREDES_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'block', marginBottom: 2 }}>
+                            <input type="radio" name="material_paredes" value={o}
+                              checked={prontuario.habitacional.material_paredes === o}
+                              onChange={(e) => updateSection('habitacional', { material_paredes: e.target.value })} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Energia Elétrica</label>
+                      <select className="form-control" value={prontuario.habitacional.energia_eletrica || ''}
+                        onChange={(e) => updateSection('habitacional', { energia_eletrica: e.target.value })}>
+                        <option value="">Selecione</option>
+                        {ENERGIA_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Água Canalizada</label>
+                      <div className="radio-group">
+                        {SIM_NAO_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                            <input type="radio" name="agua_canalizada" value={o}
+                              checked={prontuario.habitacional.agua_canalizada === o}
+                              onChange={(e) => updateSection('habitacional', { agua_canalizada: e.target.value })} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Abastecimento de Água</label>
+                      <select className="form-control" value={prontuario.habitacional.abastecimento_agua || ''}
+                        onChange={(e) => updateSection('habitacional', { abastecimento_agua: e.target.value })}>
+                        <option value="">Selecione</option>
+                        {ABASTECIMENTO_AGUA_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Escoamento Sanitário</label>
+                      <select className="form-control" value={prontuario.habitacional.escoamento_sanitario || ''}
+                        onChange={(e) => updateSection('habitacional', { escoamento_sanitario: e.target.value })}>
+                        <option value="">Selecione</option>
+                        {ESCOAMENTO_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Coleta de Lixo</label>
+                      <select className="form-control" value={prontuario.habitacional.coleta_lixo || ''}
+                        onChange={(e) => updateSection('habitacional', { coleta_lixo: e.target.value })}>
+                        <option value="">Selecione</option>
+                        {COLETA_LIXO_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Total de Cômodos</label>
+                      <input type="number" className="form-control" min={0} value={prontuario.habitacional.total_comodos ?? ''}
+                        onChange={(e) => updateSection('habitacional', { total_comodos: Number(e.target.value) })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Dormitórios</label>
+                      <input type="number" className="form-control" min={0} value={prontuario.habitacional.dormitorios ?? ''}
+                        onChange={(e) => updateSection('habitacional', { dormitorios: Number(e.target.value) })} />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Área de Risco</label>
+                      <div className="radio-group">
+                        {SIM_NAO_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                            <input type="radio" name="area_risco" value={o}
+                              checked={prontuario.habitacional.area_risco === o}
+                              onChange={(e) => updateSection('habitacional', { area_risco: e.target.value })} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Acesso Difícil</label>
+                      <div className="radio-group">
+                        {SIM_NAO_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                            <input type="radio" name="acesso_dificil" value={o}
+                              checked={prontuario.habitacional.acesso_dificil === o}
+                              onChange={(e) => updateSection('habitacional', { acesso_dificil: e.target.value })} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Conflito/Violência</label>
+                      <div className="radio-group">
+                        {SIM_NAO_OPCOES.map(o => (
+                          <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                            <input type="radio" name="conflito_violencia" value={o}
+                              checked={prontuario.habitacional.conflito_violencia === o}
+                              onChange={(e) => updateSection('habitacional', { conflito_violencia: e.target.value })} />
+                            {' '}{o}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {secao.key === 'educacional' && (
+                <div>
+                  <strong>Vulnerabilidades Educacionais</strong>
+                  <div className="form-row">
+                    {Object.entries(prontuario.educacional?.vulnerabilidades || {}).map(([key]) => (
+                      <div className="form-group" key={key} style={{ flex: '1 1 30%' }}>
+                        <label>{key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</label>
+                        <input type="number" className="form-control" min={0}
+                          value={prontuario.educacional?.vulnerabilidades?.[key] ?? ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            educacional: {
+                              ...prev.educacional,
+                              vulnerabilidades: { ...prev.educacional?.vulnerabilidades, [key]: Number(e.target.value) },
+                            },
+                          }))} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Membros</strong>
+                    {(prontuario.educacional?.membros || []).map((ed, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => removeEducando(i)} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Nome</label>
+                            <input className="form-control" value={ed.nome} onChange={(e) => updateEducando(i, 'nome', e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Idade</label>
+                            <input className="form-control" value={ed.idade} onChange={(e) => updateEducando(i, 'idade', e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Sabe Ler</label>
+                            <select className="form-control" value={ed.sabe_ler} onChange={(e) => updateEducando(i, 'sabe_ler', e.target.value)}>
+                              <option value="">Selecione</option>
+                              <option value="S">Sim</option>
+                              <option value="N">Não</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Frequenta Escola</label>
+                            <select className="form-control" value={ed.frequenta_escola} onChange={(e) => updateEducando(i, 'frequenta_escola', e.target.value)}>
+                              <option value="">Selecione</option>
+                              <option value="S">Sim</option>
+                              <option value="N">Não</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Escolaridade</label>
+                            <select className="form-control" value={ed.escolaridade} onChange={(e) => updateEducando(i, 'escolaridade', e.target.value)}>
+                              <option value="">Selecione</option>
+                              {ESCOLARIDADE_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={addEducando}>
+                      + Adicionar Membro Educacional
+                    </button>
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Condicionalidades Bolsa Família</strong>
+                    {(prontuario.educacional?.condicionalidades_bf || []).map((c, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => removeCondicionalidadeBF(i)} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Mês/Ano</label>
+                            <input className="form-control" value={c.mes_ano} onChange={(e) => updateCondicionalidadeBF(i, 'mes_ano', e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Efeito</label>
+                            <select className="form-control" value={c.efeito} onChange={(e) => updateCondicionalidadeBF(i, 'efeito', e.target.value)}>
+                              <option value="">Selecione</option>
+                              <option value="Advertência">Advertência</option>
+                              <option value="Bloqueio">Bloqueio</option>
+                              <option value="1ª Suspensão">1ª Suspensão</option>
+                              <option value="2ª Suspensão">2ª Suspensão</option>
+                              <option value="Cancelamento">Cancelamento</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={addCondicionalidadeBF}>
+                      + Adicionar Condicionalidade
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {['trabalho_renda', 'saude', 'beneficios', 'convivencia', 'participacao', 'violencia'].includes(secao.key) && (
                 <div>
                   {Object.entries(prontuario[secao.key] || {}).map(([field, value]) => (
                     <div className="form-group" key={field}>

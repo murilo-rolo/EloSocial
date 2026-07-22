@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Layout from '../components/Layout/Layout'
 import { useAuth } from '../hooks/useAuth'
 import { isRequerente } from '../utils/roles'
-import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, User, ClipboardList, ListTodo, FolderOpen, Video as VideoIcon } from 'lucide-react'
+import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, ClipboardList, ListTodo, FolderOpen, Video as VideoIcon } from 'lucide-react'
 
 const professionalSections = [
   { title: 'Usuários', icon: Users, description: 'Busque, cadastre e gerencie usuários. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.' },
@@ -10,7 +10,6 @@ const professionalSections = [
   { title: 'Mensagens', icon: MessageSquare, description: 'Chat em tempo real entre profissionais da equipe. Comunique-se sobre casos, compartilhe informações e coordene atendimentos.' },
   { title: 'Videoconferência', icon: VideoIcon, description: 'Realize atendimentos por vídeo com requerentes ou equipe técnica. Salas públicas ou privadas com código de acesso.' },
   { title: 'Base de Conhecimento', icon: BookOpen, description: 'Upload e gestão de documentos (PDFs) para a base de conhecimento da IA. Quanto mais documentos, melhor as respostas do Copiloto.' },
-  { title: 'Perfil', icon: User, description: 'Visualize e edite seus dados pessoais, senha e informações de perfil.' },
 ]
 
 const requesterSections = [

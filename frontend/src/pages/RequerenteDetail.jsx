@@ -8,8 +8,8 @@ import SlideOver from '../components/SlideOver'
 import ProntuarioView from './ProntuarioView'
 import ChatLLM from '../components/ChatLLM'
 import MensagensCaso from '../components/caso/MensagensCaso'
-import ReactMarkdown from 'react-markdown'
-import { MessageSquare } from 'lucide-react'
+import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
+import { MessageSquare, ClipboardList } from 'lucide-react'
 
 export default function RequerenteDetail() {
   const { id } = useParams()
@@ -18,10 +18,6 @@ export default function RequerenteDetail() {
   const [prontuarios, setProntuarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedProntuarioId, setSelectedProntuarioId] = useState(null)
-  const [runningTriagem, setRunningTriagem] = useState(false)
-  const [generatingResumo, setGeneratingResumo] = useState(false)
-  const [resumoText, setResumoText] = useState(null)
-  const [showResumo, setShowResumo] = useState(false)
   const [caso, setCaso] = useState(null)
 
   useEffect(() => {
@@ -49,82 +45,6 @@ export default function RequerenteDetail() {
     load()
   }, [id])
 
-  const handleTriagem = async () => {
-    setRunningTriagem(true)
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-      const res = await fetch(`${apiUrl}/api/triagem`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prontuario_context: {
-            applicant: requerente,
-            prontuarios: prontuarios
-          }
-        })
-      })
-      
-      if (!res.ok) {
-        throw new Error(`Erro HTTP: ${res.status}`)
-      }
-      
-      const data = await res.json()
-      
-      const { error: supaError } = await supabase.from('applicants').update({
-        vulnerabilidade_score: data.score,
-        vulnerabilidade_cor: data.cor,
-        vulnerabilidade_motivo: data.motivo
-      }).eq('id', id)
-      
-      if (supaError) {
-        throw new Error(`Erro no Banco: As novas colunas existem? (${supaError.message})`)
-      }
-      
-      setRequerente({
-        ...requerente,
-        vulnerabilidade_score: data.score,
-        vulnerabilidade_cor: data.cor,
-        vulnerabilidade_motivo: data.motivo
-      })
-    } catch (e) {
-      console.error("Erro na triagem:", e)
-      alert(e.message || "Erro ao realizar triagem com IA.")
-    } finally {
-      setRunningTriagem(false)
-    }
-  }
-
-  const handleResumo = async () => {
-    setGeneratingResumo(true)
-    setShowResumo(true)
-    setResumoText(null)
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-      const res = await fetch(`${apiUrl}/api/resumo`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prontuario_context: {
-            applicant: requerente,
-            prontuarios: prontuarios
-          }
-        })
-      })
-      
-      if (!res.ok) {
-        throw new Error(`Erro HTTP: ${res.status}`)
-      }
-      
-      const data = await res.json()
-      setResumoText(data.resumo)
-    } catch (e) {
-      console.error("Erro no resumo:", e)
-      setResumoText("Ocorreu um erro ao gerar o resumo executivo. Verifique se o backend está rodando.")
-    } finally {
-      setGeneratingResumo(false)
-    }
-  }
-
   if (loading) return <Layout title="Requerente"><div className="loading">Carregando...</div></Layout>
   if (!requerente) return <Layout title="Requerente"><div className="empty-state">Requerente não encontrado.</div></Layout>
 
@@ -138,36 +58,6 @@ export default function RequerenteDetail() {
         <p className="page-subtitle">
           Visão geral do histórico socioassistencial e prontuários vinculados.
         </p>
-      </div>
-
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center', background: 'var(--bg)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Assistentes de IA:
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flex: 1 }}>
-          <button className="btn btn-sm btn-outline" onClick={handleTriagem} disabled={runningTriagem} style={{ borderRadius: 20, background: 'white' }}>
-            {runningTriagem ? 'Analisando...' : '✨ Triagem IA'}
-          </button>
-          <button className="btn btn-sm btn-outline" onClick={handleResumo} disabled={generatingResumo} style={{ borderRadius: 20, background: 'white' }}>
-            {generatingResumo ? 'Gerando...' : '📄 Resumo IA'}
-          </button>
-          
-          <div style={{ flex: 1 }} />
-          
-          {requerente.vulnerabilidade_score ? (
-            <span 
-              className={`badge badge-risco-${requerente.vulnerabilidade_cor === 'vermelho' ? 'alto' : requerente.vulnerabilidade_cor === 'amarelo' ? 'medio' : 'baixo'}`} 
-              title={requerente.vulnerabilidade_motivo}
-              style={{ cursor: 'help' }}
-            >
-              {requerente.vulnerabilidade_cor === 'vermelho' ? '🔴' : requerente.vulnerabilidade_cor === 'amarelo' ? '🟡' : '🟢'} {requerente.vulnerabilidade_score}
-            </span>
-          ) : (
-            <span className="badge" style={{ background: '#f8fafc', color: '#94a3b8', border: '1px dashed #cbd5e1' }}>⚪ Triagem Pendente</span>
-          )}
-        </div>
       </div>
 
       <div className="card">
@@ -232,6 +122,22 @@ export default function RequerenteDetail() {
 
       <div className="card">
         <div className="card-header">
+          <h3><ClipboardList size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Plano de Ação</h3>
+        </div>
+        {caso ? (
+          <PlanoAcaoCaso casoId={caso.id} modo="assistente" applicantId={id} />
+        ) : (
+          <div className="empty-state">
+            <p>Nenhum caso vinculado a este requerente.</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+              Crie um caso na triagem para gerenciar o plano de ação.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="card-header">
           <h3><MessageSquare size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} /> Mensagens</h3>
         </div>
         {caso ? (
@@ -256,29 +162,6 @@ export default function RequerenteDetail() {
         {selectedProntuarioId && (
           <ProntuarioView id={selectedProntuarioId} isDrawer={true} />
         )}
-      </SlideOver>
-
-      <SlideOver 
-        isOpen={showResumo} 
-        onClose={() => setShowResumo(false)}
-        title="Resumo Executivo"
-      >
-        <div style={{ padding: 24, fontSize: 14, lineHeight: 1.6, color: 'var(--text)' }}>
-          {generatingResumo ? (
-            <div className="loading">A IA está lendo o histórico e gerando o resumo executivo...</div>
-          ) : (
-            <ReactMarkdown
-              components={{
-                p: ({node, ...props}) => <p style={{margin: '0 0 16px 0'}} {...props} />,
-                h3: ({node, ...props}) => <h3 style={{margin: '24px 0 12px 0', color: 'var(--text-primary)', fontSize: 16}} {...props} />,
-                ul: ({node, ...props}) => <ul style={{paddingLeft: 20, marginBottom: 16}} {...props} />,
-                li: ({node, ...props}) => <li style={{marginBottom: 8}} {...props} />
-              }}
-            >
-              {resumoText}
-            </ReactMarkdown>
-          )}
-        </div>
       </SlideOver>
 
       <ChatLLM prontuarioContext={{ applicant: requerente, prontuarios: prontuarios }} />

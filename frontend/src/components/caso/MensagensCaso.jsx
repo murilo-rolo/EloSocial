@@ -5,6 +5,30 @@ import { useRealtime } from '../../hooks/useRealtime'
 import { timeAgo } from '../../utils/format'
 import { ROLE_LABELS } from '../../utils/roles'
 
+const AVATAR_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#14b8a6', '#10b981', '#f59e0b', '#3b82f6']
+
+function avatarColor(name) {
+  let hash = 0
+  for (let i = 0; i < (name || '').length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
+
+function Avatar({ name, size }) {
+  const initial = (name || '?').charAt(0).toUpperCase()
+  const bg = avatarColor(name)
+  return (
+    <div
+      className="msg-avatar"
+      style={{ background: bg, color: '#fff', width: size || 24, height: size || 24, fontSize: (size || 24) * 0.46 }}
+      title={name}
+    >
+      {initial}
+    </div>
+  )
+}
+
 export default function MensagensCaso({ casoId, modo }) {
   const { profile } = useAuth()
   const [messages, setMessages] = useState([])
@@ -95,7 +119,7 @@ export default function MensagensCaso({ casoId, modo }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {messages.length === 0 ? (
           <div className="empty-state">
             <p>Nenhuma mensagem ainda. Envie uma mensagem!</p>
@@ -109,13 +133,16 @@ export default function MensagensCaso({ casoId, modo }) {
                 className={`chat-message ${isOwn ? 'sent' : 'received'}`}
               >
                 {!isOwn && msg.remetente_nome && (
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent)', marginBottom: 2 }}>
-                    {msg.remetente_nome}
-                    {msg.profiles?.role && (
-                      <span style={{ fontWeight: 400, marginLeft: 6, opacity: 0.7 }}>
-                        · {ROLE_LABELS[msg.profiles.role] || msg.profiles.role}
-                      </span>
-                    )}
+                  <div className="msg-header">
+                    <Avatar name={msg.remetente_nome} />
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent)' }}>
+                      {msg.remetente_nome}
+                      {msg.profiles?.role && (
+                        <span style={{ fontWeight: 400, marginLeft: 4, opacity: 0.7 }}>
+                          · {ROLE_LABELS[msg.profiles.role] || msg.profiles.role}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
                 <div>{msg.conteudo}</div>

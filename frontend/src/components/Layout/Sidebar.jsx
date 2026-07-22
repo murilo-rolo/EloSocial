@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { canManageUsers, isRequerente } from '../../utils/roles'
-import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot, FolderOpen, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Users, MessageSquare, Video, Settings, BookOpen, FolderOpen, HelpCircle } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
   const { profile } = useAuth()
@@ -16,10 +16,8 @@ export default function Sidebar({ open, onClose }) {
       ]
     : [
         { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
-        { to: '/agenda', label: 'Agenda', icon: <Calendar size={20} /> },
         { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
         { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
-        { to: '/chat-ia', label: 'Chat IA', icon: <Bot size={20} /> },
         { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
         { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },
         { to: '/ajuda', label: 'Ajuda', icon: <HelpCircle size={20} /> },

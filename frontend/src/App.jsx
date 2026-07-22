@@ -5,7 +5,6 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Welcome from './pages/Welcome'
-import Agenda from './pages/Agenda'
 import Requerentes from './pages/Requerentes'
 import RequerenteDetail from './pages/RequerenteDetail'
 import ProntuarioEdit from './pages/ProntuarioEdit'
@@ -22,7 +21,7 @@ import CofreDigital from './pages/CofreDigital'
 import VideoRequerente from './pages/VideoRequerente'
 import BaseConhecimento from './pages/BaseConhecimento'
 import ThemeToggle from './components/ThemeToggle'
-import ChatIA from './pages/ChatIA'
+
 import Perfil from './pages/Perfil'
 import Ajuda from './pages/Ajuda'
 
@@ -60,7 +59,6 @@ export default function App() {
         {/* Rota autenticada — Bem vindo */}
         <Route path="/sistema" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
         <Route path="/requerentes" element={<ProtectedRoute><Requerentes /></ProtectedRoute>} />
         <Route path="/requerentes/:id" element={<ProtectedRoute><RequerenteDetail /></ProtectedRoute>} />
         <Route path="/prontuarios/novo/:applicantId" element={<ProtectedRoute><ProntuarioEdit /></ProtectedRoute>} />
@@ -68,7 +66,7 @@ export default function App() {
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/videoconferencia" element={<ProtectedRoute><Videoconferencia /></ProtectedRoute>} />
         <Route path="/conhecimento" element={<ProtectedRoute><BaseConhecimento /></ProtectedRoute>} />
-        <Route path="/chat-ia" element={<ProtectedRoute><ChatIA /></ProtectedRoute>} />
+
         <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
         <Route path="/ajuda" element={<ProtectedRoute><Ajuda /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute roles={['gerente']}><Admin /></ProtectedRoute>} />

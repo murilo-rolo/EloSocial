@@ -80,6 +80,7 @@ export default function RequerenteDetail() {
   const [showPrioridadeDropdown, setShowPrioridadeDropdown] = useState(false)
   const [confirmAction, setConfirmAction] = useState(null)
   const [updating, setUpdating] = useState(false)
+  const [assigning, setAssigning] = useState(false)
 
   async function handleUpdateStatus(newStatus) {
     if (newStatus === caso?.status) {
@@ -108,6 +109,20 @@ export default function RequerenteDetail() {
     const { error } = await supabase.from('triagens').update({ prioridade: newPrioridade }).eq('id', caso.id)
     if (error) console.error('Erro ao atualizar prioridade:', error)
     setUpdating(false)
+  }
+
+  async function handleAssumirCaso() {
+    setAssigning(true)
+    const { error } = await supabase.from('triagens').update({ assistente_social_id: profile.id }).eq('id', caso.id)
+    if (error) console.error('Erro ao assumir caso:', error)
+    setAssigning(false)
+  }
+
+  async function handleSoltarCaso() {
+    setAssigning(true)
+    const { error } = await supabase.from('triagens').update({ assistente_social_id: null }).eq('id', caso.id)
+    if (error) console.error('Erro ao soltar caso:', error)
+    setAssigning(false)
   }
 
   async function confirmUpdate() {
@@ -248,6 +263,23 @@ export default function RequerenteDetail() {
                 </div>
               )}
             </div>
+            {profile?.role === 'assistente_social' && (
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                {caso.assistente_social_id === profile.id ? (
+                  <button className="btn btn-outline btn-sm" onClick={handleSoltarCaso} disabled={assigning}>
+                    {assigning ? 'Soltando...' : '✕ Soltar Caso'}
+                  </button>
+                ) : caso.assistente_social_id ? (
+                  <span className="badge" style={{ background: '#f1f5f9', color: '#94a3b8', fontSize: 12 }}>
+                    Vinculado a outro profissional
+                  </span>
+                ) : (
+                  <button className="btn btn-primary btn-sm" onClick={handleAssumirCaso} disabled={assigning}>
+                    {assigning ? 'Atribuindo...' : '⊕ Assumir Caso'}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

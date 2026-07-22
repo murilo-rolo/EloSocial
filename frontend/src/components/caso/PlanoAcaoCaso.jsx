@@ -27,7 +27,7 @@ function nextStatus(current) {
 function getStatusBadge(status) {
   switch(status) {
     case 'Pendente': return { bg: 'var(--warning)', color: '#fff', label: 'Pendente' }
-    case 'Concluído': return { bg: 'var(--accent)', color: '#fff', label: 'Concluído' }
+    case 'Concluido': return { bg: 'var(--accent)', color: '#fff', label: 'Concluído' }
     case 'Cancelado': return { bg: 'var(--danger)', color: '#fff', label: 'Cancelado' }
     case 'Faltou': return { bg: '#34495e', color: '#fff', label: 'Faltou' }
     default: return { bg: '#94a3b8', color: '#fff', label: status }
@@ -470,7 +470,7 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
                       {ag.status === 'Pendente' && (
                         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                           <button className="btn btn-sm" style={{ fontSize: 11, padding: '2px 8px', borderColor: 'var(--accent)', color: 'var(--accent)' }}
-                            onClick={() => handleUpdateAgendamentoStatus(ag.id, 'Concluído')}>
+                            onClick={() => handleUpdateAgendamentoStatus(ag.id, 'Concluido')}>
                             Concluir
                           </button>
                           <button className="btn btn-sm" style={{ fontSize: 11, padding: '2px 8px', borderColor: 'var(--danger)', color: 'var(--danger)' }}

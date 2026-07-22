@@ -2,19 +2,15 @@ import { useState } from 'react'
 import Layout from '../components/Layout/Layout'
 import { useAuth } from '../hooks/useAuth'
 import { isRequerente } from '../utils/roles'
-import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Calendar, Users, FileText, Bot, MessageSquare, Video, BookOpen, User, Settings, ClipboardList, ListTodo, FolderOpen, Video as VideoIcon } from 'lucide-react'
+import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, User, ClipboardList, ListTodo, FolderOpen, Video as VideoIcon } from 'lucide-react'
 
 const professionalSections = [
-  { title: 'Dashboard', icon: LayoutDashboard, description: 'Visão geral do sistema com estatísticas de atendimentos, prontuários recentes e gráficos de desempenho. Acesse rapidamente os dados mais importantes do seu dia a dia.' },
-  { title: 'Agenda', icon: Calendar, description: 'Gerencie seus atendimentos, sessões e visitas domiciliares. Visualize sua agenda do dia, semana ou mês e registre novos compromissos.' },
   { title: 'Requerentes', icon: Users, description: 'Busque, cadastre e gerencie requerentes. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.' },
   { title: 'Prontuário', icon: FileText, description: 'Fichas de atendimento com 13 seções detalhadas (identificação, composição familiar, habitacional, educação, trabalho, saúde, benefícios, convivência, participação, violência, encaminhamentos, observações). Exporte em PDF ou JSON.' },
-  { title: 'Chat IA', icon: Bot, description: 'Assistente inteligente que responde perguntas sobre o prontuário do requerente, sugere encaminhamentos e ajuda na análise de vulnerabilidade.' },
   { title: 'Mensagens', icon: MessageSquare, description: 'Chat em tempo real entre profissionais da equipe. Comunique-se sobre casos, compartilhe informações e coordene atendimentos.' },
   { title: 'Videoconferência', icon: VideoIcon, description: 'Realize atendimentos por vídeo com requerentes ou equipe técnica. Salas públicas ou privadas com código de acesso.' },
   { title: 'Base de Conhecimento', icon: BookOpen, description: 'Upload e gestão de documentos (PDFs) para a base de conhecimento da IA. Quanto mais documentos, melhor as respostas do Copiloto.' },
   { title: 'Perfil', icon: User, description: 'Visualize e edite seus dados pessoais, senha e informações de perfil.' },
-  { title: 'Admin', icon: Settings, description: '(Apenas Gerente) Gerencie usuários do sistema, crie novas contas, atribua CRAS e monitore a auditoria de ações.' },
 ]
 
 const requesterSections = [

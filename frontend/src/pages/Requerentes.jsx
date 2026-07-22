@@ -1,15 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../hooks/useRealtime'
+import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate } from '../utils/format'
-import { Search, Plus, Eye, UploadCloud } from 'lucide-react'
-import { useRef } from 'react'
+import { isRequerente } from '../utils/roles'
+import { Search, Plus, Eye, UploadCloud, Pencil } from 'lucide-react'
+
+const STATUS_CONFIG = {
+  pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
+  em_analise: { label: 'Em Analise', color: '#3b82f6', bg: '#dbeafe' },
+  em_atendimento: { label: 'Em Atendimento', color: '#22c55e', bg: '#d1fae5' },
+  em_acompanhamento: { label: 'Em Acompanhamento', color: '#6366f1', bg: '#e0e7ff' },
+  concluido: { label: 'Concluido', color: '#6b7280', bg: '#f3f4f6' },
+  cancelado: { label: 'Cancelado', color: '#ef4444', bg: '#fee2e2' },
+}
 
 export default function Requerentes() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const isProfessional = profile && !isRequerente(profile.role)
   const [requerentes, setRequerentes] = useState([])
+  const [triagensMap, setTriagensMap] = useState({})
   const [search, setSearch] = useState('')
   const [filtroSexo, setFiltroSexo] = useState('')
   const [loading, setLoading] = useState(true)
@@ -20,6 +33,9 @@ export default function Requerentes() {
   })
   const [saving, setSaving] = useState(false)
   const [ocrLoading, setOcrLoading] = useState(false)
+  const [openDropdown, setOpenDropdown] = useState(null)
+  const [confirmAction, setConfirmAction] = useState(null)
+  const [updating, setUpdating] = useState(false)
   const fileInputRef = useRef(null)
 
   async function loadRequerentes() {
@@ -30,7 +46,23 @@ export default function Requerentes() {
     }
     if (filtroSexo) query = query.eq('sexo', filtroSexo)
     const { data } = await query
-    setRequerentes(data || [])
+    const list = data || []
+    setRequerentes(list)
+
+    if (list.length > 0) {
+      const ids = list.map(r => r.id)
+      const { data: triagens } = await supabase
+        .from('triagens')
+        .select('*')
+        .in('applicant_id', ids)
+      const map = {}
+      for (const t of triagens || []) {
+        if (!map[t.applicant_id] || new Date(t.created_at) > new Date(map[t.applicant_id].created_at)) {
+          map[t.applicant_id] = t
+        }
+      }
+      setTriagensMap(map)
+    }
     setLoading(false)
   }
 
@@ -41,6 +73,43 @@ export default function Requerentes() {
       r.id === payload.new.id ? { ...r, ...payload.new } : r
     ))
   })
+
+  useRealtime('requerentes-list-triagens', 'triagens', '*', (payload) => {
+    const t = payload.new
+    if (t?.applicant_id) {
+      setTriagensMap(prev => ({ ...prev, [t.applicant_id]: t }))
+    }
+  })
+
+  function handleToggleDropdown(applicantId) {
+    setOpenDropdown(openDropdown === applicantId ? null : applicantId)
+  }
+
+  async function handleUpdateStatus(applicantId, newStatus, currentStatus) {
+    setOpenDropdown(null)
+    if (newStatus === currentStatus) return
+    if (newStatus === 'concluido' || newStatus === 'cancelado') {
+      setConfirmAction({ applicantId, status: newStatus })
+      return
+    }
+    setUpdating(true)
+    const t = triagensMap[applicantId]
+    if (t) {
+      await supabase.from('triagens').update({ status: newStatus }).eq('id', t.id)
+    }
+    setUpdating(false)
+  }
+
+  async function confirmUpdateStatus() {
+    if (!confirmAction) return
+    setUpdating(true)
+    const t = triagensMap[confirmAction.applicantId]
+    if (t) {
+      await supabase.from('triagens').update({ status: confirmAction.status }).eq('id', t.id)
+    }
+    setUpdating(false)
+    setConfirmAction(null)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -167,13 +236,47 @@ export default function Requerentes() {
                       </div>
                     </td>
                     <td>
-                      {r.vulnerabilidade_score ? (
-                        <span className={`badge badge-risco-${r.vulnerabilidade_cor === 'vermelho' ? 'alto' : r.vulnerabilidade_cor === 'amarelo' ? 'medio' : 'baixo'}`}>
-                          {r.vulnerabilidade_score}
-                        </span>
-                      ) : (
-                        <span className="badge" style={{ background: '#f1f5f9', color: '#64748b' }}>Triagem Pendente</span>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {r.vulnerabilidade_score ? (
+                          <span className={`badge badge-risco-${r.vulnerabilidade_cor === 'vermelho' ? 'alto' : r.vulnerabilidade_cor === 'amarelo' ? 'medio' : 'baixo'}`}>
+                            {r.vulnerabilidade_score}
+                          </span>
+                        ) : (
+                          <span className="badge" style={{ background: '#f1f5f9', color: '#64748b' }}>Triagem Pendente</span>
+                        )}
+                        {isProfessional && triagensMap[r.id] && (
+                          <div style={{ position: 'relative' }}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleToggleDropdown(r.id) }}
+                              style={{ padding: '2px 4px', background: 'none', border: 'none', cursor: 'pointer' }}
+                              title="Alterar status do caso"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            {openDropdown === r.id && (
+                              <div style={{
+                                position: 'absolute', top: '100%', left: 0, zIndex: 100,
+                                background: 'var(--card)', border: '1px solid var(--border)',
+                                borderRadius: 8, boxShadow: 'var(--shadow-lg)', padding: 4, minWidth: 150, marginTop: 4,
+                              }}>
+                                {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+                                  <button
+                                    key={key}
+                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus(r.id, key, triagensMap[r.id]?.status) }}
+                                    style={{
+                                      display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
+                                      background: key === triagensMap[r.id]?.status ? '#f1f5f9' : 'none',
+                                      border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13, color: cfg.color,
+                                    }}
+                                  >
+                                    {cfg.label}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td style={{ textAlign: 'right', paddingRight: 24 }}>
                       <button 
@@ -297,6 +400,31 @@ export default function Requerentes() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {confirmAction && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20,
+        }} onClick={() => { if (!updating) setConfirmAction(null) }}>
+          <div style={{
+            background: 'var(--card)', borderRadius: 12, padding: 24, maxWidth: 400, width: '100%',
+            boxShadow: 'var(--shadow-lg)',
+          }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Confirmar alteração</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
+              Deseja alterar o status para &ldquo;{(STATUS_CONFIG[confirmAction.status] || {}).label || confirmAction.status}&rdquo;?
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button className="btn btn-outline btn-sm" onClick={() => setConfirmAction(null)} disabled={updating}>
+                Cancelar
+              </button>
+              <button className="btn btn-primary btn-sm" onClick={confirmUpdateStatus} disabled={updating}>
+                {updating ? 'Salvando...' : 'Confirmar'}
+              </button>
+            </div>
           </div>
         </div>
       )}

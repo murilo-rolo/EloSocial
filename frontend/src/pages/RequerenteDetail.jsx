@@ -11,6 +11,21 @@ import MensagensCaso from '../components/caso/MensagensCaso'
 import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
 import { MessageSquare, ClipboardList } from 'lucide-react'
 
+const STATUS_CONFIG = {
+  pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
+  em_analise: { label: 'Em Analise', color: '#3b82f6', bg: '#dbeafe' },
+  em_atendimento: { label: 'Em Atendimento', color: '#22c55e', bg: '#d1fae5' },
+  em_acompanhamento: { label: 'Em Acompanhamento', color: '#6366f1', bg: '#e0e7ff' },
+  concluido: { label: 'Concluido', color: '#6b7280', bg: '#f3f4f6' },
+  cancelado: { label: 'Cancelado', color: '#ef4444', bg: '#fee2e2' },
+}
+
+const PRIORIDADE_CONFIG = {
+  ALTA: { label: 'ALTA', color: '#dc2626', bg: '#fee2e2' },
+  MEDIA: { label: 'MEDIA', color: '#d97706', bg: '#fef3c7' },
+  BAIXA: { label: 'BAIXA', color: '#16a34a', bg: '#d1fae5' },
+}
+
 export default function RequerenteDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -85,6 +100,24 @@ export default function RequerenteDetail() {
           <div style={{ marginTop: 12, padding: 12, background: '#f8fafc', borderRadius: 8, borderLeft: `4px solid ${requerente.vulnerabilidade_cor === 'vermelho' ? '#ef4444' : requerente.vulnerabilidade_cor === 'amarelo' ? '#f59e0b' : '#10b981'}` }}>
             <strong style={{ display: 'block', marginBottom: 4, fontSize: 13, color: 'var(--text-light)' }}>PARECER DA TRIAGEM IA:</strong>
             {requerente.vulnerabilidade_motivo}
+          </div>
+        )}
+        {caso && (
+          <div style={{ marginTop: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+            <span className="badge" style={{
+              background: (STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).bg,
+              color: (STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).color,
+            }}>
+              {(STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).label}
+            </span>
+            {caso.prioridade && (
+              <span className="badge" style={{
+                background: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).bg,
+                color: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).color,
+              }}>
+                Prioridade {(PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).label}
+              </span>
+            )}
           </div>
         )}
       </div>

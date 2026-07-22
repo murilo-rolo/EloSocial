@@ -84,6 +84,30 @@
 
 ---
 
+### AD-004: Testes de Geração de PDF
+
+**Date:** 2026-07-22
+**Status:** Implemented ✅
+
+**Problem:** Correções na geração de PDF (XML escaping, emoji sanitization, composicao_familiar guard, frontend error handling) foram implementadas sem cobertura de testes.
+
+**Decision:**
+- Criar testes unitários backend com `pytest` para `pdf_generator.py`: `_sanitize_text`, `_format_value`, `_add_secao` com composicao_familiar, e `gerar_pdf` output
+- Criar testes frontend com `vitest` para `ProntuarioView.jsx` cobrindo error handling do `exportPDF`
+- Adicionar `pytest` como dev dependency (instalado via `pip`)
+- Durante a implementação, foi descoberto e corrigido um bug crítico: `styles.add(ParagraphStyle("Heading2", ...))` em `gerar_pdf()` causava `KeyError` porque `Heading2` e `Normal` já existem no `getSampleStyleSheet()` — esse era o verdadeiro root cause do erro 500 em `POST /api/pdf`. A correção foi alterar para modificação in-place (`styles["Heading2"].fontSize = 11` etc.)
+
+**Files changed:**
+- `backend/app/services/pdf_generator.py` (sanitize quote escaping + style override fix)
+- `backend/tests/test_pdf_generator.py` (new, 21 tests)
+- `frontend/src/pages/__tests__/ProntuarioView.test.jsx` (new, 3 tests)
+- `.specs/features/testes-geracao-pdf/spec.md`
+- `.specs/features/testes-geracao-pdf/validation.md`
+
+**Evidence:** `pytest tests/` 21/21 pass, `npx vitest run` 35/35 pass. 16/16 ACs verified.
+
+---
+
 ## Handoff
 
 No active work. All features complete.

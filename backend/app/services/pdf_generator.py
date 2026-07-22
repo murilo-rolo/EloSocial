@@ -1,4 +1,6 @@
+import re
 from io import BytesIO
+from xml.sax.saxutils import escape
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
@@ -53,6 +55,12 @@ CAMPO_LABELS = {
 }
 
 
+def _sanitize_text(text: str) -> str:
+    text = escape(text, {'"': "&quot;"})
+    text = re.sub(r'[\U00010000-\U0010ffff]', '', text)
+    return text
+
+
 def _format_value(v):
     if v is None or v == "":
         return "—"
@@ -62,7 +70,7 @@ def _format_value(v):
         return "; ".join(f"{k}: {_format_value(v)}" for k, v in v.items())
     if isinstance(v, list):
         return "; ".join(str(i) for i in v)
-    return str(v)
+    return _sanitize_text(str(v))
 
 
 def _add_campo(elements, label, value, styles):
@@ -79,6 +87,8 @@ def _add_secao(elements, secao_key, dados, styles):
     if secao_key == "composicao_familiar" and isinstance(dados, list):
         data = [["Nome", "Parentesco", "Sexo", "Data Nasc.", "Documentação"]]
         for membro in dados:
+            if not isinstance(membro, dict):
+                continue
             data.append([
                 membro.get("nome", ""),
                 membro.get("parentesco", ""),
@@ -137,16 +147,13 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
         "Subtitle", parent=styles["Normal"],
         fontSize=9, textColor=colors.HexColor("#7f8c8d"), spaceAfter=20
     ))
-    styles.add(ParagraphStyle(
-        "Heading2", parent=styles["Heading2"],
-        fontSize=11, spaceBefore=10, spaceAfter=4,
-        textColor=colors.HexColor("#2c3e50"),
-        borderPadding=(0, 0, 2, 0),
-    ))
-    styles.add(ParagraphStyle(
-        "Normal", parent=styles["Normal"],
-        fontSize=9, leading=14, spaceAfter=2
-    ))
+    styles["Heading2"].fontSize = 11
+    styles["Heading2"].spaceBefore = 10
+    styles["Heading2"].spaceAfter = 4
+    styles["Heading2"].textColor = colors.HexColor("#2c3e50")
+    styles["Normal"].fontSize = 9
+    styles["Normal"].leading = 14
+    styles["Normal"].spaceAfter = 2
     styles.add(ParagraphStyle(
         "Footer", parent=styles["Normal"],
         fontSize=8, textColor=colors.HexColor("#95a5a6"), alignment=TA_CENTER
@@ -158,7 +165,7 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
     elements.append(Paragraph("PRONTUÁRIO SUAS", styles["TitleCustom"]))
     elements.append(Paragraph(
         f"Sistema Único de Assistência Social — CRAS<br/>"
-        f"Profissional: {profissional_nome}",
+        f"Profissional: {_sanitize_text(profissional_nome)}",
         styles["Subtitle"]
     ))
     elements.append(Spacer(1, 0.5*cm))
@@ -196,7 +203,7 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
     elements.append(Paragraph("_" * 40, styles["Normal"]))
     elements.append(Spacer(1, 0.3*cm))
     elements.append(Paragraph(
-        f"Assinado digitalmente por: {profissional_nome}",
+        f"Assinado digitalmente por: {_sanitize_text(profissional_nome)}",
         styles["Normal"]
     ))
     hash_val = prontuario.get("hash_assinatura", "")

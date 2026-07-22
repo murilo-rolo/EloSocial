@@ -50,7 +50,11 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
           profissional_nome: prontuario.profiles?.nome || 'Profissional',
         }),
       })
-      if (!resp.ok) throw new Error('Erro ao gerar PDF')
+      if (!resp.ok) {
+        let detail = 'Erro ao gerar PDF'
+        try { const err = await resp.json(); detail = err.detail || detail } catch (e) {}
+        throw new Error(detail)
+      }
       const blob = await resp.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')

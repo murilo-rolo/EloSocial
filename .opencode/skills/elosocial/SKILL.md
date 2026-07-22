@@ -99,7 +99,7 @@ CRAS Aura, Barreiro, Bengui, Cremação, Guama, Icoaraci, Jurunas, Mosqueiro, Ou
 # Frontend
 cd frontend && npm install && npm run dev  # → http://localhost:5173
 # Backend
-cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload  # → http://localhost:8000
+cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload --reload-strategy stat  # → http://localhost:8000
 ```
 
 ## Variáveis de Ambiente

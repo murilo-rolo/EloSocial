@@ -114,7 +114,7 @@ venv\Scripts\activate  # No Windows
 # source venv/bin/activate # No Linux/Mac
 pip install -r requirements.txt
 # Certifique-se de ter configurado o backend/.env
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --reload-strategy stat
 ```
 
 ### 2. Frontend (Node.js)

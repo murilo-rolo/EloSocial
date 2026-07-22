@@ -19,6 +19,19 @@ export function emptyProntuario() {
       },
     },
     composicao_familiar: [],
+    perfil_etario: {
+      '0_a_6': 0, '7_a_14': 0, '15_a_17': 0, '18_a_29': 0,
+      '30_a_59': 0, '60_a_64': 0, '65_a_69': 0, '70_mais': 0,
+      total: 0,
+    },
+    especificidades_sociais: {
+      situacao_rua: false,
+      quilombola: false,
+      ribeirinha: false,
+      cigana: false,
+      indigena_aldeia: { ativo: false, etnia: '' },
+      indigena_nao_aldeia: { ativo: false, etnia: '' },
+    },
     habitacional: {
       abastecimento_agua: '', energia_eletrica: '', saneamento: '',
       material_edificacao: '', comodos: '',
@@ -72,6 +85,12 @@ export const PARENTESCO_OPCOES = [
   'Neto(a)/Bisneto(a)', 'Irmão/Irmã', 'Cunhado(a)',
   'Outro parente', 'Não parente',
 ]
+
+export function emptyMembro() {
+  return { nome: '', parentesco: '', sexo: '', data_nascimento: '', pessoa_com_deficiencia: false, documentacao: [] }
+}
+
+export const DOCUMENTACAO_OPCOES = ['CN', 'RG', 'CTPS', 'CPF', 'TE']
 
 export const LOCALIZACAO_DOMICILIO_OPCOES = ['Urbano', 'Rural', 'Abrigo']
 

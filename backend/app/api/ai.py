@@ -158,10 +158,14 @@ DADOS PARA TRIAGEM:
 """
         model = genai.GenerativeModel(
             model_name="gemini-2.5-flash",
-            system_instruction=system_instruction
+            system_instruction=system_instruction,
+            tools=[consultar_base_conhecimento]
         )
         
-        response = model.generate_content("Realize a triagem e retorne o JSON.")
+        chat_session = model.start_chat(
+            enable_automatic_function_calling=True
+        )
+        response = chat_session.send_message("Realize a triagem e retorne o JSON.")
         
         # Parse JSON
         resp_text = response.text.strip()
@@ -199,11 +203,15 @@ DADOS DA FAMÍLIA E HISTÓRICO:
 {context_str}
 """
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash", # Mudado para flash por conta do limite de cota da API (429) no plano gratuito
-            system_instruction=system_instruction
+            model_name="gemini-2.5-flash",
+            system_instruction=system_instruction,
+            tools=[consultar_base_conhecimento]
         )
         
-        response = model.generate_content("Gere o resumo executivo em Markdown.")
+        chat_session = model.start_chat(
+            enable_automatic_function_calling=True
+        )
+        response = chat_session.send_message("Gere o resumo executivo em Markdown.")
         
         return {"resumo": response.text.strip()}
 

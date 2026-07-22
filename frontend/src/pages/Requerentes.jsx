@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../hooks/useRealtime'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate } from '../utils/format'
 import { Search, Plus, Eye, UploadCloud } from 'lucide-react'
@@ -34,6 +35,12 @@ export default function Requerentes() {
   }
 
   useEffect(() => { loadRequerentes() }, [search, filtroSexo])
+
+  useRealtime('requerentes-list', 'applicants', 'UPDATE', (payload) => {
+    setRequerentes(prev => prev.map(r =>
+      r.id === payload.new.id ? { ...r, ...payload.new } : r
+    ))
+  })
 
   const handleSubmit = async (e) => {
     e.preventDefault()

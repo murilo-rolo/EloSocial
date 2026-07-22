@@ -8,17 +8,16 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const [stats, setStats] = useState({ requerentes: 0, prontuarios: 0, atendimentos: 0 })
+  const [stats, setStats] = useState({ requerentes: 0, prontuarios: 0 })
   const [recentes, setRecentes] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       // Basic counts
-      const [req, pro, ate] = await Promise.all([
+      const [req, pro] = await Promise.all([
         supabase.from('applicants').select('*', { count: 'exact', head: true }),
         supabase.from('prontuarios').select('*', { count: 'exact', head: true }),
-        supabase.from('atendimentos').select('*', { count: 'exact', head: true }),
       ])
       
       // Recent prontuarios
@@ -41,7 +40,6 @@ export default function Dashboard() {
       setStats({
         requerentes: req.count || 0,
         prontuarios: pro.count || 0,
-        atendimentos: ate.count || 0,
       })
       setRecentes(prontuariosComNomes)
       setLoading(false)
@@ -70,10 +68,6 @@ export default function Dashboard() {
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
           <div className="stat-label" style={{ color: 'rgba(255,255,255,0.8)' }}>Prontuários Ativos</div>
           <div className="stat-value" style={{ color: 'white' }}>{stats.prontuarios}</div>
-        </div>
-        <div className="stat-card" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', color: 'white' }}>
-          <div className="stat-label" style={{ color: 'rgba(255,255,255,0.8)' }}>Atendimentos Realizados</div>
-          <div className="stat-value" style={{ color: 'white' }}>{stats.atendimentos}</div>
         </div>
         <div className="stat-card" style={{ background: 'var(--card)' }}>
           <div className="stat-label">Sua Função</div>

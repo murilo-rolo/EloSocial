@@ -28,7 +28,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
     async function load() {
       const { data } = await supabase
         .from('prontuarios')
-        .select('*, applicants(*), profiles!prontuarios_created_by_fkey(nome, role), atendimentos(*, profiles!atendimentos_profissional_id_fkey(nome)), prontuario_anexos(*, profiles!prontuario_anexos_created_by_fkey(nome))')
+        .select('*, applicants(*), profiles!prontuarios_created_by_fkey(nome, role), prontuario_anexos(*, profiles!prontuario_anexos_created_by_fkey(nome))')
         .eq('id', id)
         .single()
       setProntuario(data)
@@ -48,10 +48,6 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
           prontuario: prontuario.dados_json,
           requerente: prontuario.applicants,
           profissional_nome: prontuario.profiles?.nome || 'Profissional',
-          atendimentos: (prontuario.atendimentos || []).map(a => ({
-            ...a,
-            profissional_nome: a.profiles?.nome || '',
-          })),
         }),
       })
       if (!resp.ok) throw new Error('Erro ao gerar PDF')
@@ -73,7 +69,6 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
       requerente: prontuario.applicants,
       prontuario: prontuario.dados_json,
       profissional: prontuario.profiles?.nome,
-      atendimentos: prontuario.atendimentos,
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -114,7 +109,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
       
       const { data } = await supabase
         .from('prontuarios')
-        .select('*, applicants(*), profiles!prontuarios_created_by_fkey(nome, role), atendimentos(*, profiles!atendimentos_profissional_id_fkey(nome)), prontuario_anexos(*, profiles!prontuario_anexos_created_by_fkey(nome))')
+        .select('*, applicants(*), profiles!prontuarios_created_by_fkey(nome, role), prontuario_anexos(*, profiles!prontuario_anexos_created_by_fkey(nome))')
         .eq('id', id)
         .single()
       setProntuario(data)
@@ -369,34 +364,6 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
           <p style={{ color: 'var(--text-light)', padding: 16, textAlign: 'center' }}>Nenhum anexo encontrado.</p>
         )}
       </div>
-
-      {prontuario.atendimentos?.length > 0 && (
-        <div className="card">
-          <div className="card-header"><h3>📅 Histórico de Atendimentos</h3></div>
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Tipo</th>
-                  <th>Profissional</th>
-                  <th>Descrição</th>
-                </tr>
-              </thead>
-              <tbody>
-                {prontuario.atendimentos.map((a) => (
-                  <tr key={a.id}>
-                    <td>{formatDateTime(a.data_atendimento)}</td>
-                    <td>{a.tipo_atendimento}</td>
-                    <td>{a.profiles?.nome || '—'}</td>
-                    <td>{a.descricao}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       {prontuario.hash_assinatura && (
         <div className="card" style={{ background: '#f8f9fa' }}>

@@ -77,18 +77,6 @@ CREATE TABLE public.prontuarios (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 1.4 ATENDIMENTOS (histórico cronológico)
-CREATE TABLE public.atendimentos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  prontuario_id UUID REFERENCES public.prontuarios(id) ON DELETE CASCADE NOT NULL,
-  profissional_id UUID REFERENCES public.profiles(id) NOT NULL,
-  data_atendimento TIMESTAMPTZ NOT NULL,
-  tipo_atendimento TEXT NOT NULL,
-  descricao TEXT NOT NULL,
-  observacoes TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
 -- 1.5 MESSAGES (chat)
 CREATE TABLE public.messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -259,7 +247,6 @@ CREATE INDEX idx_knowledge_chunks_fts ON public.knowledge_chunks USING GIN (fts)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.applicants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.prontuarios ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.atendimentos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.video_rooms ENABLE ROW LEVEL SECURITY;
@@ -308,12 +295,6 @@ CREATE POLICY "prontuarios_update" ON public.prontuarios
     created_by = auth.uid() OR
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'gerente')
   );
-
--- ATENDIMENTOS
-CREATE POLICY "atendimentos_select" ON public.atendimentos
-  FOR SELECT USING (auth.role() = 'authenticated');
-CREATE POLICY "atendimentos_insert" ON public.atendimentos
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 -- MESSAGES
 CREATE POLICY "messages_select" ON public.messages

@@ -19,7 +19,6 @@ SECAO_TITULOS = {
     "convivencia": "8. Convivência Familiar e Comunitária",
     "participacao": "9. Participação em Serviços, Programas e Projetos",
     "violencia": "10. Situações de Violência e Violação de Direitos",
-    "atendimentos": "11. Histórico de Atendimentos",
     "encaminhamentos": "12. Encaminhamentos Realizados",
     "observacoes": "13. Observações Técnicas",
 }
@@ -50,8 +49,6 @@ CAMPO_LABELS = {
     "participacao_programas": "Participação em Serviços/Programas/Projetos",
     "situacoes_violencia": "Situações de Violência/Violação de Direitos",
     "observacoes_tecnicas": "Observações Técnicas",
-    "data_atendimento": "Data", "tipo_atendimento": "Tipo",
-    "descricao": "Descrição",
     "encaminhamentos": "Encaminhamentos",
 }
 
@@ -74,7 +71,7 @@ def _add_campo(elements, label, value, styles):
         elements.append(Paragraph(f"<b>{label}:</b> {v}", styles["Normal"]))
 
 
-def _add_secao(elements, secao_key, dados, styles, atendimentos=None):
+def _add_secao(elements, secao_key, dados, styles):
     titulo = SECAO_TITULOS.get(secao_key, secao_key)
     elements.append(Paragraph(titulo, styles["Heading2"]))
     elements.append(Spacer(1, 0.2 * cm))
@@ -105,31 +102,6 @@ def _add_secao(elements, secao_key, dados, styles, atendimentos=None):
         elements.append(Spacer(1, 0.3 * cm))
         return
 
-    if secao_key == "atendimentos" and atendimentos:
-        data = [["Data", "Tipo", "Profissional", "Descrição"]]
-        for a in atendimentos:
-            data.append([
-                a.get("data_atendimento", "")[:10],
-                a.get("tipo_atendimento", ""),
-                a.get("profissional_nome", ""),
-                a.get("descricao", ""),
-            ])
-        if len(data) > 1:
-            t = Table(data, colWidths=[2.5*cm, 3*cm, 3.5*cm, 7*cm])
-            t.setStyle(TableStyle([
-                ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-                ("FONTSIZE", (0, 0), (-1, -1), 8),
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ]))
-            elements.append(t)
-        else:
-            elements.append(Paragraph("Nenhum atendimento registrado.", styles["Normal"]))
-        elements.append(Spacer(1, 0.3 * cm))
-        return
-
     if isinstance(dados, dict):
         for key, value in dados.items():
             label = CAMPO_LABELS.get(key, key.replace("_", " ").title())
@@ -148,7 +120,7 @@ def _add_secao(elements, secao_key, dados, styles, atendimentos=None):
     elements.append(Spacer(1, 0.3 * cm))
 
 
-def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str, atendimentos: list = None):
+def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
@@ -208,9 +180,6 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str, atendi
         dados = prontuario.get(secao, {})
         if dados:
             _add_secao(elements, secao, dados, styles)
-
-    # Atendimentos
-    _add_secao(elements, "atendimentos", {}, styles, atendimentos)
 
     # Encaminhamentos
     enc = prontuario.get("encaminhamentos")

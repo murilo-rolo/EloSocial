@@ -11,7 +11,6 @@ class PDFRequest(BaseModel):
     prontuario: dict
     requerente: dict
     profissional_nome: str
-    atendimentos: list = None
 
 @router.post("/pdf")
 def generate_pdf(data: PDFRequest):
@@ -20,7 +19,6 @@ def generate_pdf(data: PDFRequest):
             prontuario=data.prontuario,
             requerente=data.requerente,
             profissional_nome=data.profissional_nome,
-            atendimentos=data.atendimentos,
         )
         return Response(
             content=pdf_buffer.read(),

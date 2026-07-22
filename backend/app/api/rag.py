@@ -95,6 +95,20 @@ async def upload_document(req: DocumentUploadRequest):
         if resp_chunks.status_code not in (200, 201):
             print(f"Erro ao salvar chunks no supabase: {resp_chunks.text}")
             raise HTTPException(500, f"Erro ao salvar chunks: {resp_chunks.text}")
+
+        if req.user_id:
+            try:
+                await client.post(
+                    f"{SUPABASE_URL}/rest/v1/audit_logs",
+                    headers=headers,
+                    json={
+                        "user_id": req.user_id,
+                        "acao": "adicionou_documento_base_conhecimento",
+                        "detalhes": {"document_id": doc_id, "title": req.title},
+                    },
+                )
+            except Exception:
+                pass
             
     return {"message": "Documento vetorizado e salvo com sucesso!", "chunks_count": len(chunks)}
 

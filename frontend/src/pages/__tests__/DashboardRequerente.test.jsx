@@ -40,6 +40,13 @@ vi.mock('../../lib/supabase', () => ({
   },
 }))
 
+// Mock PlanoAcaoCaso — renderiza texto identificável
+vi.mock('../../components/caso/PlanoAcaoCaso', () => ({
+  default: ({ casoId, modo }) => (
+    <div data-testid="plano-acao-caso">PlanoAcaoCaso casoId={casoId} modo={modo}</div>
+  ),
+}))
+
 // Mock useRealtime — noop
 vi.mock('../../hooks/useRealtime', () => ({
   useRealtime: vi.fn(() => {}),
@@ -85,6 +92,17 @@ describe('RIR-09: DashboardRequerente — quickLinks removidos', () => {
     renderDashboard()
     await waitFor(() => {
       expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
+    })
+  })
+
+  it('renderiza PlanoAcaoCaso como seção com modo requerente', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      const plano = screen.getByTestId('plano-acao-caso')
+      expect(plano).toBeInTheDocument()
+      expect(plano).toHaveTextContent('PlanoAcaoCaso')
+      expect(plano).toHaveTextContent('casoId=caso-1')
+      expect(plano).toHaveTextContent('modo=requerente')
     })
   })
 })

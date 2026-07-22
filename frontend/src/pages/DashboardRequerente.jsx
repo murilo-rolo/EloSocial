@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRealtime } from '../hooks/useRealtime'
 import Layout from '../components/Layout/Layout'
+import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
 import { ClipboardList } from 'lucide-react'
 
 const STATUS_CONFIG = {
@@ -201,6 +202,13 @@ export default function DashboardRequerente() {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="card">
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
+          Plano de Acao
+        </h2>
+        <PlanoAcaoCaso casoId={caso.id} modo="requerente" />
       </div>
     </Layout>
   )

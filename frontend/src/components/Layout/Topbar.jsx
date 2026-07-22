@@ -65,7 +65,7 @@ export default function Topbar({ title, onMenuToggle }) {
   const handleLogout = async () => {
     setShowProfileDropdown(false)
     await logout()
-    navigate('/login', { replace: true })
+    navigate('/', { replace: true })
   }
 
   return (

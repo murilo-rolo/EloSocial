@@ -1,0 +1,6 @@
+Na interface do requerente:
+- No sidebar de requerente, a primeira opção de página é 'Dashboard', mas gostaria de que fosse trocado para 'Acompanhamento', já que levará a página /acompanhamento;
+- No sidebar de requerente, a sexta opção de página é 'Cofre Digital', mas gostaria de que fosse trocado para 'Documentos', e gostaria de que a página fosse trocada de /cofre-digital para /documentos;
+- No sidebar de requerente, a quinta opção de página é 'Plano de Acao', mas gostaria de que fosse removido, e suas funcionalidades integradas a /acompanhamento, deixando de existir /plano-acao;
+- Na página /acompanhamento, há botões para levar para outras páginas (Video Atendimento, Mensagens, Plano de Ação, Cofre Digital), mas eles são desnecessários, já que existe a sidebar, então removê-los;
+- Retirar 'Triagem' da sidebar e fazer /triagem virar /acompanhamento/triagem, de modo que essa página seja acessada pelo botão 'Editar Triagem' quando a triagem já tiver sido feita e 'Fazer Triagem' caso não tenha sido feito triagem antes.

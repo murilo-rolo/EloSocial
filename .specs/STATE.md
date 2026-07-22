@@ -49,6 +49,8 @@
 
 **Evidence:** Build passes, 26/26 tests pass, all ACs verified.
 
+**Post-implementation fix:** Added migration `00004_triagem_status_em_acompanhamento.sql` to add `'em_acompanhamento'` to the DB CHECK constraint — it was missing from the original schema, causing saves to fail silently.
+
 ---
 
 ## Handoff

@@ -4,6 +4,7 @@ import Layout from '../components/Layout/Layout'
 import { useAuth } from '../hooks/useAuth'
 import { ROLE_LABELS, CRAS_LIST } from '../utils/roles'
 import { formatDateTime } from '../utils/format'
+import { auditLog } from '../utils/audit'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -48,15 +49,25 @@ export default function Admin() {
       .from('profiles')
       .update({ ativo: !currentStatus })
       .eq('id', userId)
-    if (!error) loadUsers()
+    if (!error) {
+      loadUsers()
+      auditLog(profile.id, currentStatus ? 'desativou_usuario' : 'ativou_usuario', { profile_id: userId })
+    }
   }
 
   async function changeRole(userId, newRole) {
+    const user = users.find((u) => u.id === userId)
+    const oldRole = user?.role
     const { error } = await supabase
       .from('profiles')
       .update({ role: newRole })
       .eq('id', userId)
-    if (!error) loadUsers()
+    if (!error) {
+      loadUsers()
+      if (oldRole && oldRole !== newRole) {
+        auditLog(profile.id, 'alterou_perfil', { profile_id: userId, role_anterior: oldRole, role_nova: newRole })
+      }
+    }
   }
 
   async function handleCreateUser(e) {

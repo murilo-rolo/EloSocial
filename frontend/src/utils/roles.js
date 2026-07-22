@@ -13,7 +13,7 @@ export const ROLE_LABELS = {
   [ROLES.PEDAGOGO]: 'Pedagogo',
   [ROLES.TECNICO]: 'Técnico',
   [ROLES.GERENTE]: 'Gerente',
-  [ROLES.REQUERENTE]: 'Requerente',
+  [ROLES.REQUERENTE]: 'Usuário',
 }
 
 export function canManageUsers(role) {

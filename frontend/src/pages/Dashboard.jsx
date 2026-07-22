@@ -62,7 +62,7 @@ export default function Dashboard() {
 
       <div className="stats-grid">
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: 'white' }}>
-          <div className="stat-label" style={{ color: 'rgba(255,255,255,0.8)' }}>Requerentes Cadastrados</div>
+          <div className="stat-label" style={{ color: 'rgba(255,255,255,0.8)' }}>Usuários Cadastrados</div>
           <div className="stat-value" style={{ color: 'white' }}>{stats.requerentes}</div>
         </div>
         <div className="stat-card" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white' }}>
@@ -94,7 +94,7 @@ export default function Dashboard() {
               <table>
                 <thead>
                   <tr>
-                    <th>Requerente</th>
+                    <th>Usuário</th>
                     <th>Profissional</th>
                     <th>Data</th>
                   </tr>

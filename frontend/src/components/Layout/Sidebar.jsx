@@ -16,7 +16,7 @@ export default function Sidebar({ open, onClose }) {
       ]
     : [
         { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
-        { to: '/requerentes', label: 'Requerentes', icon: <Users size={20} /> },
+        { to: '/requerentes', label: 'Usuários', icon: <Users size={20} /> },
         { to: '/conhecimento', label: 'Conhecimento IA', icon: <BookOpen size={20} /> },
         { to: '/chat', label: 'Mensagens', icon: <MessageSquare size={20} /> },
         { to: '/videoconferencia', label: 'Video', icon: <Video size={20} /> },

@@ -116,7 +116,7 @@ export default function CadastroRequerente() {
   return (
     <div className="login-page">
       <div className="login-card" style={{ maxWidth: 460 }}>
-        <h1>Cadastro de Requerente</h1>
+        <h1>Cadastro de Usuário</h1>
         <p>Preencha seus dados para se cadastrar</p>
 
         {error && <div className="login-error">{error}</div>}

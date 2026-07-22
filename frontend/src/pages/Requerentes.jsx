@@ -132,10 +132,10 @@ export default function Requerentes() {
   }
 
   return (
-    <Layout title="Requerentes">
+    <Layout title="Usuários">
       <div style={{ marginBottom: 32 }}>
         <h1 className="page-title">
-          Requerentes <em>& Famílias</em>.
+          Usuários <em>& Famílias</em>.
         </h1>
         <p className="page-subtitle">
           Gerencie os cadastros do município. Use a busca ou os filtros rápidos para encontrar as famílias.
@@ -158,7 +158,7 @@ export default function Requerentes() {
             Todos
           </button>
           <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ marginLeft: 8, padding: '8px 16px', borderRadius: 24 }}>
-            <Plus size={18} /> Novo Requerente
+            <Plus size={18} /> Novo Usuário
           </button>
         </div>
       </div>
@@ -169,14 +169,14 @@ export default function Requerentes() {
         ) : requerentes.length === 0 ? (
           <div className="empty-state">
             <div className="icon">👥</div>
-            <p>Nenhum requerente encontrado.</p>
+            <p>Nenhum usuário encontrado.</p>
           </div>
         ) : (
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th style={{ paddingLeft: 24 }}>Requerente</th>
+                  <th style={{ paddingLeft: 24 }}>Usuário</th>
                   <th>Contato</th>
                   <th>Status</th>
                   <th>Assistente Social</th>
@@ -232,7 +232,7 @@ export default function Requerentes() {
               </tbody>
             </table>
             <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', fontSize: 13, color: 'var(--text-light)' }}>
-              {requerentes.length} requerentes listados
+              {requerentes.length} usuários listados
             </div>
           </div>
         )}
@@ -252,7 +252,7 @@ export default function Requerentes() {
             <div className="eyebrow">NOVO CADASTRO</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
               <h2 className="font-serif" style={{ margin: 0, fontSize: 24, color: 'var(--text-primary)' }}>
-                Cadastrar <em>Requerente</em>
+                Cadastrar <em>Usuário</em>
               </h2>
               <button 
                 type="button" 

@@ -406,7 +406,7 @@ export default function ProntuarioEdit() {
       <div className="card" style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           <div>
-            <strong>Requerente:</strong> {requerente.nome}
+            <strong>Usuário:</strong> {requerente.nome}
             {requerente.cpf && <span style={{ color: 'var(--text-light)', marginLeft: 8 }}>CPF: {requerente.cpf}</span>}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>

@@ -123,13 +123,13 @@ export default function RequerenteDetail() {
     setConfirmAction(null)
   }
 
-  if (loading) return <Layout title="Requerente"><div className="loading">Carregando...</div></Layout>
-  if (!requerente) return <Layout title="Requerente"><div className="empty-state">Requerente não encontrado.</div></Layout>
+  if (loading) return <Layout title="Usuário"><div className="loading">Carregando...</div></Layout>
+  if (!requerente) return <Layout title="Usuário"><div className="empty-state">Usuário não encontrado.</div></Layout>
 
   return (
     <Layout title={requerente.nome}>
       <div style={{ marginBottom: 32 }}>
-        <span className="eyebrow">Dossiê do Requerente</span>
+        <span className="eyebrow">Dossiê do Usuário</span>
         <h1 className="page-title font-serif">
           {requerente.nome.split(' ')[0]} <em>& Família</em>.
         </h1>
@@ -140,7 +140,7 @@ export default function RequerenteDetail() {
 
       <div className="card">
         <div className="card-header">
-          <h3>Dados do Requerente</h3>
+          <h3>Dados do Usuário</h3>
           <button className="btn btn-primary btn-sm" onClick={() => navigate(`/prontuarios/novo/${id}`)}>
             + Novo Prontuário
           </button>
@@ -297,7 +297,7 @@ export default function RequerenteDetail() {
         {prontuarios.length === 0 ? (
           <div className="empty-state">
             <div className="icon">📋</div>
-            <p>Nenhum prontuário registrado para este requerente.</p>
+            <p>Nenhum prontuário registrado para este usuário.</p>
           </div>
         ) : (
           <div className="timeline">
@@ -329,7 +329,7 @@ export default function RequerenteDetail() {
           <PlanoAcaoCaso casoId={caso.id} modo="assistente" applicantId={id} />
         ) : (
           <div className="empty-state">
-            <p>Nenhum caso vinculado a este requerente.</p>
+            <p>Nenhum caso vinculado a este usuário.</p>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
               Crie um caso na triagem para gerenciar o plano de ação.
             </p>
@@ -347,7 +347,7 @@ export default function RequerenteDetail() {
           </div>
         ) : (
           <div className="empty-state">
-            <p>Nenhum caso vinculado a este requerente.</p>
+            <p>Nenhum caso vinculado a este usuário.</p>
           </div>
         )}
       </div>
@@ -362,7 +362,7 @@ export default function RequerenteDetail() {
           </div>
         ) : (
           <div className="empty-state">
-            <p>Nenhum caso vinculado a este requerente.</p>
+            <p>Nenhum caso vinculado a este usuário.</p>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
               Crie um caso na triagem para iniciar o chat.
             </p>

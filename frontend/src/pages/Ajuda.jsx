@@ -5,7 +5,7 @@ import { isRequerente } from '../utils/roles'
 import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, User, ClipboardList, ListTodo, FolderOpen, Video as VideoIcon } from 'lucide-react'
 
 const professionalSections = [
-  { title: 'Requerentes', icon: Users, description: 'Busque, cadastre e gerencie requerentes. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.' },
+  { title: 'Usuários', icon: Users, description: 'Busque, cadastre e gerencie usuários. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.' },
   { title: 'Prontuário', icon: FileText, description: 'Fichas de atendimento com 13 seções detalhadas (identificação, composição familiar, habitacional, educação, trabalho, saúde, benefícios, convivência, participação, violência, encaminhamentos, observações). Exporte em PDF ou JSON.' },
   { title: 'Mensagens', icon: MessageSquare, description: 'Chat em tempo real entre profissionais da equipe. Comunique-se sobre casos, compartilhe informações e coordene atendimentos.' },
   { title: 'Videoconferência', icon: VideoIcon, description: 'Realize atendimentos por vídeo com requerentes ou equipe técnica. Salas públicas ou privadas com código de acesso.' },

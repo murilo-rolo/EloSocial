@@ -15,7 +15,7 @@ const STATUS_CONFIG = {
 }
 
 const RESPONSAVEL_LABELS = {
-  requerente: 'Requerente',
+  requerente: 'Usuário',
   assistente: 'Assistente',
   ambos: 'Ambos',
 }
@@ -293,7 +293,7 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
                     value={form.responsavel}
                     onChange={e => setForm(prev => ({ ...prev, responsavel: e.target.value }))}
                   >
-                    <option value="requerente">Requerente</option>
+                    <option value="requerente">Usuário</option>
                     <option value="assistente">Assistente</option>
                     <option value="ambos">Ambos</option>
                   </select>

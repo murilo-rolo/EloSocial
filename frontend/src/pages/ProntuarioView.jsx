@@ -757,7 +757,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
 
       <div className="card">
         <div className="card-header">
-          <h3>Dados do Requerente</h3>
+          <h3>Dados do Usuário</h3>
         </div>
         <div className="form-row">
           <div><strong>Nome:</strong> {prontuario.applicants?.nome}</div>

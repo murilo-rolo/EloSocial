@@ -15,6 +15,7 @@ import {
   TIPO_DEFICIENCIA_OPCOES,
   TIPO_BENEFICIO_OPCOES,
   AVALIACAO_RELACAO_OPCOES,
+  TIPO_MEDIDA_OPCOES,
 } from '../utils/prontuarioSchema'
 import { auditLog } from '../utils/audit'
 
@@ -292,6 +293,60 @@ export default function ProntuarioEdit() {
     const list = [...(prontuario.beneficios?.registros || [])]
     list.splice(index, 1)
     setProntuario(prev => ({ ...prev, beneficios: { ...prev.beneficios, registros: list } }))
+  }
+
+  function addMedida() {
+    setProntuario(prev => ({
+      ...prev,
+      medidas_socioeducativas: [...(prev.medidas_socioeducativas || []), {
+        ordem: (prev.medidas_socioeducativas?.length || 0) + 1, nome: '', tipo_medida: '',
+        numero_processo: '', data_inicio: '', data_fim: '',
+        acompanhamento_creas: { resposta: '', data: '' }, local_psc: '',
+      }],
+    }))
+  }
+
+  function updateMedida(index, field, value) {
+    const list = [...(prontuario.medidas_socioeducativas || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, medidas_socioeducativas: list }))
+  }
+
+  function updateMedidaAcomp(index, subField, value) {
+    const list = [...(prontuario.medidas_socioeducativas || [])]
+    list[index] = { ...list[index], acompanhamento_creas: { ...list[index].acompanhamento_creas, [subField]: value } }
+    setProntuario(prev => ({ ...prev, medidas_socioeducativas: list }))
+  }
+
+  function removeMedida(index) {
+    const list = [...(prontuario.medidas_socioeducativas || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, medidas_socioeducativas: list }))
+  }
+
+  function addHistoricoAcolhimento() {
+    setProntuario(prev => ({
+      ...prev,
+      acolhimento_institucional: {
+        ...prev.acolhimento_institucional,
+        historico: [...(prev.acolhimento_institucional?.historico || []), {
+          ordem: (prev.acolhimento_institucional?.historico?.length || 0) + 1, nome: '',
+          data_inicio: '', data_fim: '', motivo: '',
+        }],
+      },
+    }))
+  }
+
+  function updateHistoricoAcolhimento(index, field, value) {
+    const list = [...(prontuario.acolhimento_institucional?.historico || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, acolhimento_institucional: { ...prev.acolhimento_institucional, historico: list } }))
+  }
+
+  function removeHistoricoAcolhimento(index) {
+    const list = [...(prontuario.acolhimento_institucional?.historico || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, acolhimento_institucional: { ...prev.acolhimento_institucional, historico: list } }))
   }
 
   const handleSave = async () => {
@@ -1500,6 +1555,222 @@ export default function ProntuarioEdit() {
                     }}>
                       + Adicionar Situação
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {secao.key === 'participacao' && (
+                <div>
+                  {Object.entries(prontuario.participacao || {}).map(([field, value]) => (
+                    <div className="form-group" key={field}>
+                      <label>{field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</label>
+                      <textarea className="form-control" rows={2} value={value || ''}
+                        onChange={(e) => updateSection('participacao', { [field]: e.target.value })} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {secao.key === 'medidas_socioeducativas' && (
+                <div>
+                  <strong>Medidas Socioeducativas</strong>
+                  {(prontuario.medidas_socioeducativas || []).map((m, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                      <button onClick={() => removeMedida(i)} style={{
+                        position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                        color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                      }}>×</button>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Nome</label>
+                          <input className="form-control" value={m.nome || ''} onChange={(e) => updateMedida(i, 'nome', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Tipo de Medida</label>
+                          <select className="form-control" value={m.tipo_medida || ''} onChange={(e) => updateMedida(i, 'tipo_medida', e.target.value)}>
+                            <option value="">Selecione</option>
+                            {TIPO_MEDIDA_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Número do Processo</label>
+                          <input className="form-control" value={m.numero_processo || ''} onChange={(e) => updateMedida(i, 'numero_processo', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Data de Início</label>
+                          <input type="date" className="form-control" value={m.data_inicio || ''} onChange={(e) => updateMedida(i, 'data_inicio', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Data de Fim</label>
+                          <input type="date" className="form-control" value={m.data_fim || ''} onChange={(e) => updateMedida(i, 'data_fim', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Acompanhamento CREAS</label>
+                          <div className="radio-group">
+                            {SIM_NAO_OPCOES.map(o => (
+                              <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                                <input type="radio" name={`med_creas_${i}`} value={o}
+                                  checked={m.acompanhamento_creas?.resposta === o}
+                                  onChange={(e) => updateMedidaAcomp(i, 'resposta', e.target.value)} />
+                                {' '}{o}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="form-group">
+                          <label>Data do Acompanhamento</label>
+                          <input type="date" className="form-control" value={m.acompanhamento_creas?.data || ''}
+                            onChange={(e) => updateMedidaAcomp(i, 'data', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Local PSC</label>
+                          <input className="form-control" value={m.local_psc || ''} onChange={(e) => updateMedida(i, 'local_psc', e.target.value)} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="btn btn-outline btn-sm" onClick={addMedida}>
+                    + Adicionar Medida Socioeducativa
+                  </button>
+                </div>
+              )}
+
+              {secao.key === 'acolhimento_institucional' && (
+                <div>
+                  <strong>Histórico de Acolhimento</strong>
+                  {(prontuario.acolhimento_institucional?.historico || []).map((h, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                      <button onClick={() => removeHistoricoAcolhimento(i)} style={{
+                        position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                        color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                      }}>×</button>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Nome</label>
+                          <input className="form-control" value={h.nome || ''} onChange={(e) => updateHistoricoAcolhimento(i, 'nome', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Data de Início</label>
+                          <input type="date" className="form-control" value={h.data_inicio || ''} onChange={(e) => updateHistoricoAcolhimento(i, 'data_inicio', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Data de Fim</label>
+                          <input type="date" className="form-control" value={h.data_fim || ''} onChange={(e) => updateHistoricoAcolhimento(i, 'data_fim', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Motivo</label>
+                          <input className="form-control" value={h.motivo || ''} onChange={(e) => updateHistoricoAcolhimento(i, 'motivo', e.target.value)} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="btn btn-outline btn-sm" onClick={addHistoricoAcolhimento}>
+                    + Adicionar Histórico
+                  </button>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Acolhimento para Família</strong>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Período</label>
+                        <input className="form-control" value={prontuario.acolhimento_institucional?.acolhimento_familia?.periodo || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            acolhimento_institucional: {
+                              ...prev.acolhimento_institucional,
+                              acolhimento_familia: { ...prev.acolhimento_institucional?.acolhimento_familia, periodo: e.target.value },
+                            },
+                          }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Motivo</label>
+                        <input className="form-control" value={prontuario.acolhimento_institucional?.acolhimento_familia?.motivo || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            acolhimento_institucional: {
+                              ...prev.acolhimento_institucional,
+                              acolhimento_familia: { ...prev.acolhimento_institucional?.acolhimento_familia, motivo: e.target.value },
+                            },
+                          }))} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 12 }}>
+                    <strong>Guarda Informal</strong>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Período</label>
+                        <input className="form-control" value={prontuario.acolhimento_institucional?.guarda_informal?.periodo || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            acolhimento_institucional: {
+                              ...prev.acolhimento_institucional,
+                              guarda_informal: { ...prev.acolhimento_institucional?.guarda_informal, periodo: e.target.value },
+                            },
+                          }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Razão</label>
+                        <input className="form-control" value={prontuario.acolhimento_institucional?.guarda_informal?.razao || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            acolhimento_institucional: {
+                              ...prev.acolhimento_institucional,
+                              guarda_informal: { ...prev.acolhimento_institucional?.guarda_informal, razao: e.target.value },
+                            },
+                          }))} />
+                      </div>
+                    </div>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Responsável</label>
+                        <input className="form-control" value={prontuario.acolhimento_institucional?.guarda_informal?.responsavel || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            acolhimento_institucional: {
+                              ...prev.acolhimento_institucional,
+                              guarda_informal: { ...prev.acolhimento_institucional?.guarda_informal, responsavel: e.target.value },
+                            },
+                          }))} />
+                      </div>
+                      <div className="form-group">
+                        <label>Criança/Adolescente</label>
+                        <input className="form-control" value={prontuario.acolhimento_institucional?.guarda_informal?.crianca || ''}
+                          onChange={(e) => setProntuario(prev => ({
+                            ...prev,
+                            acolhimento_institucional: {
+                              ...prev.acolhimento_institucional,
+                              guarda_informal: { ...prev.acolhimento_institucional?.guarda_informal, crianca: e.target.value },
+                            },
+                          }))} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 12 }}>
+                    <label className="checkbox-label" style={{ display: 'block', marginBottom: 8 }}>
+                      <input type="checkbox" checked={prontuario.acolhimento_institucional?.membro_prisao || false}
+                        onChange={(e) => setProntuario(prev => ({
+                          ...prev,
+                          acolhimento_institucional: { ...prev.acolhimento_institucional, membro_prisao: e.target.checked },
+                        }))} />
+                      {' '}Membro da família preso
+                    </label>
+                    <label className="checkbox-label">
+                      <input type="checkbox" checked={prontuario.acolhimento_institucional?.adolescente_internacao || false}
+                        onChange={(e) => setProntuario(prev => ({
+                          ...prev,
+                          acolhimento_institucional: { ...prev.acolhimento_institucional, adolescente_internacao: e.target.checked },
+                        }))} />
+                      {' '}Adolescente em internação
+                    </label>
                   </div>
                 </div>
               )}

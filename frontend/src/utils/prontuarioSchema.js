@@ -107,6 +107,14 @@ export function emptyProntuario() {
       quadro2_creas: [],
       quadro3_creas: [],
     },
+    medidas_socioeducativas: [],
+    acolhimento_institucional: {
+      historico: [],
+      acolhimento_familia: { periodo: '', motivo: '' },
+      guarda_informal: { periodo: '', razao: '', responsavel: '', crianca: '' },
+      membro_prisao: false,
+      adolescente_internacao: false,
+    },
     encaminhamentos: [],
     observacoes: '',
   }
@@ -124,8 +132,10 @@ export const SECOES = [
   { key: 'convivencia', title: '8. Convivência Familiar', icon: '💝' },
   { key: 'participacao', title: '9. Participação em Programas', icon: '📋' },
   { key: 'violencia', title: '10. Violência e Violação de Direitos', icon: '🛡️' },
-  { key: 'encaminhamentos', title: '11. Encaminhamentos', icon: '➡️' },
-  { key: 'observacoes', title: '12. Observações Técnicas', icon: '📝' },
+  { key: 'medidas_socioeducativas', title: '11. Medidas Socioeducativas', icon: '⚖️' },
+  { key: 'acolhimento_institucional', title: '12. Acolhimento Institucional', icon: '🏛️' },
+  { key: 'encaminhamentos', title: '13. Encaminhamentos', icon: '➡️' },
+  { key: 'observacoes', title: '14. Observações Técnicas', icon: '📝' },
 ]
 
 export const PARENTESCO_OPCOES = [
@@ -244,6 +254,15 @@ export const TIPO_DEFICIENCIA_OPCOES = [
 export const TIPO_BENEFICIO_OPCOES = ['Auxílio Natalidade', 'Auxílio Funeral']
 
 export const AVALIACAO_RELACAO_OPCOES = ['Conflituoso com violência', 'Conflituoso sem violência', 'Sem conflitos relevantes']
+
+export const TIPO_MEDIDA_OPCOES = [
+  'Liberdade Assistida (LA)',
+  'Prestação de Serviços à Comunidade (PSC)',
+  'Advertência',
+  'Obrigação de Reparar o Dano',
+  'Semi-Liberdade',
+  'Internação',
+]
 
 export function migrarSchemaAntigo(dados) {
   if (!dados || typeof dados !== 'object') return emptyProntuario()

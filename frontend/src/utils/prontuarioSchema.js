@@ -4,6 +4,19 @@ export function emptyProntuario() {
     identificacao: {
       logradouro: '', numero: '', complemento: '', bairro: '',
       municipio: '', uf: '', cep: '',
+      apelido: '',
+      localizacao_domicilio: '',
+      tipo_unidade: '',
+      nome_unidade: '',
+      forma_ingresso: '',
+      motivo_primeiro_atendimento: '',
+      orgao_encaminhador: '',
+      programas_sociais: {
+        bolsa_familia: { ativo: false, valor: '' },
+        bpc: { ativo: false, valor: '' },
+        peti: { ativo: false, valor: '' },
+        outros: { ativo: false, valor: '', descricao: '' },
+      },
     },
     composicao_familiar: [],
     habitacional: {
@@ -58,4 +71,28 @@ export const PARENTESCO_OPCOES = [
   'Enteado(a)', 'Sobrinho(a)', 'Pai/Mãe', 'Sogro(a)',
   'Neto(a)/Bisneto(a)', 'Irmão/Irmã', 'Cunhado(a)',
   'Outro parente', 'Não parente',
+]
+
+export const LOCALIZACAO_DOMICILIO_OPCOES = ['Urbano', 'Rural', 'Abrigo']
+
+export const TIPO_UNIDADE_OPCOES = ['CRAS', 'CREAS']
+
+export const FORMA_INGRESSO_OPCOES = [
+  'Demanda espontânea',
+  'Busca ativa',
+  'Encaminhamento PSB',
+  'Encaminhamento PSE',
+  'Encaminhamento Saúde',
+  'Encaminhamento Educação',
+  'Conselho Tutelar',
+  'Judiciário',
+  'SGD',
+  'Outros',
+]
+
+export const PROGRAMAS_SOCIAIS_LISTA = [
+  { key: 'bolsa_familia', label: 'Bolsa Família' },
+  { key: 'bpc', label: 'BPC' },
+  { key: 'peti', label: 'PETI' },
+  { key: 'outros', label: 'Outros' },
 ]

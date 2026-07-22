@@ -743,13 +743,13 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button className="btn btn-primary btn-sm" onClick={() => setShowParecerModal(true)} disabled={generatingParecer}>
-              {generatingParecer ? '✨ Analisando...' : '✨ Documento (IA)'}
+              {generatingParecer ? 'Analisando...' : 'Documento (IA)'}
             </button>
             <button className="btn btn-success btn-sm" onClick={exportPDF} disabled={downloading}>
-              {downloading ? 'Gerando...' : '📄 PDF'}
+              {downloading ? 'Gerando...' : 'PDF'}
             </button>
             <button className="btn btn-outline btn-sm" onClick={exportJSON}>
-              📥 JSON
+              JSON
             </button>
           </div>
         </div>
@@ -778,7 +778,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
         return (
           <div key={secao.key} className="card">
             <div className="card-header">
-              <h3>{secao.icon} {secao.title}</h3>
+              <h3>{secao.title}</h3>
             </div>
             <RenderSection secaoKey={secao.key} dados={dadosSecao} fullDados={dados} />
           </div>
@@ -787,7 +787,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
 
       <div className="card">
         <div className="card-header">
-          <h3>📎 Anexos (PDF)</h3>
+          <h3>Anexos (PDF)</h3>
         </div>
         
         <div 
@@ -802,7 +802,6 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
             <span>Enviando arquivo...</span>
           ) : (
             <>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>📄</div>
               <b>Arraste o PDF aqui ou clique para escolher</b>
               <p style={{ fontSize: 12, marginTop: 4 }}>Apenas arquivos PDF são permitidos</p>
             </>
@@ -863,7 +862,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
         <div className="modal-overlay" onClick={() => setShowParecerModal(false)}>
           <div className="modal" style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>✨ Gerar Relatório/Ofício</h3>
+              <h3>Gerar Relatório/Ofício</h3>
               <button className="modal-close" onClick={() => setShowParecerModal(false)}>&times;</button>
             </div>
             <div className="modal-body">
@@ -889,7 +888,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
         <div className="modal-overlay" onClick={() => setParecerText(null)}>
           <div className="modal" style={{ maxWidth: 800 }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>✨ Parecer Social Gerado (IA)</h3>
+              <h3>Parecer Social Gerado (IA)</h3>
               <button className="modal-close" onClick={() => setParecerText(null)}>&times;</button>
             </div>
             <div className="modal-body">

@@ -411,7 +411,7 @@ export default function ProntuarioEdit() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-success" onClick={handleSave} disabled={saving}>
-              {saving ? 'Salvando...' : '💾 Salvar Prontuário'}
+              {saving ? 'Salvando...' : 'Salvar Prontuário'}
             </button>
           </div>
         </div>
@@ -420,7 +420,7 @@ export default function ProntuarioEdit() {
       {SECOES.map((secao) => (
         <div key={secao.key} className="prontuario-section">
           <div className="prontuario-section-header" onClick={() => toggleSection(secao.key)}>
-            <span>{secao.icon} {secao.title}</span>
+            <span>{secao.title}</span>
             <span>{expandedSections[secao.key] ? '▼' : '▶'}</span>
           </div>
 
@@ -1388,7 +1388,6 @@ export default function ProntuarioEdit() {
                               </select>
                             </div>
                           </div>
-                        </div>
                       ))}
                       <button className="btn btn-outline btn-sm" onClick={() => {
                         const list = [...(prontuario.convivencia?.[key] || []), { tecnico: '', data: '', avaliacao: '' }]
@@ -1398,6 +1397,7 @@ export default function ProntuarioEdit() {
                       </button>
                     </div>
                   ))}
+                  </div>
 
                   <div style={{ marginTop: 16 }}>
                     <label>Outros Conflitos</label>
@@ -1946,7 +1946,7 @@ export default function ProntuarioEdit() {
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
         <button className="btn btn-outline" onClick={() => navigate(-1)}>Cancelar</button>
         <button className="btn btn-success" onClick={handleSave} disabled={saving}>
-          {saving ? 'Salvando...' : '💾 Salvar Prontuário'}
+          {saving ? 'Salvando...' : 'Salvar Prontuário'}
         </button>
       </div>
     </Layout>

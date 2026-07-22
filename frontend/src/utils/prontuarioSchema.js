@@ -127,21 +127,21 @@ export function emptyProntuario() {
 
 // Seções e seus campos
 export const SECOES = [
-  { key: 'identificacao', title: '1. Identificação e Endereço', icon: '📍' },
-  { key: 'composicao_familiar', title: '2. Composição Familiar', icon: '👨‍👩‍👧‍👦' },
-  { key: 'habitacional', title: '3. Condições Habitacionais', icon: '🏠' },
-  { key: 'educacional', title: '4. Condições Educacionais', icon: '📚' },
-  { key: 'trabalho_renda', title: '5. Trabalho e Rendimento', icon: '💼' },
-  { key: 'saude', title: '6. Condições de Saúde', icon: '🏥' },
-  { key: 'beneficios', title: '7. Benefícios Eventuais', icon: '🎯' },
-  { key: 'convivencia', title: '8. Convivência Familiar', icon: '💝' },
-  { key: 'participacao', title: '9. Participação em Programas', icon: '📋' },
-  { key: 'violencia', title: '10. Violência e Violação de Direitos', icon: '🛡️' },
-  { key: 'medidas_socioeducativas', title: '11. Medidas Socioeducativas', icon: '⚖️' },
-  { key: 'acolhimento_institucional', title: '12. Acolhimento Institucional', icon: '🏛️' },
-  { key: 'planejamento_evolucao', title: '13. Planejamento e Evolução', icon: '📋' },
-  { key: 'encaminhamentos', title: '14. Encaminhamentos', icon: '➡️' },
-  { key: 'observacoes', title: '15. Observações Técnicas', icon: '📝' },
+  { key: 'identificacao', title: '1. Identificação e Endereço' },
+  { key: 'composicao_familiar', title: '2. Composição Familiar' },
+  { key: 'habitacional', title: '3. Condições Habitacionais' },
+  { key: 'educacional', title: '4. Condições Educacionais' },
+  { key: 'trabalho_renda', title: '5. Trabalho e Rendimento' },
+  { key: 'saude', title: '6. Condições de Saúde' },
+  { key: 'beneficios', title: '7. Benefícios Eventuais' },
+  { key: 'convivencia', title: '8. Convivência Familiar' },
+  { key: 'participacao', title: '9. Participação em Programas' },
+  { key: 'violencia', title: '10. Violência e Violação de Direitos' },
+  { key: 'medidas_socioeducativas', title: '11. Medidas Socioeducativas' },
+  { key: 'acolhimento_institucional', title: '12. Acolhimento Institucional' },
+  { key: 'planejamento_evolucao', title: '13. Planejamento e Evolução' },
+  { key: 'encaminhamentos', title: '14. Encaminhamentos' },
+  { key: 'observacoes', title: '15. Observações Técnicas' },
 ]
 
 export const PARENTESCO_OPCOES = [

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
 import { emptyProntuario, SECOES, PARENTESCO_OPCOES } from '../utils/prontuarioSchema'
+import { auditLog } from '../utils/audit'
 
 export default function ProntuarioEdit() {
   const { id, applicantId } = useParams()
@@ -93,6 +94,7 @@ export default function ProntuarioEdit() {
         created_by: user.id,
         dados_json: prontuario,
       })
+      auditLog(user.id, 'gerou_prontuario', { applicant_id: applicantId })
     }
     setSaving(false)
     navigate(applicantId ? `/requerentes/${applicantId}` : '/')

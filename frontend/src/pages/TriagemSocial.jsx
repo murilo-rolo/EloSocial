@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import { ETAPAS } from '../utils/triagemOptions'
 import { calcularPrioridade, gerarSintomas, gerarDetalhes } from '../utils/triagemScoring'
+import { auditLog } from '../utils/audit'
 import EtapaContato from '../components/triagem/EtapaContato'
 import EtapaFamilia from '../components/triagem/EtapaFamilia'
 import EtapaMotivo from '../components/triagem/EtapaMotivo'
@@ -137,10 +138,14 @@ export default function TriagemSocial() {
         status: 'pendente',
       }
 
+      let resultTriagemId = triagemId
       if (triagemId) {
         await supabase.from('triagens').update(payload).eq('id', triagemId)
+        auditLog(profile.id, 'editou_triagem', { triagem_id: triagemId })
       } else {
-        await supabase.from('triagens').insert(payload)
+        const { data: inserted } = await supabase.from('triagens').insert(payload).select('id').single()
+        resultTriagemId = inserted?.id
+        auditLog(profile.id, 'criou_triagem', { triagem_id: inserted?.id, prioridade })
       }
 
       await supabase.from('applicants').update({

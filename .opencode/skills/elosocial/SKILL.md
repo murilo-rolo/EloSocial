@@ -12,7 +12,7 @@ description: Prontuário SUAS para CRAS com IA Copiloto. Stack, arquitetura, con
 | Frontend | React + JavaScript + Vite + PWA + Tailwind CSS v4 |
 | Backend | Python + FastAPI (PDF, IA, admin de usuários) |
 | Banco + Auth + Realtime | Supabase Cloud |
-| IA / LLM | Google Gemini API (gemini-2.5-flash, gemini-embedding-2) |
+| IA / LLM | Google Gemini API (gemini-3.5-flash, gemini-embedding-2) |
 | RAG / Vetores | pgvector (Supabase PostgreSQL) |
 | Chat | Supabase Realtime (subscriptions PostgreSQL) |
 | PDF | ReportLab |
@@ -45,7 +45,7 @@ Frontend (React PWA + Tailwind) ←→ Supabase SDK (Auth, DB, Realtime)
 | Docker | Setup via `setup.sh` (templates `.example` no git, `.env` e Dockerfiles ignorados) | Evita vazar credenciais; artefatos locais gerados sob demanda |
 | Relatórios | JSON + PDF exportado | Imutabilidade via hash SHA-256 |
 | Videoconferência | Daily.co (chave no backend) | daily-js no frontend |
-| IA | Google Gemini (gemini-2.5-flash) | Cota gratuita, tool calling nativo, multimodal (OCR) |
+| IA | Google Gemini (gemini-3.5-flash) | Cota gratuita, tool calling nativo, multimodal (OCR) |
 | RAG | pgvector + busca híbrida | Embeddings 768d, busca semântica + textual |
 | CSS | Tailwind CSS v4 | Utility-first, tema escuro/claro via CSS custom properties |
 

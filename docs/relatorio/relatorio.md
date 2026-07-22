@@ -42,7 +42,7 @@ O público-alvo são os profissionais lotados nas 12 unidades CRAS de Belém/PA,
 | Autenticação | Supabase Auth (JWT) | — |
 | Tempo Real | Supabase Realtime (PostgreSQL subscriptions) | — |
 | Armazenamento | Supabase Storage | — |
-| IA / LLM | Google Gemini API (gemini-2.5-flash) | google-generativeai 0.8.3 |
+| IA / LLM | Google Gemini API (gemini-3.5-flash) | google-generativeai 0.8.3 |
 | Embeddings | gemini-embedding-2 (768 dimensões) | — |
 | RAG / Vetores | pgvector (extensão PostgreSQL) | — |
 | PDF | ReportLab | 4.3.1 |
@@ -197,7 +197,7 @@ O prontuário é o componente central do sistema, estruturado em 12 seções pad
 
 ## 6. Copiloto SUAS — Inteligência Artificial
 
-O componente de IA é integrado ao sistema como um copiloto contextual, utilizando o modelo **gemini-2.5-flash** do Google Gemini com tool calling nativo.
+O componente de IA é integrado ao sistema como um copiloto contextual, utilizando o modelo **gemini-3.5-flash** do Google Gemini com tool calling nativo.
 
 ### 6.1 Contexto Base
 

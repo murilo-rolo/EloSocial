@@ -22,7 +22,7 @@
 
 ## IA & RAG
 
-15. IA usa Google Gemini (gemini-2.5-flash) — cota gratuita, tool calling nativo
+15. IA usa Google Gemini (gemini-3.5-flash) — cota gratuita, tool calling nativo
 16. Embeddings: gemini-embedding-2 (768 dimensões) via `genai.embed_content()`
 17. Contexto base SUAS/LOAS definido em `backend/app/api/suas_context.py`
 18. RAG usa pgvector no Supabase — busca híbrida (semântica + lexical via tsvector)

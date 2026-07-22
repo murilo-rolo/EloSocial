@@ -123,7 +123,7 @@ DADOS DO PRONTUÁRIO (CONTEXTO):
         
         # Inicializando o modelo
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash", # Usando modelo rápido e eficiente
+            model_name="gemini-3.5-flash", # Usando modelo rápido e eficiente
             system_instruction=system_instruction,
             tools=[consultar_base_conhecimento]
         )
@@ -172,7 +172,7 @@ DADOS PARA TRIAGEM:
 {context_str}
 """
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.5-flash",
             system_instruction=system_instruction,
             tools=[consultar_base_conhecimento]
         )
@@ -218,7 +218,7 @@ DADOS DA FAMÍLIA E HISTÓRICO:
 {context_str}
 """
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.5-flash",
             system_instruction=system_instruction,
             tools=[consultar_base_conhecimento]
         )

@@ -38,7 +38,7 @@ async def extract_requerente(file: UploadFile = File(...)):
         """
         
         model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+            model_name="gemini-3.5-flash",
             system_instruction=system_instruction,
             generation_config={"response_mime_type": "application/json"}
         )

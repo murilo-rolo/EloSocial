@@ -11,7 +11,7 @@
 - Frontend: Videoconferência (salas públicas/privadas, código de acesso, Daily.co)
 
 ### IA — Copiloto SUAS
-- Backend: ChatIA (gemini-2.5-flash + tool calling RAG)
+- Backend: ChatIA (gemini-3.5-flash + tool calling RAG)
 - Backend: Triagem de vulnerabilidade automática (score + cor)
 - Backend: Resumo executivo de prontuários
 - Backend: Gerador de pareceres (padrão, jurídico, saúde)

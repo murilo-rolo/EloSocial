@@ -19,7 +19,7 @@ Inspirado no projeto Arcane, o sistema foi atualizado com agentes de Inteligênc
 |---|---|
 | Frontend | React + JavaScript + Vite + PWA |
 | Backend | Python + FastAPI |
-| Inteligência Artificial | Google Gemini API (gemini-2.5-flash e text-embedding-004) |
+| Inteligência Artificial | Google Gemini API (gemini-3.5-flash e text-embedding-004) |
 | Banco de Dados (IA) | Supabase (PostgreSQL) com extensão `pgvector` |
 | Banco + Auth | Supabase (Auth + Realtime + RLS) |
 | Videoconferência | Daily.co API + daily-js SDK |

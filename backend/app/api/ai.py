@@ -1,13 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
-import os
 import json
 import httpx
 import google.generativeai as genai
-from dotenv import load_dotenv
 from .suas_context import SUAS_BASE_CONTEXT
-from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY
+from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, GEMINI_API_KEY
 
 def consultar_base_conhecimento(assunto: str) -> str:
     """Consulta a base de conhecimento do SUAS (leis, diretrizes, manuais) para responder dúvidas técnicas e procedimentais. 
@@ -75,14 +73,7 @@ def consultar_base_conhecimento(assunto: str) -> str:
     except Exception as e:
         return f"Erro ao consultar base: {str(e)}"
 
-load_dotenv()
-
 router = APIRouter()
-
-# Configuração da API do Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 class Message(BaseModel):
     role: str

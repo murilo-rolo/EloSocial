@@ -1,16 +1,9 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
-import os
 import json
 import google.generativeai as genai
-from dotenv import load_dotenv
-
-load_dotenv()
+from app.config import GEMINI_API_KEY
 
 router = APIRouter()
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 @router.post("/ocr/extract_requerente")
 async def extract_requerente(file: UploadFile = File(...)):

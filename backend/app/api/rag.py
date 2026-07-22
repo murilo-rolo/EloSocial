@@ -5,16 +5,9 @@ import io
 import pypdf
 from typing import List, Optional
 import google.generativeai as genai
-import os
-from dotenv import load_dotenv
-from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY
+from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, GEMINI_API_KEY
 
-load_dotenv()
 router = APIRouter()
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 class DocumentUploadRequest(BaseModel):
     title: str

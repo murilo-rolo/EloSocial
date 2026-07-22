@@ -1,20 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any
-import os
+from typing import Dict, Any, Optional
 import json
 import google.generativeai as genai
-from dotenv import load_dotenv
-from typing import Optional
 from .suas_context import SUAS_BASE_CONTEXT
-
-load_dotenv()
+from app.config import GEMINI_API_KEY
 
 router = APIRouter()
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 class GenerateReportRequest(BaseModel):
     prontuario_context: Dict[str, Any]

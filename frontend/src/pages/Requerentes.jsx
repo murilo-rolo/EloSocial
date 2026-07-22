@@ -4,9 +4,8 @@ import { supabase } from '../lib/supabase'
 import { useRealtime } from '../hooks/useRealtime'
 import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
-import { formatCPF, formatDate } from '../utils/format'
-import { isRequerente } from '../utils/roles'
-import { Search, Plus, Eye, UploadCloud, Pencil } from 'lucide-react'
+import { formatCPF } from '../utils/format'
+import { Search, Plus, Eye, UploadCloud } from 'lucide-react'
 
 const STATUS_CONFIG = {
   pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
@@ -20,7 +19,6 @@ const STATUS_CONFIG = {
 export default function Requerentes() {
   const navigate = useNavigate()
   const { profile } = useAuth()
-  const isProfessional = profile && !isRequerente(profile.role)
   const [requerentes, setRequerentes] = useState([])
   const [triagensMap, setTriagensMap] = useState({})
   const [search, setSearch] = useState('')
@@ -33,9 +31,6 @@ export default function Requerentes() {
   })
   const [saving, setSaving] = useState(false)
   const [ocrLoading, setOcrLoading] = useState(false)
-  const [openDropdown, setOpenDropdown] = useState(null)
-  const [confirmAction, setConfirmAction] = useState(null)
-  const [updating, setUpdating] = useState(false)
   const fileInputRef = useRef(null)
 
   async function loadRequerentes() {
@@ -53,7 +48,7 @@ export default function Requerentes() {
       const ids = list.map(r => r.id)
       const { data: triagens } = await supabase
         .from('triagens')
-        .select('*')
+        .select('*, profiles!triagens_assistente_social_id_fkey(nome)')
         .in('applicant_id', ids)
       const map = {}
       for (const t of triagens || []) {
@@ -80,36 +75,6 @@ export default function Requerentes() {
       setTriagensMap(prev => ({ ...prev, [t.applicant_id]: t }))
     }
   })
-
-  function handleToggleDropdown(applicantId) {
-    setOpenDropdown(openDropdown === applicantId ? null : applicantId)
-  }
-
-  async function handleUpdateStatus(applicantId, newStatus, currentStatus) {
-    setOpenDropdown(null)
-    if (newStatus === currentStatus) return
-    if (newStatus === 'concluido' || newStatus === 'cancelado') {
-      setConfirmAction({ applicantId, status: newStatus })
-      return
-    }
-    setUpdating(true)
-    const t = triagensMap[applicantId]
-    if (t) {
-      await supabase.from('triagens').update({ status: newStatus }).eq('id', t.id)
-    }
-    setUpdating(false)
-  }
-
-  async function confirmUpdateStatus() {
-    if (!confirmAction) return
-    setUpdating(true)
-    const t = triagensMap[confirmAction.applicantId]
-    if (t) {
-      await supabase.from('triagens').update({ status: confirmAction.status }).eq('id', t.id)
-    }
-    setUpdating(false)
-    setConfirmAction(null)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -211,85 +176,59 @@ export default function Requerentes() {
             <table>
               <thead>
                 <tr>
-                  <th style={{ paddingLeft: 24 }}>Requerente Principal</th>
+                  <th style={{ paddingLeft: 24 }}>Requerente</th>
                   <th>Contato</th>
-                  <th>Triagem</th>
+                  <th>Status</th>
+                  <th>Assistente Social</th>
                   <th style={{ textAlign: 'right', paddingRight: 24 }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {requerentes.map((r) => (
-                  <tr key={r.id} onClick={() => navigate(`/requerentes/${r.id}`)} style={{ cursor: 'pointer' }}>
-                    <td style={{ paddingLeft: 24 }}>
-                      <div className="cell-inline">
-                        <div className="cell-avatar">{r.nome.charAt(0).toUpperCase()}</div>
-                        <div className="cell-text">
-                          <span className="name">{r.nome}</span>
-                          <span className="meta">{formatCPF(r.cpf) || 'Sem CPF'}</span>
+                {requerentes.map((r) => {
+                  const t = triagensMap[r.id]
+                  const statusCfg = t ? STATUS_CONFIG[t.status] : null
+                  const assistenteNome = t?.profiles?.nome || 'Ausente'
+                  return (
+                    <tr key={r.id} onClick={() => navigate(`/requerentes/${r.id}`)} style={{ cursor: 'pointer' }}>
+                      <td style={{ paddingLeft: 24 }}>
+                        <div className="cell-inline">
+                          <div className="cell-avatar">{r.nome.charAt(0).toUpperCase()}</div>
+                          <div className="cell-text">
+                            <span className="name">{r.nome}</span>
+                            <span className="meta">{formatCPF(r.cpf) || 'Sem CPF'}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="cell-text">
+                      </td>
+                      <td>
                         <span>{r.telefone || '—'}</span>
-                        <span className="meta">{formatDate(r.data_nascimento)}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {r.vulnerabilidade_score ? (
-                          <span className={`badge badge-risco-${r.vulnerabilidade_cor === 'vermelho' ? 'alto' : r.vulnerabilidade_cor === 'amarelo' ? 'medio' : 'baixo'}`}>
-                            {r.vulnerabilidade_score}
+                      </td>
+                      <td>
+                        {statusCfg ? (
+                          <span className="badge" style={{ background: statusCfg.bg, color: statusCfg.color }}>
+                            {statusCfg.label}
                           </span>
                         ) : (
                           <span className="badge" style={{ background: '#f1f5f9', color: '#64748b' }}>Triagem Pendente</span>
                         )}
-                        {isProfessional && triagensMap[r.id] && (
-                          <div style={{ position: 'relative' }}>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleToggleDropdown(r.id) }}
-                              style={{ padding: '2px 4px', background: 'none', border: 'none', cursor: 'pointer' }}
-                              title="Alterar status do caso"
-                            >
-                              <Pencil size={14} />
-                            </button>
-                            {openDropdown === r.id && (
-                              <div style={{
-                                position: 'absolute', top: '100%', left: 0, zIndex: 100,
-                                background: 'var(--card)', border: '1px solid var(--border)',
-                                borderRadius: 8, boxShadow: 'var(--shadow-lg)', padding: 4, minWidth: 150, marginTop: 4,
-                              }}>
-                                {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                                  <button
-                                    key={key}
-                                    onClick={(e) => { e.stopPropagation(); handleUpdateStatus(r.id, key, triagensMap[r.id]?.status) }}
-                                    style={{
-                                      display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
-                                      background: key === triagensMap[r.id]?.status ? '#f1f5f9' : 'none',
-                                      border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 13, color: cfg.color,
-                                    }}
-                                  >
-                                    {cfg.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td style={{ textAlign: 'right', paddingRight: 24 }}>
-                      <button 
-                        className="btn btn-outline" 
-                        style={{ padding: '8px', borderRadius: '50%', background: 'transparent', border: 'none', color: 'var(--text-light)' }} 
-                        title="Ver Perfil"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/requerentes/${r.id}`) }}
-                      >
-                        <Eye size={20} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td>
+                        <span style={{ color: assistenteNome === 'Ausente' ? 'var(--text-muted)' : 'var(--text-primary)' }}>
+                          {assistenteNome}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right', paddingRight: 24 }}>
+                        <button 
+                          className="btn btn-outline" 
+                          style={{ padding: '8px', borderRadius: '50%', background: 'transparent', border: 'none', color: 'var(--text-light)' }} 
+                          title="Ver Perfil"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/requerentes/${r.id}`) }}
+                        >
+                          <Eye size={20} />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
             <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', fontSize: 13, color: 'var(--text-light)' }}>
@@ -404,30 +343,6 @@ export default function Requerentes() {
         </div>
       )}
 
-      {confirmAction && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20,
-        }} onClick={() => { if (!updating) setConfirmAction(null) }}>
-          <div style={{
-            background: 'var(--card)', borderRadius: 12, padding: 24, maxWidth: 400, width: '100%',
-            boxShadow: 'var(--shadow-lg)',
-          }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Confirmar alteração</h3>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
-              Deseja alterar o status para &ldquo;{(STATUS_CONFIG[confirmAction.status] || {}).label || confirmAction.status}&rdquo;?
-            </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <button className="btn btn-outline btn-sm" onClick={() => setConfirmAction(null)} disabled={updating}>
-                Cancelar
-              </button>
-              <button className="btn btn-primary btn-sm" onClick={confirmUpdateStatus} disabled={updating}>
-                {updating ? 'Salvando...' : 'Confirmar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </Layout>
   )
 }

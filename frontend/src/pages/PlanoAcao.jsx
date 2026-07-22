@@ -76,7 +76,7 @@ export default function PlanoAcao() {
       </div>
 
       <div className="card" style={{ padding: 24 }}>
-        <PlanoAcaoCaso casoId={caso.id} modo="requerente" />
+        <PlanoAcaoCaso casoId={caso.id} modo="requerente" applicantId={caso.applicant_id} />
       </div>
     </Layout>
   )

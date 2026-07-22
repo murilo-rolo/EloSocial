@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../hooks/useRealtime'
+import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate, formatDateTime } from '../utils/format'
-import { ROLE_LABELS } from '../utils/roles'
+import { ROLE_LABELS, isRequerente } from '../utils/roles'
 import SlideOver from '../components/SlideOver'
 import ProntuarioView from './ProntuarioView'
 import ChatLLM from '../components/ChatLLM'
 import MensagensCaso from '../components/caso/MensagensCaso'
 import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
-import { MessageSquare, ClipboardList } from 'lucide-react'
+import { MessageSquare, ClipboardList, Pencil } from 'lucide-react'
 
 const STATUS_CONFIG = {
   pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
@@ -73,6 +74,54 @@ export default function RequerenteDetail() {
     }
   })
 
+  const { profile } = useAuth()
+  const isProfessional = profile && !isRequerente(profile.role)
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false)
+  const [showPrioridadeDropdown, setShowPrioridadeDropdown] = useState(false)
+  const [confirmAction, setConfirmAction] = useState(null)
+  const [updating, setUpdating] = useState(false)
+
+  async function handleUpdateStatus(newStatus) {
+    if (newStatus === caso?.status) {
+      setShowStatusDropdown(false)
+      return
+    }
+    if (newStatus === 'concluido' || newStatus === 'cancelado') {
+      setConfirmAction({ type: 'status', value: newStatus })
+      setShowStatusDropdown(false)
+      return
+    }
+    setShowStatusDropdown(false)
+    setUpdating(true)
+    const { error } = await supabase.from('triagens').update({ status: newStatus }).eq('id', caso.id)
+    if (error) console.error('Erro ao atualizar status:', error)
+    setUpdating(false)
+  }
+
+  async function handleUpdatePrioridade(newPrioridade) {
+    if (newPrioridade === caso?.prioridade) {
+      setShowPrioridadeDropdown(false)
+      return
+    }
+    setShowPrioridadeDropdown(false)
+    setUpdating(true)
+    const { error } = await supabase.from('triagens').update({ prioridade: newPrioridade }).eq('id', caso.id)
+    if (error) console.error('Erro ao atualizar prioridade:', error)
+    setUpdating(false)
+  }
+
+  async function confirmUpdate() {
+    if (!confirmAction) return
+    setUpdating(true)
+    const update = confirmAction.type === 'status'
+      ? { status: confirmAction.value }
+      : { prioridade: confirmAction.value }
+    const { error } = await supabase.from('triagens').update(update).eq('id', caso.id)
+    if (error) console.error('Erro ao confirmar atualizacao:', error)
+    setUpdating(false)
+    setConfirmAction(null)
+  }
+
   if (loading) return <Layout title="Requerente"><div className="loading">Carregando...</div></Layout>
   if (!requerente) return <Layout title="Requerente"><div className="empty-state">Requerente não encontrado.</div></Layout>
 
@@ -117,20 +166,88 @@ export default function RequerenteDetail() {
         )}
         {caso && (
           <div style={{ marginTop: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span className="badge" style={{
-              background: (STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).bg,
-              color: (STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).color,
-            }}>
-              {(STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).label}
-            </span>
-            {caso.prioridade && (
+            <div style={{ position: 'relative' }}>
               <span className="badge" style={{
-                background: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).bg,
-                color: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).color,
+                background: (STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).bg,
+                color: (STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).color,
               }}>
-                Prioridade {(PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).label}
+                {(STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente).label}
               </span>
-            )}
+              {isProfessional && (
+                <button
+                  onClick={() => { setShowStatusDropdown(!showStatusDropdown); setShowPrioridadeDropdown(false) }}
+                  style={{ marginLeft: 4, padding: '2px 4px', background: 'none', border: 'none', cursor: 'pointer', verticalAlign: 'middle' }}
+                  title="Alterar status"
+                >
+                  <Pencil size={14} />
+                </button>
+              )}
+              {showStatusDropdown && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, zIndex: 100,
+                  background: 'var(--card)', border: '1px solid var(--border)',
+                  borderRadius: 8, boxShadow: 'var(--shadow-lg)', padding: 4, minWidth: 160, marginTop: 4,
+                }}>
+                  {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+                    <button
+                      key={key}
+                      onClick={() => handleUpdateStatus(key)}
+                      style={{
+                        display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
+                        background: key === caso.status ? '#f1f5f9' : 'none', border: 'none',
+                        borderRadius: 4, cursor: 'pointer', fontSize: 13, color: cfg.color,
+                      }}
+                    >
+                      {cfg.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ position: 'relative' }}>
+              {caso.prioridade ? (
+                <span className="badge" style={{
+                  background: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).bg,
+                  color: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).color,
+                }}>
+                  Prioridade {(PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).label}
+                </span>
+              ) : (
+                <span className="badge" style={{ background: '#f1f5f9', color: '#94a3b8' }}>
+                  Sem prioridade
+                </span>
+              )}
+              {isProfessional && (
+                <button
+                  onClick={() => { setShowPrioridadeDropdown(!showPrioridadeDropdown); setShowStatusDropdown(false) }}
+                  style={{ marginLeft: 4, padding: '2px 4px', background: 'none', border: 'none', cursor: 'pointer', verticalAlign: 'middle' }}
+                  title="Alterar prioridade"
+                >
+                  <Pencil size={14} />
+                </button>
+              )}
+              {showPrioridadeDropdown && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, zIndex: 100,
+                  background: 'var(--card)', border: '1px solid var(--border)',
+                  borderRadius: 8, boxShadow: 'var(--shadow-lg)', padding: 4, minWidth: 160, marginTop: 4,
+                }}>
+                  {Object.entries(PRIORIDADE_CONFIG).map(([key, cfg]) => (
+                    <button
+                      key={key}
+                      onClick={() => handleUpdatePrioridade(key)}
+                      style={{
+                        display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
+                        background: key === caso.prioridade ? '#f1f5f9' : 'none', border: 'none',
+                        borderRadius: 4, cursor: 'pointer', fontSize: 13, color: cfg.color,
+                      }}
+                    >
+                      {cfg.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -199,6 +316,33 @@ export default function RequerenteDetail() {
           </div>
         )}
       </div>
+
+      {confirmAction && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20,
+        }} onClick={() => { if (!updating) setConfirmAction(null) }}>
+          <div style={{
+            background: 'var(--card)', borderRadius: 12, padding: 24, maxWidth: 400, width: '100%',
+            boxShadow: 'var(--shadow-lg)',
+          }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Confirmar alteração</h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
+              {confirmAction.type === 'status'
+                ? `Deseja alterar o status para "${(STATUS_CONFIG[confirmAction.value] || {}).label || confirmAction.value}"?`
+                : `Deseja alterar a prioridade para "${(PRIORIDADE_CONFIG[confirmAction.value] || {}).label || confirmAction.value}"?`}
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button className="btn btn-outline btn-sm" onClick={() => setConfirmAction(null)} disabled={updating}>
+                Cancelar
+              </button>
+              <button className="btn btn-primary btn-sm" onClick={confirmUpdate} disabled={updating}>
+                {updating ? 'Salvando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SlideOver 
         isOpen={!!selectedProntuarioId} 

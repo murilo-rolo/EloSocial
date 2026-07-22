@@ -17,6 +17,7 @@ vi.mock('../../hooks/useAuth', () => ({
 const mockCaso = {
   id: 'caso-1',
   user_id: 'user-1',
+  applicant_id: 'applicant-1',
   status: 'em_atendimento',
   prioridade: 'ALTA',
   dados_acolhimento: {
@@ -42,8 +43,8 @@ vi.mock('../../lib/supabase', () => ({
 
 // Mock PlanoAcaoCaso — renderiza texto identificável
 vi.mock('../../components/caso/PlanoAcaoCaso', () => ({
-  default: ({ casoId, modo }) => (
-    <div data-testid="plano-acao-caso">PlanoAcaoCaso casoId={casoId} modo={modo}</div>
+  default: ({ casoId, modo, applicantId }) => (
+    <div data-testid="plano-acao-caso">PlanoAcaoCaso casoId={casoId} modo={modo} applicantId={applicantId}</div>
   ),
 }))
 

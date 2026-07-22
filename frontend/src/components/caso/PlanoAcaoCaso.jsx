@@ -71,10 +71,10 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
   }, [casoId])
 
   useEffect(() => {
-    if (applicantId && modo === 'assistente') {
+    if (applicantId) {
       loadAgendamentos()
     }
-  }, [applicantId, modo])
+  }, [applicantId])
 
   async function loadItens() {
     setLoading(true)
@@ -418,7 +418,7 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
         </div>
       )}
 
-      {applicantId && modo === 'assistente' && (
+      {applicantId && (
         <>
           <div style={{ marginTop: 24, marginBottom: 12, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -427,10 +427,12 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
                 Agendamentos
               </h4>
               <div style={{ flex: 1 }} />
-              <button className="btn btn-primary btn-sm" onClick={() => setShowAgendaModal(true)}>
-                <Plus size={14} style={{ marginRight: 4 }} />
-                Novo Agendamento
-              </button>
+              {modo === 'assistente' && (
+                <button className="btn btn-primary btn-sm" onClick={() => setShowAgendaModal(true)}>
+                  <Plus size={14} style={{ marginRight: 4 }} />
+                  Novo Agendamento
+                </button>
+              )}
             </div>
 
             {loadingAgendamentos ? (
@@ -439,7 +441,7 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
               </div>
             ) : agendamentos.length === 0 ? (
               <div style={{ padding: 16, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-                Nenhum agendamento para este requerente.
+                Nenhum agendamento ou ação pendente.
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -486,12 +488,14 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
             )}
           </div>
 
-          <div style={{ marginTop: 8 }}>
-            <button className="btn btn-outline" onClick={() => setShowVideoModal(true)} style={{ width: '100%', justifyContent: 'center', gap: 8 }}>
-              <Video size={16} />
-              Agendar Video Chamada
-            </button>
-          </div>
+          {modo === 'assistente' && (
+            <div style={{ marginTop: 8 }}>
+              <button className="btn btn-outline" onClick={() => setShowVideoModal(true)} style={{ width: '100%', justifyContent: 'center', gap: 8 }}>
+                <Video size={16} />
+                Agendar Video Chamada
+              </button>
+            </div>
+          )}
         </>
       )}
 

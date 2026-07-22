@@ -194,7 +194,7 @@ export default function DashboardRequerente() {
         <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
           Plano de Ação
         </h2>
-        <PlanoAcaoCaso casoId={caso.id} modo="requerente" />
+        <PlanoAcaoCaso casoId={caso.id} modo="requerente" applicantId={caso.applicant_id} />
       </div>
     </Layout>
   )

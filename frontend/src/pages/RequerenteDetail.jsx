@@ -67,6 +67,12 @@ export default function RequerenteDetail() {
     }
   })
 
+  useRealtime(`requerente-detail-applicant-${id}`, 'applicants', 'UPDATE', (payload) => {
+    if (payload.new?.id === id) {
+      setRequerente(payload.new)
+    }
+  })
+
   if (loading) return <Layout title="Requerente"><div className="loading">Carregando...</div></Layout>
   if (!requerente) return <Layout title="Requerente"><div className="empty-state">Requerente não encontrado.</div></Layout>
 

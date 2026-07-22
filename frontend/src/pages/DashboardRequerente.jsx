@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useRealtime } from '../hooks/useRealtime'
 import Layout from '../components/Layout/Layout'
-import { Video, MessageSquare, ListTodo, FolderOpen, ClipboardList } from 'lucide-react'
+import { ClipboardList } from 'lucide-react'
 
 const STATUS_CONFIG = {
   pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
@@ -118,13 +118,6 @@ export default function DashboardRequerente() {
   const telefone = dados?.contato?.telefone || '—'
   const bairro = dados?.contato?.bairro_localidade || '—'
 
-  const quickLinks = [
-    { to: '/video-atendimento', label: 'Video Atendimento', icon: <Video size={24} />, disabled: isConcluido },
-    { to: '/chat-atendimento', label: 'Mensagens', icon: <MessageSquare size={24} />, disabled: isConcluido },
-    { to: '/plano-acao', label: 'Plano de Acao', icon: <ListTodo size={24} />, disabled: false },
-    { to: '/cofre-digital', label: 'Cofre Digital', icon: <FolderOpen size={24} />, disabled: isConcluido },
-  ]
-
   return (
     <Layout title="Acompanhamento">
       <div style={{ marginBottom: 32 }}>
@@ -208,26 +201,6 @@ export default function DashboardRequerente() {
             </div>
           </div>
         )}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
-        {quickLinks.map((link) => (
-          <div
-            key={link.to}
-            className="card"
-            onClick={() => !link.disabled && navigate(link.to)}
-            style={{
-              cursor: link.disabled ? 'not-allowed' : 'pointer',
-              opacity: link.disabled ? 0.5 : 1,
-              textAlign: 'center',
-              padding: 20,
-              transition: 'all 0.2s',
-            }}
-          >
-            <div style={{ color: 'var(--accent)', marginBottom: 8 }}>{link.icon}</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{link.label}</div>
-          </div>
-        ))}
       </div>
     </Layout>
   )

@@ -66,7 +66,7 @@ export default function Admin() {
       const resp = await fetch(`${API_URL}/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, created_by: profile.id }),
       })
       if (!resp.ok) {
         const err = await resp.json()
@@ -84,7 +84,7 @@ export default function Admin() {
   async function handleDeleteUser(userId, nome) {
     if (!confirm(`Tem certeza que deseja excluir o usuário "${nome}"? Esta ação não pode ser desfeita.`)) return
     try {
-      const resp = await fetch(`${API_URL}/api/users/${userId}`, { method: 'DELETE' })
+      const resp = await fetch(`${API_URL}/api/users/${userId}?created_by=${profile.id}`, { method: 'DELETE' })
       if (!resp.ok) throw new Error('Erro ao excluir usuário')
       loadUsers()
     } catch (err) {

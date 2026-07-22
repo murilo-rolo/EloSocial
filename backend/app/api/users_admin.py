@@ -17,6 +17,7 @@ class CreateUserRequest(BaseModel):
     nome: str
     role: str
     cras: str
+    created_by: str | None = None
 
 @router.post("/users")
 def create_user(data: CreateUserRequest):
@@ -44,10 +45,24 @@ def create_user(data: CreateUserRequest):
         error_msg = resp.json().get("message", "Erro ao criar usuário")
         raise HTTPException(status_code=resp.status_code, detail=error_msg)
 
+    if data.created_by:
+        try:
+            httpx.post(
+                f"{SUPABASE_URL}/rest/v1/audit_logs",
+                headers=HEADERS,
+                json={
+                    "user_id": data.created_by,
+                    "acao": "criou_usuario",
+                    "detalhes": {"email": data.email, "role": data.role, "cras": data.cras},
+                },
+            )
+        except Exception:
+            pass
+
     return {"ok": True, "user": resp.json()}
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: str):
+def delete_user(user_id: str, created_by: str | None = None):
     if not SUPABASE_SERVICE_KEY:
         raise HTTPException(status_code=500, detail="SUPABASE_SERVICE_KEY não configurada")
 
@@ -58,5 +73,19 @@ def delete_user(user_id: str):
 
     if resp.status_code != 200 and resp.status_code != 204:
         raise HTTPException(status_code=resp.status_code, detail="Erro ao excluir usuário")
+
+    if created_by:
+        try:
+            httpx.post(
+                f"{SUPABASE_URL}/rest/v1/audit_logs",
+                headers=HEADERS,
+                json={
+                    "user_id": created_by,
+                    "acao": "excluiu_usuario",
+                    "detalhes": {"user_id_excluido": user_id},
+                },
+            )
+        except Exception:
+            pass
 
     return {"ok": True}

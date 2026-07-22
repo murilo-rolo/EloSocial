@@ -349,6 +349,30 @@ export default function ProntuarioEdit() {
     setProntuario(prev => ({ ...prev, acolhimento_institucional: { ...prev.acolhimento_institucional, historico: list } }))
   }
 
+  function addInclusaoDesligamento() {
+    setProntuario(prev => ({
+      ...prev,
+      planejamento_evolucao: {
+        ...prev.planejamento_evolucao,
+        inclusao_desligamento: [...(prev.planejamento_evolucao?.inclusao_desligamento || []), {
+          incluir: false, data_inclusao: '', desligar: false, data_desligamento: '', razao_desligamento: '',
+        }],
+      },
+    }))
+  }
+
+  function updateInclusaoDesligamento(index, field, value) {
+    const list = [...(prontuario.planejamento_evolucao?.inclusao_desligamento || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, planejamento_evolucao: { ...prev.planejamento_evolucao, inclusao_desligamento: list } }))
+  }
+
+  function removeInclusaoDesligamento(index) {
+    const list = [...(prontuario.planejamento_evolucao?.inclusao_desligamento || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, planejamento_evolucao: { ...prev.planejamento_evolucao, inclusao_desligamento: list } }))
+  }
+
   const handleSave = async () => {
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -1771,6 +1795,84 @@ export default function ProntuarioEdit() {
                         }))} />
                       {' '}Adolescente em internação
                     </label>
+                  </div>
+                </div>
+              )}
+
+              {secao.key === 'planejamento_evolucao' && (
+                <div>
+                  <strong>Inclusão/Desligamento PAIF/PAEFI</strong>
+                  {(prontuario.planejamento_evolucao?.inclusao_desligamento || []).map((r, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                      <button onClick={() => removeInclusaoDesligamento(i)} style={{
+                        position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                        color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                      }}>×</button>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="checkbox-label">
+                            <input type="checkbox" checked={r.incluir || false}
+                              onChange={(e) => updateInclusaoDesligamento(i, 'incluir', e.target.checked)} />
+                            {' '}Incluir
+                          </label>
+                        </div>
+                        <div className="form-group">
+                          <label>Data de Inclusão</label>
+                          <input type="date" className="form-control" value={r.data_inclusao || ''}
+                            onChange={(e) => updateInclusaoDesligamento(i, 'data_inclusao', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label className="checkbox-label">
+                            <input type="checkbox" checked={r.desligar || false}
+                              onChange={(e) => updateInclusaoDesligamento(i, 'desligar', e.target.checked)} />
+                            {' '}Desligar
+                          </label>
+                        </div>
+                        <div className="form-group">
+                          <label>Data de Desligamento</label>
+                          <input type="date" className="form-control" value={r.data_desligamento || ''}
+                            onChange={(e) => updateInclusaoDesligamento(i, 'data_desligamento', e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Razão do Desligamento</label>
+                        <select className="form-control" value={r.razao_desligamento || ''}
+                          onChange={(e) => updateInclusaoDesligamento(i, 'razao_desligamento', e.target.value)}>
+                          <option value="">Selecione</option>
+                          <option value="Desligamento programado">Desligamento programado</option>
+                          <option value="Transferência">Transferência</option>
+                          <option value="Desistência">Desistência</option>
+                          <option value="Não localizado">Não localizado</option>
+                          <option value="Óbito">Óbito</option>
+                          <option value="Mudança de município">Mudança de município</option>
+                          <option value="Outro">Outro</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="btn btn-outline btn-sm" onClick={addInclusaoDesligamento}>
+                    + Adicionar Registro
+                  </button>
+
+                  <div style={{ marginTop: 16 }}>
+                    <div className="form-group">
+                      <label>Planejamento Inicial</label>
+                      <textarea className="form-control" rows={4} value={prontuario.planejamento_evolucao?.planejamento_inicial || ''}
+                        onChange={(e) => setProntuario(prev => ({
+                          ...prev,
+                          planejamento_evolucao: { ...prev.planejamento_evolucao, planejamento_inicial: e.target.value },
+                        }))} />
+                    </div>
+                    <div className="form-group" style={{ marginTop: 8 }}>
+                      <label>Evolução</label>
+                      <textarea className="form-control" rows={4} value={prontuario.planejamento_evolucao?.evolucao || ''}
+                        onChange={(e) => setProntuario(prev => ({
+                          ...prev,
+                          planejamento_evolucao: { ...prev.planejamento_evolucao, evolucao: e.target.value },
+                        }))} />
+                    </div>
                   </div>
                 </div>
               )}

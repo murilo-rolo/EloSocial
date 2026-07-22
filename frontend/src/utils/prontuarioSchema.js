@@ -115,6 +115,11 @@ export function emptyProntuario() {
       membro_prisao: false,
       adolescente_internacao: false,
     },
+    planejamento_evolucao: {
+      inclusao_desligamento: [],
+      planejamento_inicial: '',
+      evolucao: '',
+    },
     encaminhamentos: [],
     observacoes: '',
   }
@@ -134,8 +139,9 @@ export const SECOES = [
   { key: 'violencia', title: '10. Violência e Violação de Direitos', icon: '🛡️' },
   { key: 'medidas_socioeducativas', title: '11. Medidas Socioeducativas', icon: '⚖️' },
   { key: 'acolhimento_institucional', title: '12. Acolhimento Institucional', icon: '🏛️' },
-  { key: 'encaminhamentos', title: '13. Encaminhamentos', icon: '➡️' },
-  { key: 'observacoes', title: '14. Observações Técnicas', icon: '📝' },
+  { key: 'planejamento_evolucao', title: '13. Planejamento e Evolução', icon: '📋' },
+  { key: 'encaminhamentos', title: '14. Encaminhamentos', icon: '➡️' },
+  { key: 'observacoes', title: '15. Observações Técnicas', icon: '📝' },
 ]
 
 export const PARENTESCO_OPCOES = [

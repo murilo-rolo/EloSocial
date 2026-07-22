@@ -6,6 +6,7 @@ import { useRealtime } from '../hooks/useRealtime'
 import Layout from '../components/Layout/Layout'
 import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
 import { ClipboardList } from 'lucide-react'
+import TriagemDetalhes from '../components/triagem/TriagemDetalhes'
 
 const STATUS_CONFIG = {
   pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
@@ -189,6 +190,8 @@ export default function DashboardRequerente() {
             </div>
           </div>
         )}
+
+        <TriagemDetalhes dados={dados} />
       </div>
 
       <div className="card">

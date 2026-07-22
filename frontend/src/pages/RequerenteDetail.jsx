@@ -14,6 +14,7 @@ import MensagensCaso from '../components/caso/MensagensCaso'
 import PlanoAcaoCaso from '../components/caso/PlanoAcaoCaso'
 import DocumentosCaso from '../components/caso/DocumentosCaso'
 import { MessageSquare, ClipboardList, Pencil, FileText } from 'lucide-react'
+import TriagemDetalhes from '../components/triagem/TriagemDetalhes'
 
 const STATUS_CONFIG = {
   pendente: { label: 'Pendente', color: '#f59e0b', bg: '#fef3c7' },
@@ -351,6 +352,8 @@ export default function RequerenteDetail() {
               </div>
             </div>
           )}
+
+          <TriagemDetalhes dados={caso.dados_acolhimento} />
         </div>
       )}
 

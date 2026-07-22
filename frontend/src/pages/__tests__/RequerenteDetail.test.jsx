@@ -197,8 +197,8 @@ describe('BD-06: Seção triagem no detalhe', () => {
     await waitFor(() => {
       expect(screen.getByText('Dados da Triagem')).toBeInTheDocument()
     })
-    expect(screen.getByText('Necessidade de assistencia')).toBeInTheDocument()
-    expect(screen.getByText('Ansiedade')).toBeInTheDocument()
+    expect(screen.getAllByText('Necessidade de assistencia').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Ansiedade').length).toBeGreaterThanOrEqual(1)
   })
 
   it('exibe mensagem quando não há triagem', async () => {

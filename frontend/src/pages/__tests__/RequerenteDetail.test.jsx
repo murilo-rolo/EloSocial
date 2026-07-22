@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
+let mockRole = 'assistente'
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: vi.fn(() => ({
-    profile: { id: 'user-1', role: 'assistente' },
+    profile: { id: 'user-1', role: mockRole },
   })),
 }))
 
@@ -113,6 +114,7 @@ describe('TS-01: Exibir status da triagem em RequerenteDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     casoData = mockCaso
+    mockRole = 'assistente'
   })
 
   it('exibe badge de status "Em Atendimento" quando caso existe', async () => {
@@ -137,5 +139,51 @@ describe('TS-01: Exibir status da triagem em RequerenteDetail', () => {
     })
     expect(screen.queryByText('Em Atendimento')).not.toBeInTheDocument()
     expect(screen.queryByText('Prioridade ALTA')).not.toBeInTheDocument()
+  })
+})
+
+describe('TS-01: Profissional ve icones de edicao', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    casoData = mockCaso
+    mockRole = 'assistente'
+  })
+
+  it('exibe icone de edicao ao lado do status quando profissional', async () => {
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByTitle('Alterar status')).toBeInTheDocument()
+    })
+  })
+
+  it('exibe icone de edicao ao lado da prioridade quando profissional', async () => {
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByTitle('Alterar prioridade')).toBeInTheDocument()
+    })
+  })
+})
+
+describe('TS-03: Requerente nao ve icones de edicao', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    casoData = mockCaso
+    mockRole = 'requerente'
+  })
+
+  it('nao exibe icone de edicao ao lado do status quando requerente', async () => {
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
+    })
+    expect(screen.queryByTitle('Alterar status')).not.toBeInTheDocument()
+  })
+
+  it('nao exibe icone de edicao ao lado da prioridade quando requerente', async () => {
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('Prioridade ALTA')).toBeInTheDocument()
+    })
+    expect(screen.queryByTitle('Alterar prioridade')).not.toBeInTheDocument()
   })
 })

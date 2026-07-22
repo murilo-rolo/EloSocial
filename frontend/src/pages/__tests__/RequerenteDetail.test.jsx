@@ -184,3 +184,28 @@ describe('BD-02: Seção Documentos no detalhe', () => {
     expect(screen.getByTestId('documentos-caso')).toBeInTheDocument()
   })
 })
+
+describe('BD-06: Seção triagem no detalhe', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockRole = 'assistente'
+  })
+
+  it('exibe seção Dados da Triagem quando dados_acolhimento existe', async () => {
+    casoData = { ...mockCaso, dados_acolhimento: { motivo: { demanda_principal: 'Necessidade de assistencia' }, urgencia: { nivel: 'Alta' }, contato: { telefone: '(91) 99999-0000', bairro_localidade: 'Jurunas' } }, sintomas: ['Ansiedade', 'Depressao'] }
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('Dados da Triagem')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Necessidade de assistencia')).toBeInTheDocument()
+    expect(screen.getByText('Ansiedade')).toBeInTheDocument()
+  })
+
+  it('exibe mensagem quando não há triagem', async () => {
+    casoData = { ...mockCaso, dados_acolhimento: null }
+    renderDetail()
+    await waitFor(() => {
+      expect(screen.getByText('Nenhuma triagem realizada.')).toBeInTheDocument()
+    })
+  })
+})

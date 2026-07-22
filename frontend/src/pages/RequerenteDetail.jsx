@@ -169,7 +169,7 @@ export default function RequerenteDetail() {
               </span>
               {isProfessional && (
                 <button
-                  onClick={() => { setShowStatusDropdown(!showStatusDropdown); setShowPrioridadeDropdown(false) }}
+                  onClick={() => { setShowStatusDropdown(!showStatusDropdown) }}
                   style={{ marginLeft: 4, padding: '2px 4px', background: 'none', border: 'none', cursor: 'pointer', verticalAlign: 'middle' }}
                   title="Alterar status"
                 >
@@ -218,6 +218,70 @@ export default function RequerenteDetail() {
           </div>
         )}
       </div>
+
+      {caso && caso.dados_acolhimento && (
+        <div className="card">
+          <div className="card-header">
+            <h3>Dados da Triagem</h3>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: 16 }}>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Motivo
+              </div>
+              <div style={{ fontSize: 14, color: 'var(--text-primary)' }}>
+                {caso.dados_acolhimento?.motivo?.demanda_principal || caso.dados_acolhimento?.motivo || '—'}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Urgência
+              </div>
+              <div style={{ fontSize: 14, color: 'var(--text-primary)' }}>
+                {caso.dados_acolhimento?.urgencia?.nivel || caso.dados_acolhimento?.urgencia || '—'}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Telefone
+              </div>
+              <div style={{ fontSize: 14, color: 'var(--text-primary)' }}>
+                {caso.dados_acolhimento?.contato?.telefone || '—'}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Bairro
+              </div>
+              <div style={{ fontSize: 14, color: 'var(--text-primary)' }}>
+                {caso.dados_acolhimento?.contato?.bairro_localidade || '—'}
+              </div>
+            </div>
+          </div>
+          {caso.sintomas && caso.sintomas.length > 0 && (
+            <div style={{ padding: '0 16px 16px' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Sintomas / Demandas
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {caso.sintomas.map((s, i) => (
+                  <span key={i} className="badge" style={{ background: 'var(--bg-surface-hover)', color: 'var(--text-primary)', fontSize: 11, padding: '3px 8px' }}>
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {caso && !caso.dados_acolhimento && (
+        <div className="card">
+          <div className="empty-state">
+            <p>Nenhuma triagem realizada.</p>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="card-header">

@@ -409,16 +409,45 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
                   </div>
                 </div>
 
-                {modo === 'assistente' && (
-                  <button
-                    className="btn btn-outline btn-sm"
-                    onClick={() => handleDelete(item)}
-                    title="Excluir"
-                    style={{ color: 'var(--danger)', borderColor: 'var(--danger)', flexShrink: 0 }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
+                <div style={{ display: 'flex', gap: 4, flexShrink: 0, alignItems: 'center' }}>
+                  {item.status === 'pendente' && (
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleToggleStatus(item)}
+                      style={{ fontSize: 11, padding: '2px 8px', borderColor: '#2563eb', color: '#2563eb' }}
+                    >
+                      Iniciar
+                    </button>
+                  )}
+                  {item.status === 'em_andamento' && (
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleToggleStatus(item)}
+                      style={{ fontSize: 11, padding: '2px 8px', borderColor: '#16a34a', color: '#16a34a' }}
+                    >
+                      Concluir
+                    </button>
+                  )}
+                  {item.status === 'concluido' && (
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => handleToggleStatus(item)}
+                      style={{ fontSize: 11, padding: '2px 8px', borderColor: '#d97706', color: '#d97706' }}
+                    >
+                      Reabrir
+                    </button>
+                  )}
+                  {modo === 'assistente' && (
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => handleDelete(item)}
+                      title="Excluir"
+                      style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
             )
           })}

@@ -16,11 +16,6 @@ const STATUS_CONFIG = {
   cancelado: { label: 'Cancelado', color: '#ef4444', bg: '#fee2e2' },
 }
 
-const PRIORIDADE_CONFIG = {
-  ALTA: { label: 'ALTA', color: '#dc2626', bg: '#fee2e2' },
-  MEDIA: { label: 'MEDIA', color: '#d97706', bg: '#fef3c7' },
-  BAIXA: { label: 'BAIXA', color: '#16a34a', bg: '#d1fae5' },
-}
 
 function getDados(dados_acolhimento, detalhes) {
   if (dados_acolhimento && Object.keys(dados_acolhimento).length > 0) {
@@ -109,7 +104,6 @@ export default function DashboardRequerente() {
   }
 
   const status = STATUS_CONFIG[caso.status] || STATUS_CONFIG.pendente
-  const prioridade = caso.prioridade ? PRIORIDADE_CONFIG[caso.prioridade] : null
   const dados = getDados(caso.dados_acolhimento, caso.detalhes)
   const isConcluido = caso.status === 'concluido'
   const isPendente = caso.status === 'pendente'
@@ -138,14 +132,6 @@ export default function DashboardRequerente() {
           >
             {status.label}
           </span>
-          {prioridade && (
-            <span
-              className="badge"
-              style={{ background: prioridade.bg, color: prioridade.color, fontSize: 12, padding: '4px 12px' }}
-            >
-              Prioridade {prioridade.label}
-            </span>
-          )}
           {isPendente && (
             <button
               className="btn btn-outline btn-sm"

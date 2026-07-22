@@ -23,12 +23,6 @@ const STATUS_CONFIG = {
   cancelado: { label: 'Cancelado', color: '#ef4444', bg: '#fee2e2' },
 }
 
-const PRIORIDADE_CONFIG = {
-  ALTA: { label: 'ALTA', color: '#dc2626', bg: '#fee2e2' },
-  MEDIA: { label: 'MEDIA', color: '#d97706', bg: '#fef3c7' },
-  BAIXA: { label: 'BAIXA', color: '#16a34a', bg: '#d1fae5' },
-}
-
 export default function RequerenteDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -78,7 +72,6 @@ export default function RequerenteDetail() {
   const { profile } = useAuth()
   const isProfessional = profile && !isRequerente(profile.role)
   const [showStatusDropdown, setShowStatusDropdown] = useState(false)
-  const [showPrioridadeDropdown, setShowPrioridadeDropdown] = useState(false)
   const [confirmAction, setConfirmAction] = useState(null)
   const [updating, setUpdating] = useState(false)
   const [assigning, setAssigning] = useState(false)
@@ -100,18 +93,6 @@ export default function RequerenteDetail() {
     setUpdating(false)
   }
 
-  async function handleUpdatePrioridade(newPrioridade) {
-    if (newPrioridade === caso?.prioridade) {
-      setShowPrioridadeDropdown(false)
-      return
-    }
-    setShowPrioridadeDropdown(false)
-    setUpdating(true)
-    const { error } = await supabase.from('triagens').update({ prioridade: newPrioridade }).eq('id', caso.id)
-    if (error) console.error('Erro ao atualizar prioridade:', error)
-    setUpdating(false)
-  }
-
   async function handleAssumirCaso() {
     setAssigning(true)
     const { error } = await supabase.from('triagens').update({ assistente_social_id: profile.id }).eq('id', caso.id)
@@ -129,10 +110,7 @@ export default function RequerenteDetail() {
   async function confirmUpdate() {
     if (!confirmAction) return
     setUpdating(true)
-    const update = confirmAction.type === 'status'
-      ? { status: confirmAction.value }
-      : { prioridade: confirmAction.value }
-    const { error } = await supabase.from('triagens').update(update).eq('id', caso.id)
+    const { error } = await supabase.from('triagens').update({ status: confirmAction.value }).eq('id', caso.id)
     if (error) console.error('Erro ao confirmar atualizacao:', error)
     setUpdating(false)
     setConfirmAction(null)
@@ -211,50 +189,6 @@ export default function RequerenteDetail() {
                       style={{
                         display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
                         background: key === caso.status ? '#f1f5f9' : 'none', border: 'none',
-                        borderRadius: 4, cursor: 'pointer', fontSize: 13, color: cfg.color,
-                      }}
-                    >
-                      {cfg.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div style={{ position: 'relative' }}>
-              {caso.prioridade ? (
-                <span className="badge" style={{
-                  background: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).bg,
-                  color: (PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).color,
-                }}>
-                  Prioridade {(PRIORIDADE_CONFIG[caso.prioridade] || PRIORIDADE_CONFIG.BAIXA).label}
-                </span>
-              ) : (
-                <span className="badge" style={{ background: '#f1f5f9', color: '#94a3b8' }}>
-                  Sem prioridade
-                </span>
-              )}
-              {isProfessional && (
-                <button
-                  onClick={() => { setShowPrioridadeDropdown(!showPrioridadeDropdown); setShowStatusDropdown(false) }}
-                  style={{ marginLeft: 4, padding: '2px 4px', background: 'none', border: 'none', cursor: 'pointer', verticalAlign: 'middle' }}
-                  title="Alterar prioridade"
-                >
-                  <Pencil size={14} />
-                </button>
-              )}
-              {showPrioridadeDropdown && (
-                <div style={{
-                  position: 'absolute', top: '100%', left: 0, zIndex: 100,
-                  background: 'var(--card)', border: '1px solid var(--border)',
-                  borderRadius: 8, boxShadow: 'var(--shadow-lg)', padding: 4, minWidth: 160, marginTop: 4,
-                }}>
-                  {Object.entries(PRIORIDADE_CONFIG).map(([key, cfg]) => (
-                    <button
-                      key={key}
-                      onClick={() => handleUpdatePrioridade(key)}
-                      style={{
-                        display: 'block', width: '100%', padding: '6px 12px', textAlign: 'left',
-                        background: key === caso.prioridade ? '#f1f5f9' : 'none', border: 'none',
                         borderRadius: 4, cursor: 'pointer', fontSize: 13, color: cfg.color,
                       }}
                     >
@@ -376,9 +310,7 @@ export default function RequerenteDetail() {
           }} onClick={e => e.stopPropagation()}>
             <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Confirmar alteração</h3>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
-              {confirmAction.type === 'status'
-                ? `Deseja alterar o status para "${(STATUS_CONFIG[confirmAction.value] || {}).label || confirmAction.value}"?`
-                : `Deseja alterar a prioridade para "${(PRIORIDADE_CONFIG[confirmAction.value] || {}).label || confirmAction.value}"?`}
+              Deseja alterar o status para "{confirmAction.value}"?
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
               <button className="btn btn-outline btn-sm" onClick={() => setConfirmAction(null)} disabled={updating}>

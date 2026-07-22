@@ -105,7 +105,7 @@ describe('RIR-09: DashboardRequerente — quickLinks removidos', () => {
     expect(screen.queryByText('Cofre Digital')).not.toBeInTheDocument()
   })
 
-  it('ainda exibe informações do caso (status, prioridade)', async () => {
+  it('ainda exibe status do caso', async () => {
     renderDashboard()
     await waitFor(() => {
       expect(screen.getByText('Em Atendimento')).toBeInTheDocument()

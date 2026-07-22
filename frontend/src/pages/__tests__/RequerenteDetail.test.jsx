@@ -128,13 +128,6 @@ describe('TS-01: Exibir status da triagem em RequerenteDetail', () => {
     })
   })
 
-  it('exibe badge de prioridade "ALTA" quando caso tem prioridade', async () => {
-    renderDetail()
-    await waitFor(() => {
-      expect(screen.getByText('Prioridade ALTA')).toBeInTheDocument()
-    })
-  })
-
   it('não exibe badges de status quando caso é nulo', async () => {
     casoData = null
     renderDetail()
@@ -142,7 +135,6 @@ describe('TS-01: Exibir status da triagem em RequerenteDetail', () => {
       expect(screen.getByText('Maria da Silva')).toBeInTheDocument()
     })
     expect(screen.queryByText('Em Atendimento')).not.toBeInTheDocument()
-    expect(screen.queryByText('Prioridade ALTA')).not.toBeInTheDocument()
   })
 })
 
@@ -157,13 +149,6 @@ describe('TS-01: Profissional ve icones de edicao', () => {
     renderDetail()
     await waitFor(() => {
       expect(screen.getByTitle('Alterar status')).toBeInTheDocument()
-    })
-  })
-
-  it('exibe icone de edicao ao lado da prioridade quando profissional', async () => {
-    renderDetail()
-    await waitFor(() => {
-      expect(screen.getByTitle('Alterar prioridade')).toBeInTheDocument()
     })
   })
 })
@@ -181,14 +166,6 @@ describe('TS-03: Requerente nao ve icones de edicao', () => {
       expect(screen.getByText('Em Atendimento')).toBeInTheDocument()
     })
     expect(screen.queryByTitle('Alterar status')).not.toBeInTheDocument()
-  })
-
-  it('nao exibe icone de edicao ao lado da prioridade quando requerente', async () => {
-    renderDetail()
-    await waitFor(() => {
-      expect(screen.getByText('Prioridade ALTA')).toBeInTheDocument()
-    })
-    expect(screen.queryByTitle('Alterar prioridade')).not.toBeInTheDocument()
   })
 })
 

@@ -70,6 +70,70 @@ export default function RequerenteDetail() {
     }
   })
 
+  const [triagemLoading, setTriagemLoading] = useState(false)
+  const [resumoResult, setResumoResult] = useState(null)
+  const [resumoLoading, setResumoLoading] = useState(false)
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+  async function handleTriagemIA() {
+    setTriagemLoading(true)
+    try {
+      const resp = await fetch(`${apiUrl}/api/triagem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prontuario_context: { applicant: requerente, prontuarios } }),
+      })
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}))
+        throw new Error(err.detail || 'Erro na triagem IA')
+      }
+      const result = await resp.json()
+      const { error } = await supabase
+        .from('applicants')
+        .update({
+          vulnerabilidade_score: result.score,
+          vulnerabilidade_cor: result.cor,
+          vulnerabilidade_motivo: result.motivo,
+        })
+        .eq('id', id)
+      if (error) throw error
+      setRequerente(prev => ({
+        ...prev,
+        vulnerabilidade_score: result.score,
+        vulnerabilidade_cor: result.cor,
+        vulnerabilidade_motivo: result.motivo,
+      }))
+    } catch (err) {
+      console.error(err)
+      alert('Erro na triagem IA: ' + err.message)
+    } finally {
+      setTriagemLoading(false)
+    }
+  }
+
+  async function handleResumoIA() {
+    setResumoLoading(true)
+    try {
+      const resp = await fetch(`${apiUrl}/api/resumo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prontuario_context: { applicant: requerente, prontuarios } }),
+      })
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}))
+        throw new Error(err.detail || 'Erro ao gerar resumo')
+      }
+      const result = await resp.json()
+      setResumoResult(result.resumo)
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao gerar resumo IA: ' + err.message)
+    } finally {
+      setResumoLoading(false)
+    }
+  }
+
   const { profile } = useAuth()
   const isProfessional = profile && !isRequerente(profile.role)
   const [showStatusDropdown, setShowStatusDropdown] = useState(false)
@@ -159,6 +223,14 @@ export default function RequerenteDetail() {
             <strong>Observações:</strong> {requerente.observacoes}
           </div>
         )}
+        <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn btn-primary btn-sm" onClick={handleTriagemIA} disabled={triagemLoading}>
+            {triagemLoading ? 'Analisando...' : 'Triagem IA'}
+          </button>
+          <button className="btn btn-primary btn-sm" onClick={handleResumoIA} disabled={resumoLoading}>
+            {resumoLoading ? 'Gerando...' : 'Resumo IA'}
+          </button>
+        </div>
         {requerente.vulnerabilidade_motivo && (
           <div style={{ marginTop: 12, padding: 12, background: '#f8fafc', borderRadius: 8, borderLeft: `4px solid ${requerente.vulnerabilidade_cor === 'vermelho' ? '#ef4444' : requerente.vulnerabilidade_cor === 'amarelo' ? '#f59e0b' : '#10b981'}` }}>
             <strong style={{ display: 'block', marginBottom: 4, fontSize: 13, color: 'var(--text-light)' }}>PARECER DA TRIAGEM IA:</strong>
@@ -404,6 +476,35 @@ export default function RequerenteDetail() {
           <ProntuarioView id={selectedProntuarioId} isDrawer={true} />
         )}
       </SlideOver>
+
+      {resumoResult && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: 20,
+        }} onClick={() => setResumoResult(null)}>
+          <div style={{
+            background: 'var(--card)', borderRadius: 12, padding: 24, maxWidth: 700, width: '100%',
+            maxHeight: '80vh', display: 'flex', flexDirection: 'column',
+            boxShadow: 'var(--shadow-lg)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 16 }}>Resumo Executivo (IA)</h3>
+              <button onClick={() => setResumoResult(null)} style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--text-light)' }}>&times;</button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+              {resumoResult}
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <button className="btn btn-primary btn-sm" onClick={() => { navigator.clipboard.writeText(resumoResult); alert('Copiado!') }}>
+                Copiar Texto
+              </button>
+              <button className="btn btn-outline btn-sm" onClick={() => setResumoResult(null)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ChatLLM prontuarioContext={{ applicant: requerente, prontuarios: prontuarios }} />
     </Layout>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Layout from '../components/Layout/Layout'
 import { useAuth } from '../hooks/useAuth'
 import { isRequerente } from '../utils/roles'
-import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, ClipboardList, ListTodo, FolderOpen, Video as VideoIcon } from 'lucide-react'
+import { HelpCircle, ChevronDown, ChevronRight, LayoutDashboard, Users, FileText, MessageSquare, Video, BookOpen, ClipboardList, FolderOpen, Video as VideoIcon } from 'lucide-react'
 
 const professionalSections = [
   { title: 'Usuários', icon: Users, description: 'Busque, cadastre e gerencie usuários. Acesse o histórico completo de atendimentos e prontuários de cada pessoa atendida.' },
@@ -13,12 +13,10 @@ const professionalSections = [
 ]
 
 const requesterSections = [
-  { title: 'Dashboard', icon: LayoutDashboard, description: 'Acompanhe o status do seu atendimento, veja próximas ações e receba notificações importantes da equipe técnica.' },
+  { title: 'Acompanhamento', icon: LayoutDashboard, description: 'Acompanhe o status do seu atendimento, veja próximas ações e receba notificações importantes da equipe técnica.' },
   { title: 'Triagem', icon: ClipboardList, description: 'Visualize sua avaliação de vulnerabilidade. A IA analisa suas respostas e indica o nível de prioridade do seu caso.' },
-  { title: 'Mensagens', icon: MessageSquare, description: 'Converse em tempo real com a equipe técnica responsável pelo seu atendimento. Envie dúvidas, documentos e atualizações.' },
   { title: 'Video', icon: VideoIcon, description: 'Participe de videochamadas com profissionais. Acesse salas de atendimento por vídeo de forma segura e simples.' },
-  { title: 'Plano de Ação', icon: ListTodo, description: 'Acompanhe as etapas do seu plano de ação social. Veja tarefas, prazos e progresso do seu acompanhamento.' },
-  { title: 'Cofre Digital', icon: FolderOpen, description: 'Armazene e acesse seus documentos de forma segura. Anexe RG, CPF, comprovantes e outros arquivos importantes ao seu prontuário.' },
+  { title: 'Documentos', icon: FolderOpen, description: 'Armazene e acesse seus documentos de forma segura. Anexe RG, CPF, comprovantes e outros arquivos importantes ao seu prontuário.' },
 ]
 
 function AccordionItem({ title, icon: Icon, description, isOpen, onToggle }) {

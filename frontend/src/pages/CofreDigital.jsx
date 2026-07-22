@@ -29,7 +29,7 @@ export default function CofreDigital() {
 
   if (loading) {
     return (
-      <Layout title="Cofre Digital">
+      <Layout title="Documentos">
         <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-secondary)' }}>
           Carregando...
         </div>
@@ -39,10 +39,10 @@ export default function CofreDigital() {
 
   if (!caso) {
     return (
-      <Layout title="Cofre Digital">
+      <Layout title="Documentos">
         <div style={{ marginBottom: 32 }}>
           <h1 className="page-title font-serif">
-            Cofre <em>Digital</em>.
+            Documentos.
           </h1>
           <p className="page-subtitle">
             Envie e gerencie documentos do seu caso.
@@ -65,10 +65,10 @@ export default function CofreDigital() {
   }
 
   return (
-    <Layout title="Cofre Digital">
+    <Layout title="Documentos">
       <div style={{ marginBottom: 16 }}>
         <h1 className="page-title font-serif">
-          Cofre <em>Digital</em>.
+          Documentos.
         </h1>
         <p className="page-subtitle">
           Envie e gerencie documentos vinculados ao seu caso.

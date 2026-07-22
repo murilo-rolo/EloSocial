@@ -33,8 +33,19 @@ export function emptyProntuario() {
       indigena_nao_aldeia: { ativo: false, etnia: '' },
     },
     habitacional: {
-      abastecimento_agua: '', energia_eletrica: '', saneamento: '',
-      material_edificacao: '', comodos: '',
+      tipo_residencia: '',
+      material_paredes: '',
+      energia_eletrica: '',
+      agua_canalizada: '',
+      abastecimento_agua: '',
+      escoamento_sanitario: '',
+      coleta_lixo: '',
+      total_comodos: 0,
+      dormitorios: 0,
+      pessoas_por_dormitorio: 0,
+      area_risco: '',
+      acesso_dificil: '',
+      conflito_violencia: '',
     },
     educacional: {
       escolaridade: '', situacao_educacional: '',
@@ -108,6 +119,20 @@ export const FORMA_INGRESSO_OPCOES = [
   'SGD',
   'Outros',
 ]
+
+export const TIPO_RESIDENCIA_OPCOES = ['Própria', 'Alugada', 'Cedida', 'Ocupada']
+
+export const MATERIAL_PAREDES_OPCOES = ['Alvenaria', 'Precária']
+
+export const ENERGIA_OPCOES = ['Medidor próprio', 'Medidor compartilhado', 'Sem medidor', 'Não possui']
+
+export const ABASTECIMENTO_AGUA_OPCOES = ['Rede geral', 'Poço', 'Cisterna', 'Carro pipa', 'Outra']
+
+export const ESCOAMENTO_OPCOES = ['Rede esgoto', 'Fossa séptica', 'Fossa rudimentar', 'Vala', 'Sem banheiro']
+
+export const COLETA_LIXO_OPCOES = ['Direta', 'Indireta', 'Não possui']
+
+export const SIM_NAO_OPCOES = ['Sim', 'Não']
 
 export const PROGRAMAS_SOCIAIS_LISTA = [
   { key: 'bolsa_familia', label: 'Bolsa Família' },

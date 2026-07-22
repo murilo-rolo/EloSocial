@@ -7,7 +7,7 @@ import ProntuarioView from '../ProntuarioView'
 const mockProntuarioData = {
   id: 'pront-1',
   dados_json: {
-    identificacao: { logradouro: 'Rua A', numero: '100' },
+    identificacao: { logradouro: 'Rua A', numero: '100', localizacao_domicilio: 'Urbano' },
     composicao_familiar: [{ nome: 'João', parentesco: 'Filho' }],
   },
   applicants: {

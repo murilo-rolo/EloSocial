@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
 import {
-  emptyProntuario, emptyMembro, calcularPerfilEtario,
+  emptyProntuario, emptyMembro, calcularPerfilEtario, migrarSchemaAntigo,
   SECOES, PARENTESCO_OPCOES, DOCUMENTACAO_OPCOES,
   LOCALIZACAO_DOMICILIO_OPCOES, TIPO_UNIDADE_OPCOES,
   FORMA_INGRESSO_OPCOES, PROGRAMAS_SOCIAIS_LISTA, SIM_NAO_OPCOES,
@@ -33,7 +33,7 @@ export default function ProntuarioEdit() {
       if (isEditing) {
         const { data: pro } = await supabase.from('prontuarios').select('*, applicants(*)').eq('id', id).single()
         if (pro) {
-          setProntuario(pro.dados_json || emptyProntuario())
+          setProntuario(migrarSchemaAntigo(pro.dados_json || emptyProntuario()))
           setRequerente(pro.applicants)
         }
       } else if (applicantId) {

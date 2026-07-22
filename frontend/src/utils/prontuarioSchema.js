@@ -244,3 +244,22 @@ export const TIPO_DEFICIENCIA_OPCOES = [
 export const TIPO_BENEFICIO_OPCOES = ['Auxílio Natalidade', 'Auxílio Funeral']
 
 export const AVALIACAO_RELACAO_OPCOES = ['Conflituoso com violência', 'Conflituoso sem violência', 'Sem conflitos relevantes']
+
+export function migrarSchemaAntigo(dados) {
+  if (!dados || typeof dados !== 'object') return emptyProntuario()
+  if (dados.identificacao?.localizacao_domicilio !== undefined) return dados
+  const novo = emptyProntuario()
+  function deepMerge(target, source) {
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        target[key] = deepMerge(target[key] || {}, source[key])
+      } else {
+        if (source[key] !== undefined && source[key] !== null) {
+          target[key] = source[key]
+        }
+      }
+    }
+    return target
+  }
+  return deepMerge(novo, dados)
+}

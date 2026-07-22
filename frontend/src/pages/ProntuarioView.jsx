@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Layout from '../components/Layout/Layout'
-import { SECOES } from '../utils/prontuarioSchema'
+import { SECOES, migrarSchemaAntigo } from '../utils/prontuarioSchema'
 import { ROLE_LABELS } from '../utils/roles'
 import { formatDate, formatDateTime } from '../utils/format'
 
@@ -31,6 +31,9 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
         .select('*, applicants(*), profiles!prontuarios_created_by_fkey(nome, role), prontuario_anexos(*, profiles!prontuario_anexos_created_by_fkey(nome))')
         .eq('id', id)
         .single()
+      if (data) {
+        data.dados_json = migrarSchemaAntigo(data.dados_json || {})
+      }
       setProntuario(data)
       setLoading(false)
     }

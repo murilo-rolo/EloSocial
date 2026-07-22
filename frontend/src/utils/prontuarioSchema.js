@@ -79,16 +79,33 @@ export function emptyProntuario() {
       condicionalidades_bf: [],
     },
     beneficios: {
-      beneficios_eventuais: '',
+      registros: [],
     },
     convivencia: {
-      convivencia_familiar: '',
+      dependentes_sozinhos: { resposta: '', observacao: '' },
+      discriminacao: { resposta: '', observacao: '' },
+      tempo_residencia: {
+        estado: { anos: 0, sempre: false },
+        municipio: { anos: 0, sempre: false },
+        bairro: { anos: 0, sempre: false },
+      },
+      rede_apoio_parentes: { resposta: '', observacao: '' },
+      rede_apoio_vizinhos: { resposta: '', observacao: '' },
+      grupos_religiosos_comunitarios: { resposta: '', observacao: '' },
+      lazer_crianca: { resposta: '' },
+      lazer_idoso: { resposta: '' },
+      relacoes_conjugais: [],
+      relacoes_pais_filhos: [],
+      relacoes_irmaos: [],
+      outros_conflitos: '',
     },
     participacao: {
       participacao_programas: '',
     },
     violencia: {
-      situacoes_violencia: '',
+      quadro1: [],
+      quadro2_creas: [],
+      quadro3_creas: [],
     },
     encaminhamentos: [],
     observacoes: '',
@@ -200,3 +217,7 @@ export const TIPO_DEFICIENCIA_OPCOES = [
   'Transtorno/doença mental',
   'Deficiências múltiplas',
 ]
+
+export const TIPO_BENEFICIO_OPCOES = ['Auxílio Natalidade', 'Auxílio Funeral']
+
+export const AVALIACAO_RELACAO_OPCOES = ['Conflituoso com violência', 'Conflituoso sem violência', 'Sem conflitos relevantes']

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useRealtime } from '../hooks/useRealtime'
 import Layout from '../components/Layout/Layout'
 import { formatCPF, formatDate, formatDateTime } from '../utils/format'
 import { ROLE_LABELS } from '../utils/roles'
@@ -59,6 +60,12 @@ export default function RequerenteDetail() {
     }
     load()
   }, [id])
+
+  useRealtime(`requerente-detail-triagem-${id}`, 'triagens', '*', (payload) => {
+    if (payload.new?.applicant_id === id) {
+      setCaso(payload.new)
+    }
+  })
 
   if (loading) return <Layout title="Requerente"><div className="loading">Carregando...</div></Layout>
   if (!requerente) return <Layout title="Requerente"><div className="empty-state">Requerente não encontrado.</div></Layout>

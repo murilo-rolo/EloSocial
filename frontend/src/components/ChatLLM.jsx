@@ -6,7 +6,33 @@ export default function ChatLLM({ prontuarioContext }) {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [ragChunks, setRagChunks] = useState(null)
   const endOfMessagesRef = useRef(null)
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+  // Pré-consulta RAG ao abrir o Copiloto
+  useEffect(() => {
+    if (!isOpen || ragChunks !== null || !prontuarioContext?.applicant) return
+    const applicant = prontuarioContext.applicant
+    const queryParts = [
+      applicant.nome ? `família ${applicant.nome}` : '',
+      applicant.observacoes || '',
+      'perfil socioassistencial benefícios vulnerabilidade SUAS',
+    ].filter(Boolean)
+    const query = queryParts.join(' ').slice(0, 500)
+
+    fetch(`${apiUrl}/api/rag/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, match_threshold: 0.4, match_count: 3 }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data?.matches?.length > 0) setRagChunks(data.matches)
+      })
+      .catch(() => {})
+  }, [isOpen])
 
   // Scroll para a última mensagem
   useEffect(() => {
@@ -40,8 +66,13 @@ export default function ChatLLM({ prontuarioContext }) {
     setLoading(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       let finalContext = { ...prontuarioContext }
+      if (ragChunks) {
+        finalContext.base_conhecimento = ragChunks.map(m => ({
+          fonte: m.title || 'Documento Oficial',
+          trecho: m.chunk_text,
+        }))
+      }
 
       const response = await fetch(`${apiUrl}/api/chat-ai`, {
         method: 'POST',

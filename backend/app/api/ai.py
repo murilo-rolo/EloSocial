@@ -94,14 +94,29 @@ async def chat_with_ai(req: ChatRequest):
 
     try:
         # Preparando a instrução de sistema (System Prompt) com os dados do prontuário
+        base_conhecimento = req.prontuario_context.pop("base_conhecimento", None)
         context_str = json.dumps(req.prontuario_context, ensure_ascii=False, indent=2)
+        
+        rag_section = ""
+        if base_conhecimento and len(base_conhecimento) > 0:
+            rag_lines = []
+            for item in base_conhecimento:
+                fonte = item.get("fonte", "Documento Oficial")
+                trecho = item.get("trecho", "")
+                rag_lines.append(f"[Fonte: {fonte}]\n{trecho}")
+            rag_section = f"""
+BASE DE CONHECIMENTO (FONTES OFICIAIS SUAS):
+Os trechos abaixo foram recuperados da base de conhecimento do sistema. Use-os como referência técnica para embasar suas respostas. Sempre cite a fonte quando utilizar estas informações.
+{'\n'.join(rag_lines)}
+"""
+
         system_instruction = f"""{SUAS_BASE_CONTEXT}
 
 Você está integrado ao sistema EloSocial (Prontuário Eletrônico SUAS).
 Sua função é auxiliar o profissional analisando os dados do prontuário do requerente em foco, de forma dinâmica e interativa como um chat.
 Você deve basear suas respostas ÚNICA E EXCLUSIVAMENTE nas informações fornecidas no contexto abaixo.
 Se a informação solicitada não estiver no contexto, responda que você não possui essa informação com base no prontuário atual, mas use seu conhecimento de SUAS para orientar o que o profissional pode perguntar ou investigar.
-
+{rag_section}
 DADOS DO PRONTUÁRIO (CONTEXTO):
 {context_str}
 """

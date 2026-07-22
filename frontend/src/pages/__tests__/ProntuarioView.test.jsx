@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import ProntuarioView from '../ProntuarioView'
+import * as schemaModule from '../../utils/prontuarioSchema'
 
 const mockProntuarioData = {
   id: 'pront-1',
@@ -146,5 +147,64 @@ describe('PDFTEST-05: exportPDF error handling', () => {
     await waitFor(() => {
       expect(clickSpy).toHaveBeenCalled()
     })
+  })
+})
+
+describe('PRONT-17: visualização expandida', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders all new habitacional fields when present', async () => {
+    const habitacionalData = {
+      tipo_residencia: 'Própria',
+      material_paredes: 'Alvenaria',
+      energia_eletrica: 'Medidor próprio',
+      agua_canalizada: 'Sim',
+      abastecimento_agua: 'Rede geral',
+      escoamento_sanitario: 'Rede esgoto',
+      coleta_lixo: 'Direta',
+      total_comodos: 5,
+      dormitorios: 2,
+      area_risco: 'Não',
+      acesso_dificil: 'Não',
+      conflito_violencia: 'Não',
+    }
+    const mockData = {
+      ...mockProntuarioData,
+      dados_json: {
+        identificacao: { logradouro: 'Rua A', localizacao_domicilio: 'Urbano' },
+        composicao_familiar: [{ nome: 'João', parentesco: 'Filho' }],
+        habitacional: habitacionalData,
+      },
+    }
+    mockSingle.mockResolvedValueOnce({ data: mockData, error: null })
+    renderView()
+    await waitFor(() => {
+      expect(screen.getByText('Própria')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Alvenaria')).toBeInTheDocument()
+    expect(screen.getByText('Medidor próprio')).toBeInTheDocument()
+    expect(screen.getByText('Rede geral')).toBeInTheDocument()
+    expect(screen.getByText('Rede esgoto')).toBeInTheDocument()
+  })
+
+  it('calls migrarSchemaAntigo on load with old schema data', async () => {
+    const migrarSpy = vi.spyOn(schemaModule, 'migrarSchemaAntigo')
+    const oldData = {
+      identificacao: { logradouro: 'Rua Velha', numero: '50' },
+      composicao_familiar: [],
+      observacoes: 'Prontuário antigo',
+    }
+    const mockData = {
+      ...mockProntuarioData,
+      dados_json: oldData,
+    }
+    mockSingle.mockResolvedValueOnce({ data: mockData, error: null })
+    renderView()
+    await waitFor(() => {
+      expect(migrarSpy).toHaveBeenCalledWith(expect.objectContaining({ identificacao: expect.objectContaining({ logradouro: 'Rua Velha' }) }))
+    })
+    migrarSpy.mockRestore()
   })
 })

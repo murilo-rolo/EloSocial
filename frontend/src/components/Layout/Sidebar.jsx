@@ -1,19 +1,17 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { canManageUsers, isRequerente } from '../../utils/roles'
-import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot, ClipboardList, ListTodo, FolderOpen, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Calendar, Users, FileText, MessageSquare, Video, Settings, BookOpen, Bot, FolderOpen, HelpCircle } from 'lucide-react'
 
 export default function Sidebar({ open, onClose }) {
   const { profile } = useAuth()
 
   const links = isRequerente(profile?.role)
     ? [
-        { to: '/acompanhamento', label: 'Dashboard', icon: <LayoutDashboard size={20} />, end: true },
-        { to: '/triagem', label: 'Triagem', icon: <ClipboardList size={20} /> },
+        { to: '/acompanhamento', label: 'Acompanhamento', icon: <LayoutDashboard size={20} />, end: true },
         { to: '/chat-atendimento', label: 'Mensagens', icon: <MessageSquare size={20} /> },
         { to: '/video-atendimento', label: 'Video', icon: <Video size={20} /> },
-        { to: '/plano-acao', label: 'Plano de Acao', icon: <ListTodo size={20} /> },
-        { to: '/cofre-digital', label: 'Cofre Digital', icon: <FolderOpen size={20} /> },
+        { to: '/documentos', label: 'Documentos', icon: <FolderOpen size={20} /> },
         { to: '/ajuda', label: 'Ajuda', icon: <HelpCircle size={20} /> },
       ]
     : [

@@ -6,6 +6,536 @@ import { SECOES, migrarSchemaAntigo } from '../utils/prontuarioSchema'
 import { ROLE_LABELS } from '../utils/roles'
 import { formatDate, formatDateTime } from '../utils/format'
 
+function _hasEspecificidade(v) {
+  if (typeof v === 'boolean') return v
+  if (typeof v === 'object' && v) return v.ativo
+  return false
+}
+
+function RenderSection({ secaoKey, dados, fullDados }) {
+  if (secaoKey === 'composicao_familiar') {
+    return (
+      <div>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Parentesco</th>
+                <th>Sexo</th>
+                <th>Data Nasc.</th>
+                <th>Documentação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dados.map((m, i) => (
+                <tr key={i}>
+                  <td>{m.nome}</td>
+                  <td>{m.parentesco}</td>
+                  <td>{m.sexo}</td>
+                  <td>{m.data_nascimento}</td>
+                  <td>{(m.documentacao || []).join(', ')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {fullDados?.perfil_etario && (
+          <div style={{ marginTop: 12 }}>
+            <strong>Perfil Etário</strong>
+            <div className="table-container" style={{ marginTop: 4 }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>0 a 6</th><th>7 a 14</th><th>15 a 17</th><th>18 a 29</th>
+                    <th>30 a 59</th><th>60 a 64</th><th>65 a 69</th><th>70+</th><th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{fullDados.perfil_etario['0_a_6']}</td>
+                    <td>{fullDados.perfil_etario['7_a_14']}</td>
+                    <td>{fullDados.perfil_etario['15_a_17']}</td>
+                    <td>{fullDados.perfil_etario['18_a_29']}</td>
+                    <td>{fullDados.perfil_etario['30_a_59']}</td>
+                    <td>{fullDados.perfil_etario['60_a_64']}</td>
+                    <td>{fullDados.perfil_etario['65_a_69']}</td>
+                    <td>{fullDados.perfil_etario['70_mais']}</td>
+                    <td><strong>{fullDados.perfil_etario.total}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {fullDados?.especificidades_sociais && Object.values(fullDados.especificidades_sociais).some(_hasEspecificidade) && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Especificidades Sociais:</strong>
+            <ul style={{ margin: '4px 0 0 16px' }}>
+              {Object.entries(fullDados.especificidades_sociais).filter(([, v]) => typeof v === 'boolean' && v).map(([k]) => (
+                <li key={k}>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</li>
+              ))}
+              {Object.entries(fullDados.especificidades_sociais).filter(([, v]) => typeof v === 'object' && v?.ativo).map(([k, v]) => (
+                <li key={k}>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}{v.etnia ? ` — ${v.etnia}` : ''}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'identificacao') {
+    const simpleFields = ['logradouro', 'numero', 'complemento', 'bairro', 'municipio', 'uf', 'cep', 'apelido', 'localizacao_domicilio', 'tipo_unidade', 'nome_unidade', 'forma_ingresso', 'motivo_primeiro_atendimento', 'orgao_encaminhador']
+    const progs = dados.programas_sociais
+    return (
+      <div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 8 }}>
+          {simpleFields.map(k => dados[k] ? <div key={k}><strong>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:</strong> {dados[k]}</div> : null)}
+        </div>
+        {progs && Object.values(progs).some(p => p?.ativo) && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Programas Sociais:</strong>
+            <ul style={{ margin: '4px 0 0 16px' }}>
+              {Object.entries(progs).filter(([, v]) => v?.ativo).map(([k, v]) => (
+                <li key={k}>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}{v.valor ? ` — R$ ${v.valor}` : ''}{k === 'outros' && v.descricao ? ` (${v.descricao})` : ''}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'habitacional') {
+    const fields = [
+      ['tipo_residencia', 'Tipo de Residência'],
+      ['material_paredes', 'Material das Paredes'],
+      ['energia_eletrica', 'Energia Elétrica'],
+      ['agua_canalizada', 'Água Canalizada'],
+      ['abastecimento_agua', 'Abastecimento de Água'],
+      ['escoamento_sanitario', 'Escoamento Sanitário'],
+      ['coleta_lixo', 'Coleta de Lixo'],
+      ['total_comodos', 'Total de Cômodos'],
+      ['dormitorios', 'Dormitórios'],
+      ['pessoas_por_dormitorio', 'Pessoas por Dormitório'],
+      ['area_risco', 'Área de Risco'],
+      ['acesso_dificil', 'Acesso Difícil'],
+      ['conflito_violencia', 'Conflito/Violência'],
+    ]
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 8 }}>
+        {fields.map(([k, label]) => {
+          const v = dados[k]
+          return v || v === 0 ? <div key={k}><strong>{label}:</strong> {v === 0 ? '0' : v}</div> : null
+        })}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'educacional') {
+    return (
+      <div>
+        {dados.vulnerabilidades && Object.values(dados.vulnerabilidades).some(v => v) && (
+          <div>
+            <strong>Vulnerabilidades Educacionais</strong>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8, marginTop: 4 }}>
+              {Object.entries(dados.vulnerabilidades).filter(([, v]) => v).map(([k, v]) => (
+                <div key={k}><strong>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:</strong> {v}</div>
+              ))}
+            </div>
+          </div>
+        )}
+        {dados.membros?.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Membros</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Nome</th><th>Idade</th><th>Sabe Ler</th><th>Frequenta Escola</th><th>Escolaridade</th></tr></thead>
+                <tbody>
+                  {dados.membros.map((m, i) => (
+                    <tr key={i}>
+                      <td>{m.nome}</td><td>{m.idade}</td><td>{m.sabe_ler || '—'}</td><td>{m.frequenta_escola || '—'}</td><td>{m.escolaridade || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {dados.condicionalidades_bf?.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Condicionalidades Bolsa Família</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Mês/Ano</th><th>Efeito</th></tr></thead>
+                <tbody>
+                  {dados.condicionalidades_bf.map((c, i) => (
+                    <tr key={i}><td>{c.mes_ano || '—'}</td><td>{c.efeito || '—'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'trabalho_renda') {
+    const rendaFields = [
+      ['renda_total_sem_programas', 'Renda Total sem Programas'],
+      ['renda_per_capita_sem_programas', 'Renda Per Capita sem Programas'],
+      ['renda_total_com_programas', 'Renda Total com Programas'],
+      ['renda_per_capita_com_programas', 'Renda Per Capita com Programas'],
+      ['aposentados', 'Aposentados'],
+    ]
+    return (
+      <div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 8 }}>
+          {rendaFields.map(([k, label]) => dados[k] ? <div key={k}><strong>{label}:</strong> R$ {dados[k]}</div> : null)}
+        </div>
+        {dados.membros?.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Membros</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Nome</th><th>Idade</th><th>CTPS</th><th>Ocupação</th><th>Qualificação</th><th>Renda</th></tr></thead>
+                <tbody>
+                  {dados.membros.map((m, i) => (
+                    <tr key={i}>
+                      <td>{m.nome}</td><td>{m.idade}</td>
+                      <td>{m.possui_ctps || '—'}</td><td>{m.condicao_ocupacao || '—'}</td>
+                      <td>{m.possui_qualificacao === 'S' ? (m.qualificacao || 'Sim') : (m.possui_qualificacao || '—')}</td>
+                      <td>{m.renda_mensal ? `R$ ${m.renda_mensal}` : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'saude') {
+    return (
+      <div>
+        {dados.deficiencias?.length > 0 && (
+          <div>
+            <strong>Deficiências</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Nome</th><th>Tipos</th><th>Cuidador</th></tr></thead>
+                <tbody>
+                  {dados.deficiencias.map((d, i) => (
+                    <tr key={i}>
+                      <td>{d.nome}</td>
+                      <td>{(d.tipos || []).join(', ')}</td>
+                      <td>{d.necessita_cuidador === 'Sim' ? `Sim — ${d.responsavel_cuidador || ''}` : (d.necessita_cuidador || '—')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {[
+          { key: 'pessoa_necessita_cuidados', label: 'Pessoa que necessita de cuidados' },
+          { key: 'inseguranca_alimentar', label: 'Insegurança Alimentar' },
+          { key: 'doencas_graves', label: 'Doenças Graves' },
+          { key: 'remedios_controlados', label: 'Remédios Controlados' },
+          { key: 'uso_alcool', label: 'Uso de Álcool' },
+          { key: 'uso_drogas', label: 'Uso de Drogas' },
+        ].map(({ key, label }) => {
+          const item = dados[key]
+          if (!item || !item.resposta) return null
+          return (
+            <div key={key} style={{ marginTop: 4 }}>
+              <strong>{label}:</strong> {item.resposta === 'Sim' ? 'Sim' : 'Não'}
+              {item.resposta === 'Sim' && Object.entries(item).filter(([k]) => k !== 'resposta').filter(([, v]) => v).map(([k, v]) => (
+                <span key={k}> — {k.replace(/_/g, ' ')}: {v}</span>
+              ))}
+            </div>
+          )
+        })}
+        {dados.gestantes?.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Gestantes</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Nome</th><th>Meses</th><th>Pré-natal</th><th>Data</th></tr></thead>
+                <tbody>
+                  {dados.gestantes.map((g, i) => (
+                    <tr key={i}>
+                      <td>{g.nome}</td><td>{g.meses_gestacao}</td>
+                      <td>{g.pre_natal || '—'}</td><td>{g.data_anotacao || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'beneficios') {
+    if (!dados.registros?.length) return null
+    return (
+      <div className="table-container">
+        <table>
+          <thead><tr><th>Data</th><th>Tipo</th><th>Observação</th></tr></thead>
+          <tbody>
+            {dados.registros.map((b, i) => (
+              <tr key={i}>
+                <td>{b.data || '—'}</td>
+                <td>{b.tipo || '—'}</td>
+                <td>{b.observacao || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  if (secaoKey === 'convivencia') {
+    const simNaoKeys = [
+      { key: 'dependentes_sozinhos', label: 'Dependentes ficam sozinhos' },
+      { key: 'discriminacao', label: 'Discriminação na comunidade' },
+      { key: 'rede_apoio_parentes', label: 'Rede de apoio (parentes)' },
+      { key: 'rede_apoio_vizinhos', label: 'Rede de apoio (vizinhos)' },
+      { key: 'grupos_religiosos_comunitarios', label: 'Grupos religiosos/comunitários' },
+      { key: 'lazer_crianca', label: 'Lazer para crianças' },
+      { key: 'lazer_idoso', label: 'Lazer para idosos' },
+    ]
+    return (
+      <div>
+        {simNaoKeys.map(({ key, label }) => {
+          const item = dados[key]
+          if (!item || !item.resposta) return null
+          return (
+            <div key={key} style={{ marginTop: 2 }}>
+              <strong>{label}:</strong> {item.resposta}{item.observacao ? ` — ${item.observacao}` : ''}
+            </div>
+          )
+        })}
+        {dados.tempo_residencia && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Tempo de Residência</strong>
+            {['estado', 'municipio', 'bairro'].map(local => {
+              const t = dados.tempo_residencia[local]
+              if (!t || (!t.anos && !t.sempre)) return null
+              return <div key={local}>{local.charAt(0).toUpperCase() + local.slice(1)}: {t.sempre ? 'Sempre morou' : `${t.anos} anos`}</div>
+            })}
+          </div>
+        )}
+        {['relacoes_conjugais', 'relacoes_pais_filhos', 'relacoes_irmaos'].map(section => {
+          const items = dados[section]
+          if (!items?.length) return null
+          return (
+            <div key={section} style={{ marginTop: 8 }}>
+              <strong>{section.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</strong>
+              <div className="table-container">
+                <table>
+                  <thead><tr><th>Técnico</th><th>Data</th><th>Avaliação</th></tr></thead>
+                  <tbody>
+                    {items.map((r, i) => (
+                      <tr key={i}><td>{r.tecnico || '—'}</td><td>{r.data || '—'}</td><td>{r.avaliacao || '—'}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        })}
+        {dados.outros_conflitos && <div style={{ marginTop: 4 }}><strong>Outros Conflitos:</strong> {dados.outros_conflitos}</div>}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'violencia') {
+    return (
+      <div>
+        {dados.quadro1?.length > 0 && (
+          <div>
+            <strong>Quadro 1 — Tipos de Violência</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Tipo</th><th>Persiste</th><th>Data</th></tr></thead>
+                <tbody>
+                  {dados.quadro1.map((q, i) => (
+                    q.tipo || q.persiste ? <tr key={i}><td>{q.tipo || '—'}</td><td>{q.persiste || '—'}</td><td>{q.data_anotacao || '—'}</td></tr> : null
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {dados.quadro2_creas?.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Quadro 2 — Acompanhamento CREAS</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Data Início</th><th>Data Fim</th><th>Identificação CREAS</th></tr></thead>
+                <tbody>
+                  {dados.quadro2_creas.map((q, i) => (
+                    <tr key={i}><td>{q.data_inicio || '—'}</td><td>{q.data_fim || '—'}</td><td>{q.identificacao_creas || '—'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {dados.quadro3_creas?.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <strong>Quadro 3 — Situações (CREAS)</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Ordem/Pessoa</th><th>Código</th><th>Tipo</th><th>Data</th></tr></thead>
+                <tbody>
+                  {dados.quadro3_creas.map((q, i) => (
+                    <tr key={i}><td>{q.ordem_pessoa || '—'}</td><td>{q.codigo_situacao || '—'}</td><td>{q.tipo || '—'}</td><td>{q.data_registro || '—'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'encaminhamentos') {
+    return (
+      <div className="table-container">
+        <table>
+          <thead><tr><th>Área</th><th>Órgão Destino</th><th>Objetivo/Motivo</th><th>Data</th><th>Contra-Referência</th></tr></thead>
+          <tbody>
+            {dados.map((e, i) => (
+              <tr key={i}>
+                <td>{e.area || '—'}</td>
+                <td>{e.orgao_destino || e.destino || '—'}</td>
+                <td>{e.objetivo_motivo || e.motivo || '—'}</td>
+                <td>{e.data || '—'}</td>
+                <td>{e.contra_referencia || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  if (secaoKey === 'participacao') {
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 8 }}>
+        {Object.entries(dados).filter(([, v]) => v).map(([k, v]) => (
+          <div key={k}><strong>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:</strong> {typeof v === 'object' ? JSON.stringify(v) : v}</div>
+        ))}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'observacoes') {
+    return <p style={{ whiteSpace: 'pre-wrap' }}>{dados}</p>
+  }
+
+  if (secaoKey === 'medidas_socioeducativas') {
+    return (
+      <div className="table-container">
+        <table>
+          <thead><tr><th>Ordem</th><th>Nome</th><th>Tipo</th><th>Processo</th><th>Início</th><th>Fim</th><th>Acomp. CREAS</th></tr></thead>
+          <tbody>
+            {dados.map((m, i) => (
+              <tr key={i}>
+                <td>{m.ordem || i + 1}</td>
+                <td>{m.nome || '—'}</td>
+                <td>{m.tipo_medida || '—'}</td>
+                <td>{m.numero_processo || '—'}</td>
+                <td>{m.data_inicio || '—'}</td>
+                <td>{m.data_fim || '—'}</td>
+                <td>{m.acompanhamento_creas?.resposta || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  if (secaoKey === 'acolhimento_institucional') {
+    return (
+      <div>
+        {dados.historico?.length > 0 && (
+          <div>
+            <strong>Histórico de Acolhimento</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Nome</th><th>Data Início</th><th>Data Fim</th><th>Motivo</th></tr></thead>
+                <tbody>
+                  {dados.historico.map((h, i) => (
+                    <tr key={i}><td>{h.nome || '—'}</td><td>{h.data_inicio || '—'}</td><td>{h.data_fim || '—'}</td><td>{h.motivo || '—'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {dados.acolhimento_familia?.periodo && <div style={{ marginTop: 4 }}><strong>Acolhimento Família:</strong> {dados.acolhimento_familia.periodo}{dados.acolhimento_familia.motivo ? ` — ${dados.acolhimento_familia.motivo}` : ''}</div>}
+        {dados.guarda_informal?.periodo && <div style={{ marginTop: 2 }}><strong>Guarda Informal:</strong> {dados.guarda_informal.periodo}{dados.guarda_informal.razao ? ` — ${dados.guarda_informal.razao}` : ''}</div>}
+        {dados.membro_prisao && <div style={{ marginTop: 2 }}><strong>Membro Preso:</strong> Sim</div>}
+        {dados.adolescente_internacao && <div style={{ marginTop: 2 }}><strong>Adolescente em Internação:</strong> Sim</div>}
+      </div>
+    )
+  }
+
+  if (secaoKey === 'planejamento_evolucao') {
+    return (
+      <div>
+        {dados.inclusao_desligamento?.length > 0 && (
+          <div>
+            <strong>Inclusão/Desligamento</strong>
+            <div className="table-container">
+              <table>
+                <thead><tr><th>Incluir</th><th>Data Inclusão</th><th>Desligar</th><th>Data Desligamento</th><th>Razão</th></tr></thead>
+                <tbody>
+                  {dados.inclusao_desligamento.map((r, i) => (
+                    <tr key={i}>
+                      <td>{r.incluir ? 'Sim' : 'Não'}</td>
+                      <td>{r.data_inclusao || '—'}</td>
+                      <td>{r.desligar ? 'Sim' : 'Não'}</td>
+                      <td>{r.data_desligamento || '—'}</td>
+                      <td>{r.razao_desligamento || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        {dados.planejamento_inicial && <div style={{ marginTop: 8 }}><strong>Planejamento Inicial:</strong><p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{dados.planejamento_inicial}</p></div>}
+        {dados.evolucao && <div style={{ marginTop: 8 }}><strong>Evolução:</strong><p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{dados.evolucao}</p></div>}
+      </div>
+    )
+  }
+
+  if (typeof dados === 'object' && !Array.isArray(dados)) {
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 8 }}>
+        {Object.entries(dados).filter(([, v]) => v !== null && v !== '' && v !== false && !(typeof v === 'object' && !Array.isArray(v) && !Object.values(v).some(v2 => v2))).map(([k, v]) => (
+          <div key={k}><strong>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:</strong> {typeof v === 'object' ? JSON.stringify(v) : String(v)}</div>
+        ))}
+      </div>
+    )
+  }
+
+  return null
+}
+
 export default function ProntuarioView({ id: propId, isDrawer = false }) {
   const { id: paramId } = useParams()
   const id = propId || paramId
@@ -250,61 +780,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
             <div className="card-header">
               <h3>{secao.icon} {secao.title}</h3>
             </div>
-            {secao.key === 'composicao_familiar' ? (
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Nome</th>
-                      <th>Parentesco</th>
-                      <th>Sexo</th>
-                      <th>Data Nasc.</th>
-                      <th>Documentação</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dadosSecao.map((m, i) => (
-                      <tr key={i}>
-                        <td>{m.nome}</td>
-                        <td>{m.parentesco}</td>
-                        <td>{m.sexo}</td>
-                        <td>{m.data_nascimento}</td>
-                        <td>{m.documentacao}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : secao.key === 'encaminhamentos' ? (
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Destino</th>
-                      <th>Motivo</th>
-                      <th>Data</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dadosSecao.map((e, i) => (
-                      <tr key={i}>
-                        <td>{e.destino}</td>
-                        <td>{e.motivo}</td>
-                        <td>{e.data}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : secao.key === 'observacoes' ? (
-              <p style={{ whiteSpace: 'pre-wrap' }}>{dadosSecao}</p>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 8 }}>
-                {Object.entries(dadosSecao).map(([k, v]) => (
-                  v ? <div key={k}><strong>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:</strong> {v}</div> : null
-                ))}
-              </div>
-            )}
+            <RenderSection secaoKey={secao.key} dados={dadosSecao} fullDados={dados} />
           </div>
         )
       })}

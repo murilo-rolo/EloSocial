@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useRealtime } from '../../hooks/useRealtime'
 import { formatDate, formatDateTime } from '../../utils/format'
+import { auditLog } from '../../utils/audit'
 import { Plus, Trash2, CheckCircle2, Clock, PlayCircle, Calendar, Video, X } from 'lucide-react'
 
 const STATUS_CYCLE = ['pendente', 'em_andamento', 'concluido']
@@ -143,6 +144,9 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', item.id)
       if (error) throw error
+      if (newStatus === 'concluido') {
+        auditLog(profile.id, 'concluiu_tarefa', { tarefa_id: item.id, titulo: item.titulo, caso_id: casoId })
+      }
     } catch (err) {
       alert('Erro ao atualizar status: ' + err.message)
     }
@@ -188,6 +192,9 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
     try {
       const { error } = await supabase.from('agendamentos').update({ status: newStatus }).eq('id', id)
       if (error) throw error
+      if (newStatus === 'Concluido') {
+        auditLog(profile.id, 'concluiu_agendamento', { agendamento_id: id })
+      }
       loadAgendamentos()
     } catch (err) {
       alert('Erro ao atualizar agendamento: ' + err.message)

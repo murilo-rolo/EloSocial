@@ -11,6 +11,9 @@ import {
   ENERGIA_OPCOES, ABASTECIMENTO_AGUA_OPCOES,
   ESCOAMENTO_OPCOES, COLETA_LIXO_OPCOES,
   ESCOLARIDADE_OPCOES,
+  CONDICAO_OCUPACAO_OPCOES,
+  TIPO_DEFICIENCIA_OPCOES,
+  TIPO_BENEFICIO_OPCOES,
 } from '../utils/prontuarioSchema'
 import { auditLog } from '../utils/audit'
 
@@ -178,6 +181,116 @@ export default function ProntuarioEdit() {
     const list = [...(prontuario.educacional?.condicionalidades_bf || [])]
     list.splice(index, 1)
     setProntuario(prev => ({ ...prev, educacional: { ...prev.educacional, condicionalidades_bf: list } }))
+  }
+
+  function addMembroTrabalho() {
+    setProntuario(prev => ({
+      ...prev,
+      trabalho_renda: {
+        ...prev.trabalho_renda,
+        membros: [...(prev.trabalho_renda?.membros || []), { ordem: (prev.trabalho_renda?.membros?.length || 0) + 1, nome: '', idade: '', possui_ctps: '', condicao_ocupacao: '', possui_qualificacao: '', qualificacao: '', renda_mensal: '' }],
+      },
+    }))
+  }
+
+  function updateMembroTrabalho(index, field, value) {
+    const list = [...(prontuario.trabalho_renda?.membros || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, trabalho_renda: { ...prev.trabalho_renda, membros: list } }))
+  }
+
+  function removeMembroTrabalho(index) {
+    const list = [...(prontuario.trabalho_renda?.membros || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, trabalho_renda: { ...prev.trabalho_renda, membros: list } }))
+  }
+
+  function addDeficiencia() {
+    setProntuario(prev => ({
+      ...prev,
+      saude: {
+        ...prev.saude,
+        deficiencias: [...(prev.saude?.deficiencias || []), { ordem: (prev.saude?.deficiencias?.length || 0) + 1, nome: '', tipos: [], necessita_cuidador: '', responsavel_cuidador: '' }],
+      },
+    }))
+  }
+
+  function updateDeficiencia(index, field, value) {
+    const list = [...(prontuario.saude?.deficiencias || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, saude: { ...prev.saude, deficiencias: list } }))
+  }
+
+  function toggleDeficienciaTipo(index, tipo) {
+    const list = [...(prontuario.saude?.deficiencias || [])]
+    const tipos = list[index].tipos || []
+    const idx = tipos.indexOf(tipo)
+    list[index] = {
+      ...list[index],
+      tipos: idx >= 0 ? tipos.filter(t => t !== tipo) : [...tipos, tipo],
+    }
+    setProntuario(prev => ({ ...prev, saude: { ...prev.saude, deficiencias: list } }))
+  }
+
+  function removeDeficiencia(index) {
+    const list = [...(prontuario.saude?.deficiencias || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, saude: { ...prev.saude, deficiencias: list } }))
+  }
+
+  function addGestante() {
+    setProntuario(prev => ({
+      ...prev,
+      saude: {
+        ...prev.saude,
+        gestantes: [...(prev.saude?.gestantes || []), { ordem: (prev.saude?.gestantes?.length || 0) + 1, nome: '', meses_gestacao: 0, pre_natal: '', data_anotacao: '' }],
+      },
+    }))
+  }
+
+  function updateGestante(index, field, value) {
+    const list = [...(prontuario.saude?.gestantes || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, saude: { ...prev.saude, gestantes: list } }))
+  }
+
+  function removeGestante(index) {
+    const list = [...(prontuario.saude?.gestantes || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, saude: { ...prev.saude, gestantes: list } }))
+  }
+
+  function updateSaudeField(field, subField, value) {
+    setProntuario(prev => ({
+      ...prev,
+      saude: {
+        ...prev.saude,
+        [field]: { ...prev.saude?.[field], [subField]: value },
+      },
+    }))
+  }
+
+  function addBeneficio() {
+    const novo = { data: '', tipo: '', observacao: '', registro_nascimento: '', cpf_falecido: '' }
+    setProntuario(prev => ({
+      ...prev,
+      beneficios: {
+        ...prev.beneficios,
+        registros: [...(prev.beneficios?.registros || []), novo],
+      },
+    }))
+  }
+
+  function updateBeneficio(index, field, value) {
+    const list = [...(prontuario.beneficios?.registros || [])]
+    list[index] = { ...list[index], [field]: value }
+    setProntuario(prev => ({ ...prev, beneficios: { ...prev.beneficios, registros: list } }))
+  }
+
+  function removeBeneficio(index) {
+    const list = [...(prontuario.beneficios?.registros || [])]
+    list.splice(index, 1)
+    setProntuario(prev => ({ ...prev, beneficios: { ...prev.beneficios, registros: list } }))
   }
 
   const handleSave = async () => {
@@ -761,7 +874,279 @@ export default function ProntuarioEdit() {
                 </div>
               )}
 
-              {['trabalho_renda', 'saude', 'beneficios', 'convivencia', 'participacao', 'violencia'].includes(secao.key) && (
+              {secao.key === 'trabalho_renda' && (
+                <div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Renda Total sem Programas (R$)</label>
+                      <input className="form-control" type="text" inputMode="decimal" value={prontuario.trabalho_renda.renda_total_sem_programas || ''}
+                        onChange={(e) => updateSection('trabalho_renda', { renda_total_sem_programas: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Renda Per Capita sem Programas (R$)</label>
+                      <input className="form-control" type="text" inputMode="decimal" value={prontuario.trabalho_renda.renda_per_capita_sem_programas || ''}
+                        onChange={(e) => updateSection('trabalho_renda', { renda_per_capita_sem_programas: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>Renda Total com Programas (R$)</label>
+                      <input className="form-control" type="text" inputMode="decimal" value={prontuario.trabalho_renda.renda_total_com_programas || ''}
+                        onChange={(e) => updateSection('trabalho_renda', { renda_total_com_programas: e.target.value })} />
+                    </div>
+                    <div className="form-group">
+                      <label>Renda Per Capita com Programas (R$)</label>
+                      <input className="form-control" type="text" inputMode="decimal" value={prontuario.trabalho_renda.renda_per_capita_com_programas || ''}
+                        onChange={(e) => updateSection('trabalho_renda', { renda_per_capita_com_programas: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Aposentados na Família</label>
+                    <textarea className="form-control" rows={2} value={prontuario.trabalho_renda.aposentados || ''}
+                      onChange={(e) => updateSection('trabalho_renda', { aposentados: e.target.value })} />
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Membros (Trabalho e Rendimento)</strong>
+                    {(prontuario.trabalho_renda?.membros || []).map((m, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => removeMembroTrabalho(i)} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Nome</label>
+                            <input className="form-control" value={m.nome} onChange={(e) => updateMembroTrabalho(i, 'nome', e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Idade</label>
+                            <input className="form-control" value={m.idade} onChange={(e) => updateMembroTrabalho(i, 'idade', e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Possui CTPS</label>
+                            <select className="form-control" value={m.possui_ctps} onChange={(e) => updateMembroTrabalho(i, 'possui_ctps', e.target.value)}>
+                              <option value="">Selecione</option>
+                              <option value="S">Sim</option>
+                              <option value="N">Não</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Condição de Ocupação</label>
+                            <select className="form-control" value={m.condicao_ocupacao} onChange={(e) => updateMembroTrabalho(i, 'condicao_ocupacao', e.target.value)}>
+                              <option value="">Selecione</option>
+                              {CONDICAO_OCUPACAO_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Possui Qualificação Profissional</label>
+                            <select className="form-control" value={m.possui_qualificacao} onChange={(e) => updateMembroTrabalho(i, 'possui_qualificacao', e.target.value)}>
+                              <option value="">Selecione</option>
+                              <option value="S">Sim</option>
+                              <option value="N">Não</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Qualificação</label>
+                            <input className="form-control" value={m.qualificacao} onChange={(e) => updateMembroTrabalho(i, 'qualificacao', e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Renda Mensal (R$)</label>
+                            <input className="form-control" value={m.renda_mensal} onChange={(e) => updateMembroTrabalho(i, 'renda_mensal', e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={addMembroTrabalho}>
+                      + Adicionar Membro
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {secao.key === 'saude' && (
+                <div>
+                  <div style={{ marginTop: 8 }}>
+                    <strong>Deficiências</strong>
+                    {(prontuario.saude?.deficiencias || []).map((d, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => removeDeficiencia(i)} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Nome</label>
+                            <input className="form-control" value={d.nome} onChange={(e) => updateDeficiencia(i, 'nome', e.target.value)} />
+                          </div>
+                        </div>
+                        <div className="form-group">
+                          <label>Tipos de Deficiência</label>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {TIPO_DEFICIENCIA_OPCOES.map(tipo => (
+                              <label key={tipo} className="checkbox-label">
+                                <input type="checkbox" checked={(d.tipos || []).includes(tipo)}
+                                  onChange={() => toggleDeficienciaTipo(i, tipo)} />
+                                {' '}{tipo}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Necessita Cuidador</label>
+                            <div className="radio-group">
+                              {SIM_NAO_OPCOES.map(o => (
+                                <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                                  <input type="radio" name={`cuidador_${i}`} value={o}
+                                    checked={d.necessita_cuidador === o}
+                                    onChange={(e) => updateDeficiencia(i, 'necessita_cuidador', e.target.value)} />
+                                  {' '}{o}
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="form-group">
+                            <label>Responsável/Cuidador</label>
+                            <input className="form-control" value={d.responsavel_cuidador || ''}
+                              onChange={(e) => updateDeficiencia(i, 'responsavel_cuidador', e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={addDeficiencia}>
+                      + Adicionar Deficiência
+                    </button>
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    {[
+                      { key: 'pessoa_necessita_cuidados', label: 'Pessoa que necessita de cuidados', fields: ['nomes', 'responsavel'] },
+                      { key: 'inseguranca_alimentar', label: 'Insegurança Alimentar', fields: ['data'] },
+                      { key: 'doencas_graves', label: 'Doenças Graves', fields: ['descricao'] },
+                      { key: 'remedios_controlados', label: 'Remédios Controlados', fields: ['nomes'] },
+                      { key: 'uso_alcool', label: 'Uso de Álcool', fields: ['nomes', 'data'] },
+                      { key: 'uso_drogas', label: 'Uso de Drogas', fields: ['nomes_substancias', 'data'] },
+                    ].map(({ key, label, fields }) => (
+                      <div key={key} style={{ marginTop: 12 }}>
+                        <label>{label}</label>
+                        <div className="radio-group">
+                          {SIM_NAO_OPCOES.map(o => (
+                            <label key={o} className="radio-label" style={{ display: 'inline-block', marginRight: 8 }}>
+                              <input type="radio" name={key} value={o}
+                                checked={prontuario.saude?.[key]?.resposta === o}
+                                onChange={(e) => updateSaudeField(key, 'resposta', e.target.value)} />
+                              {' '}{o}
+                            </label>
+                          ))}
+                        </div>
+                        {prontuario.saude?.[key]?.resposta === 'Sim' && fields.map(f => (
+                          <div key={f} className="form-group" style={{ marginTop: 4 }}>
+                            <input className="form-control" placeholder={f.replace(/_/g, ' ')}
+                              value={prontuario.saude?.[key]?.[f] || ''}
+                              onChange={(e) => updateSaudeField(key, f, e.target.value)} />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: 16 }}>
+                    <strong>Gestantes</strong>
+                    {(prontuario.saude?.gestantes || []).map((g, i) => (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                        <button onClick={() => removeGestante(i)} style={{
+                          position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                          color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                        }}>×</button>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Nome</label>
+                            <input className="form-control" value={g.nome} onChange={(e) => updateGestante(i, 'nome', e.target.value)} />
+                          </div>
+                          <div className="form-group">
+                            <label>Meses de Gestação</label>
+                            <input type="number" className="form-control" min={0} max={9} value={g.meses_gestacao ?? ''}
+                              onChange={(e) => updateGestante(i, 'meses_gestacao', Number(e.target.value))} />
+                          </div>
+                        </div>
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label>Pré-natal</label>
+                            <select className="form-control" value={g.pre_natal} onChange={(e) => updateGestante(i, 'pre_natal', e.target.value)}>
+                              <option value="">Selecione</option>
+                              <option value="S">Sim</option>
+                              <option value="N">Não</option>
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label>Data da Anotação</label>
+                            <input type="date" className="form-control" value={g.data_anotacao || ''}
+                              onChange={(e) => updateGestante(i, 'data_anotacao', e.target.value)} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button className="btn btn-outline btn-sm" onClick={addGestante}>
+                      + Adicionar Gestante
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {secao.key === 'beneficios' && (
+                <div>
+                  <strong>Registros de Benefícios Eventuais</strong>
+                  {(prontuario.beneficios?.registros || []).map((b, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 12, marginBottom: 8, position: 'relative' }}>
+                      <button onClick={() => removeBeneficio(i)} style={{
+                        position: 'absolute', top: 8, right: 8, background: 'none', border: 'none',
+                        color: 'var(--danger)', cursor: 'pointer', fontSize: 18,
+                      }}>×</button>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Data</label>
+                          <input type="date" className="form-control" value={b.data || ''}
+                            onChange={(e) => updateBeneficio(i, 'data', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>Tipo</label>
+                          <select className="form-control" value={b.tipo} onChange={(e) => updateBeneficio(i, 'tipo', e.target.value)}>
+                            <option value="">Selecione</option>
+                            {TIPO_BENEFICIO_OPCOES.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <label>Observação</label>
+                        <textarea className="form-control" rows={2} value={b.observacao || ''}
+                          onChange={(e) => updateBeneficio(i, 'observacao', e.target.value)} />
+                      </div>
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Registro de Nascimento</label>
+                          <input className="form-control" value={b.registro_nascimento || ''}
+                            onChange={(e) => updateBeneficio(i, 'registro_nascimento', e.target.value)} />
+                        </div>
+                        <div className="form-group">
+                          <label>CPF do Falecido</label>
+                          <input className="form-control" value={b.cpf_falecido || ''}
+                            onChange={(e) => updateBeneficio(i, 'cpf_falecido', e.target.value)} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="btn btn-outline btn-sm" onClick={addBeneficio}>
+                    + Adicionar Benefício
+                  </button>
+                </div>
+              )}
+
+              {['convivencia', 'participacao', 'violencia'].includes(secao.key) && (
                 <div>
                   {Object.entries(prontuario[secao.key] || {}).map(([field, value]) => (
                     <div className="form-group" key={field}>

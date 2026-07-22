@@ -58,6 +58,7 @@ Frontend (React PWA + Tailwind) ←→ Supabase SDK (Auth, DB, Realtime)
 - **Joins no Dashboard:** `Promise.all` manual (Supabase FK joins instáveis)
 - **Escopo CRAS:** Cada usuário vinculado a uma das 12 unidades; gerentes gerenciam só o próprio CRAS
 - **IA Contexto:** Prompt base em `backend/app/api/suas_context.py` (diretrizes SUAS/LOAS)
+- **IA Config:** `GEMINI_API_KEY` centralizada em `backend/app/config.py` (todos os módulos importam de lá)
 - **Ícones:** lucide-react em todas as páginas
 
 ## Perfis de Acesso
@@ -72,15 +73,23 @@ Frontend (React PWA + Tailwind) ←→ Supabase SDK (Auth, DB, Realtime)
 
 ## Funcionalidades de IA (Copiloto SUAS)
 
-| Funcionalidade | Endpoint | Descrição |
-|---|---|---|
-| ChatIA | `POST /api/chat-ai` | Chat contextual com IA sobre prontuário do requerente |
-| Triagem | `POST /api/triagem` | Análise automática de vulnerabilidade (score + cor) |
-| Resumo | `POST /api/resumo` | Resumo executivo do histórico do requerente |
-| Parecer | `POST /api/generate-parecer` | Geração de relatório (padrão, jurídico, saúde) |
-| RAG Upload | `POST /api/rag/upload` / `POST /api/rag/upload_file` | Upload de PDFs para base de conhecimento |
-| RAG Query | `POST /api/rag/query` | Busca híbrida (semântica + textual) |
-| OCR | `POST /api/ocr/extract_requerente` | Extração de dados de documentos (RG, CPF, CNH) |
+| Funcionalidade | Endpoint | Descrição | RAG |
+|---|---|---|---|
+| ChatIA | `POST /api/chat-ai` | Chat contextual com IA sobre prontuário do requerente | ✅ Tool calling + pré-consulta |
+| Triagem | `POST /api/triagem` | Análise automática de vulnerabilidade (score + cor) | ✅ Tool calling |
+| Resumo | `POST /api/resumo` | Resumo executivo do histórico do requerente | ✅ Tool calling |
+| Parecer | `POST /api/generate-parecer` | Geração de relatório (padrão, jurídico, saúde) | ❌ |
+| RAG Upload | `POST /api/rag/upload` / `POST /api/rag/upload_file` | Upload de PDFs para base de conhecimento | — |
+| RAG Query | `POST /api/rag/query` | Busca híbrida (semântica + textual) | — |
+| OCR | `POST /api/ocr/extract_requerente` | Extração de dados de documentos (RG, CPF, CNH) | ❌ |
+
+### Frontend — Copiloto SUAS em RequerenteDetail
+
+| Ação | Descrição |
+|---|---|
+| **Triagem IA** | Botão no detail que chama `/api/triagem` e salva resultado em `applicants.vulnerabilidade_*` |
+| **Resumo IA** | Botão no detail que chama `/api/resumo` e exibe em modal com cópia |
+| **Copiloto SUAS** | Widget flutuante (`ChatLLM`) que pré-carrega contexto RAG ao abrir e mantém tool calling |
 
 ## Unidades CRAS (Belém/PA)
 

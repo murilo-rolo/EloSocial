@@ -7,7 +7,7 @@
 | `/` | Dashboard | Autenticado |
 | `/agenda` | Agenda de Atendimentos | Autenticado |
 | `/requerentes` | Lista Requerentes | Autenticado |
-| `/requerentes/:id` | Detalhe Requerente + Triagem IA | Autenticado |
+| `/requerentes/:id` | Detalhe Requerente + Triagem IA + Resumo IA + Copiloto SUAS (ChatLLM) | Autenticado |
 | `/prontuarios/novo/:applicantId` | Novo Prontuário | Autenticado |
 | `/prontuarios/:id` | Ver Prontuário + Resumo IA | Autenticado |
 | `/chat` | Chat (Realtime) | Autenticado |
@@ -46,9 +46,9 @@
 
 | Método | Rota | Função |
 |---|---|---|
-| POST | `/api/chat-ai` | Chat contextual com IA sobre prontuário (tool calling RAG) |
-| POST | `/api/triagem` | Triagem de vulnerabilidade automática (score + cor) |
-| POST | `/api/resumo` | Resumo executivo do histórico do requerente |
+| POST | `/api/chat-ai` | Chat contextual com IA sobre prontuário (tool calling RAG + pré-consulta) |
+| POST | `/api/triagem` | Triagem de vulnerabilidade automática (score + cor, tool calling RAG) |
+| POST | `/api/resumo` | Resumo executivo do histórico do requerente (tool calling RAG) |
 | POST | `/api/generate-parecer` | Geração de parecer (formato: padrao_suas, juridico, saude) |
 
 ## RAG — Base de Conhecimento

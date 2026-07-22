@@ -30,6 +30,9 @@
 20. OCR usa Gemini Vision (`response_mime_type: application/json`) para extrair dados de documentos
 21. Triagem gera JSON com score (Alto/Médio/Baixo Risco), cor (vermelho/amarelo/verde) e motivo
 22. Gerador de pareceres aceita 3 formatos: `padrao_suas`, `juridico`, `saude`
+23. Triagem e resumo usam RAG via tool calling (`consultar_base_conhecimento`) — assim como o chat-ai
+24. ChatLLM faz pré-consulta RAG ao abrir — busca chunks relevantes ao requerente e injeta no system prompt
+25. `GEMINI_API_KEY` centralizada em `backend/app/config.py` — `genai.configure()` chamado uma vez; ai.py, rag.py, report_generator.py, ocr.py importam de lá
 
 ## Videoconferência & Anexos
 

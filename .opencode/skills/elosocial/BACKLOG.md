@@ -17,6 +17,11 @@
 - Backend: Gerador de pareceres (padrão, jurídico, saúde)
 - Backend: OCR — extração de dados de documentos (Gemini Vision)
 - Frontend: ChatIA (split-view: requerentes à esquerda, chat à direita)
+- Backend: RAG tool calling adicionado a triagem e resumo
+- Frontend: Botão "Triagem IA" em RequerenteDetail (chama `/api/triagem`, salva em `applicants.vulnerabilidade_*`)
+- Frontend: Botão "Resumo IA" em RequerenteDetail (chama `/api/resumo`, exibe modal)
+- Frontend: ChatLLM faz pré-consulta RAG ao abrir (injeta contexto no system prompt)
+- Backend: `GEMINI_API_KEY` centralizada em `config.py`
 
 ### RAG — Base de Conhecimento
 - Backend: pgvector + embeddings gemini-embedding-2 (768d)

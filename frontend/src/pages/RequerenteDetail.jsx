@@ -75,7 +75,7 @@ export default function RequerenteDetail() {
   const [resumoResult, setResumoResult] = useState(null)
   const [resumoLoading, setResumoLoading] = useState(false)
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
 
   async function handleTriagemIA() {
     setTriagemLoading(true)

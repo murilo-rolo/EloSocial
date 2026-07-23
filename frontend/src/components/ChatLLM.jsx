@@ -9,7 +9,7 @@ export default function ChatLLM({ prontuarioContext }) {
   const [ragChunks, setRagChunks] = useState(null)
   const endOfMessagesRef = useRef(null)
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
 
   // Pré-consulta RAG ao abrir o Copiloto
   useEffect(() => {

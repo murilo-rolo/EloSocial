@@ -18,7 +18,7 @@ export default function BaseConhecimento() {
   const fetchDocuments = async () => {
     setLoading(true)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
       const res = await fetch(`${apiUrl}/api/rag/documents`)
       if (res.ok) {
         const data = await res.json()
@@ -49,7 +49,7 @@ export default function BaseConhecimento() {
     formData.append('file', file)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
       const res = await fetch(`${apiUrl}/api/rag/upload_file`, {
         method: 'POST',
         body: formData
@@ -75,7 +75,7 @@ export default function BaseConhecimento() {
     if (!window.confirm(`Tem certeza que deseja apagar o documento "${titleStr}"? Esta ação excluirá todos os vetores associados.`)) return
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
       const res = await fetch(`${apiUrl}/api/rag/documents/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Erro ao deletar')
       fetchDocuments()

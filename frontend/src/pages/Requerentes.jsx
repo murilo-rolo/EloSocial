@@ -101,7 +101,7 @@ export default function Requerentes() {
     formData.append('file', file)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
       const res = await fetch(`${apiUrl}/api/ocr/extract_requerente`, {
         method: 'POST',
         body: formData

@@ -572,7 +572,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
 
   async function exportPDF() {
     setDownloading(true)
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
     try {
       const resp = await fetch(`${apiUrl}/api/pdf`, {
         method: 'POST',
@@ -672,7 +672,7 @@ export default function ProntuarioView({ id: propId, isDrawer = false }) {
   async function handleGenerateParecer() {
     setShowParecerModal(false)
     setGeneratingParecer(true)
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
     try {
       const resp = await fetch(`${apiUrl}/api/generate-parecer`, {
         method: 'POST',

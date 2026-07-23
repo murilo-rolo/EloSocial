@@ -206,7 +206,7 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
     setCreatingVideo(true)
     setVideoRoom(null)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
       const res = await fetch(`${apiUrl}/api/rooms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

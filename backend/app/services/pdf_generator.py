@@ -160,6 +160,22 @@ def _add_table(elements, headers, rows, col_widths, styles):
     elements.append(t)
 
 
+def _add_sub_table(elements, label, data, styles):
+    rows = [[_sanitize_text(k), _format_value(v)] for k, v in data.items() if v or v is False]
+    if not rows:
+        return
+    elements.append(Paragraph(f"<b>{label}:</b>", styles["Normal"]))
+    elements.append(Spacer(1, 0.1*cm))
+    t = Table([["Campo", "Valor"]] + rows, colWidths=[5*cm, 9*cm])
+    t.setStyle(TABLE_HEADER_STYLE)
+    t.setStyle(TABLE_BODY_STYLE)
+    for i in range(1, len(rows) + 1):
+        bg = ZEBRA_LIGHT if i % 2 == 0 else ZEBRA_DARK
+        t.setStyle(TableStyle([("BACKGROUND", (0, i), (-1, i), bg)]))
+    elements.append(t)
+    elements.append(Spacer(1, 0.15*cm))
+
+
 def _add_secao(elements, secao_key, dados, styles):
     titulo = SECAO_TITULOS.get(secao_key, secao_key)
     elements.append(Paragraph(titulo, styles["Heading2"]))
@@ -259,14 +275,18 @@ def _add_secao(elements, secao_key, dados, styles):
     if isinstance(dados, dict):
         for key, value in dados.items():
             if isinstance(value, dict):
-                sub = {k: v for k, v in value.items() if v or v is False}
-                if sub:
-                    sub_label = CAMPO_LABELS.get(key, key.replace("_", " ").title())
-                    elements.append(Paragraph(f"<b>{sub_label}:</b> {_format_value(value)}", styles["Normal"]))
+                filtered = {k: v for k, v in value.items() if v or v is False}
+                if filtered:
+                    label = CAMPO_LABELS.get(key, key.replace("_", " ").title())
+                    _add_sub_table(elements, label, filtered, styles)
             elif isinstance(value, list):
                 if value:
-                    sub_label = CAMPO_LABELS.get(key, key.replace("_", " ").title())
-                    elements.append(Paragraph(f"<b>{sub_label}:</b> {_format_value(value)}", styles["Normal"]))
+                    label = CAMPO_LABELS.get(key, key.replace("_", " ").title())
+                    items = [_format_value(v) for v in value if v or v is False]
+                    if items:
+                        elements.append(Paragraph(f"<b>{label}:</b>", styles["Normal"]))
+                        for item in items:
+                            elements.append(Paragraph(f"• {item}", styles["Normal"]))
             else:
                 _add_campo(elements, CAMPO_LABELS.get(key, key.replace("_", " ").title()), value, styles)
     elif isinstance(dados, list):

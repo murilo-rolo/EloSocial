@@ -112,7 +112,7 @@ def create_room(data: CreateRoomRequest):
             "daily_room_url": room_url,
             "daily_room_name": room_name,
             "daily_room_created_at": datetime.now(timezone.utc).isoformat(),
-            "daily_room_expires_at": daily_expires,
+            "daily_room_expires_at": datetime.fromtimestamp(daily_expires, tz=timezone.utc).isoformat(),
             "status": "em_atendimento",
         }
         resp_triagem = httpx.patch(

@@ -121,13 +121,29 @@ def _add_campo(elements, label, value, styles):
         elements.append(Paragraph(f"<b>{label}:</b> {v}", styles["Normal"]))
 
 
-TABLE_STYLE = TableStyle([
-    ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
-    ("FONTSIZE", (0, 0), (-1, -1), 8),
+ZEBRA_LIGHT = colors.HexColor("#f9f9f9")
+ZEBRA_DARK = colors.HexColor("#ffffff")
+
+TABLE_HEADER_STYLE = TableStyle([
+    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+    ("FONTSIZE", (0, 0), (-1, 0), 8),
     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#2c3e50")),
     ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+    ("LEFTPADDING", (0, 0), (-1, 0), 5),
+    ("RIGHTPADDING", (0, 0), (-1, 0), 5),
+    ("TOPPADDING", (0, 0), (-1, 0), 4),
+    ("BOTTOMPADDING", (0, 0), (-1, 0), 4),
+])
+
+TABLE_BODY_STYLE = TableStyle([
+    ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
+    ("FONTSIZE", (0, 1), (-1, -1), 9),
+    ("LEFTPADDING", (0, 1), (-1, -1), 5),
+    ("RIGHTPADDING", (0, 1), (-1, -1), 5),
+    ("TOPPADDING", (0, 1), (-1, -1), 3),
+    ("BOTTOMPADDING", (0, 1), (-1, -1), 3),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+    ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dcdcdc")),
 ])
 
 
@@ -136,7 +152,11 @@ def _add_table(elements, headers, rows, col_widths, styles):
         return
     data = [headers] + rows
     t = Table(data, colWidths=col_widths)
-    t.setStyle(TABLE_STYLE)
+    t.setStyle(TABLE_HEADER_STYLE)
+    t.setStyle(TABLE_BODY_STYLE)
+    for i in range(1, len(data)):
+        bg = ZEBRA_LIGHT if i % 2 == 0 else ZEBRA_DARK
+        t.setStyle(TableStyle([("BACKGROUND", (0, i), (-1, i), bg)]))
     elements.append(t)
 
 

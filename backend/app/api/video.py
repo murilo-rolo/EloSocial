@@ -2,6 +2,7 @@ import httpx
 import secrets
 import time
 import uuid
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, DAILY_API_KEY
@@ -110,15 +111,17 @@ def create_room(data: CreateRoomRequest):
         triagem_update = {
             "daily_room_url": room_url,
             "daily_room_name": room_name,
-            "daily_room_created_at": "now()",
+            "daily_room_created_at": datetime.now(timezone.utc).isoformat(),
             "daily_room_expires_at": daily_expires,
             "status": "em_atendimento",
         }
-        httpx.patch(
+        resp_triagem = httpx.patch(
             f"{SUPABASE_URL}/rest/v1/triagens?id=eq.{data.caso_id}",
             headers=HEADERS,
             json=triagem_update,
         )
+        if resp_triagem.status_code not in (200, 201, 204):
+            raise HTTPException(status_code=500, detail="Erro ao atualizar triagem com sala de vídeo")
 
     return {
         "id": room_id,

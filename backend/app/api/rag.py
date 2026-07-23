@@ -1,3 +1,5 @@
+import time
+import random
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from pydantic import BaseModel
 import httpx
@@ -5,6 +7,7 @@ import io
 import pypdf
 from typing import List, Optional
 import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
 from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, GEMINI_API_KEY
 
 router = APIRouter()
@@ -27,6 +30,42 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> List[st
         chunks.append(text[start:end])
         start += (chunk_size - overlap)
     return chunks
+
+
+def _batch_embed(texts: list[str], task_type: str = "retrieval_document") -> list[list[float]]:
+    if not texts:
+        return []
+    emb_resp = genai.embed_content(
+        model="models/gemini-embedding-2",
+        content=texts,
+        task_type=task_type,
+        output_dimensionality=768,
+    )
+    return emb_resp['embedding']
+
+
+def _embed_with_retry(content: str, task_type: str, max_retries: int = 3) -> list[float]:
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            emb_resp = genai.embed_content(
+                model="models/gemini-embedding-2",
+                content=content,
+                task_type=task_type,
+                output_dimensionality=768,
+            )
+            return emb_resp['embedding']
+        except ResourceExhausted as e:
+            last_error = e
+            if attempt < max_retries - 1:
+                delay = 2 ** attempt + random.random()
+                time.sleep(delay)
+    raise HTTPException(
+        status_code=429,
+        detail="Cota da API Gemini exaurida. Tente novamente em alguns segundos.",
+        headers={"Retry-After": str(int(2 ** max_retries))},
+    )
+
 
 @router.post("/rag/upload")
 async def upload_document(req: DocumentUploadRequest):
@@ -59,25 +98,13 @@ async def upload_document(req: DocumentUploadRequest):
         doc = resp.json()[0]
         doc_id = doc["id"]
         
-        # 2. Chunking e Embeddings
+        # 2. Chunking e Embeddings (batch - 1 chamada)
         chunks = chunk_text(req.content)
-        chunk_payloads = []
-        
-        for c in chunks:
-            # Gerar embedding
-            emb_resp = genai.embed_content(
-                model="models/gemini-embedding-2",
-                content=c,
-                task_type="retrieval_document",
-                output_dimensionality=768
-            )
-            embedding = emb_resp['embedding']
-            
-            chunk_payloads.append({
-                "document_id": doc_id,
-                "chunk_text": c,
-                "embedding": embedding
-            })
+        embeddings = _batch_embed(chunks)
+        chunk_payloads = [
+            {"document_id": doc_id, "chunk_text": c, "embedding": emb}
+            for c, emb in zip(chunks, embeddings)
+        ]
             
         # 3. Salvar chunks
         resp_chunks = await client.post(
@@ -184,14 +211,8 @@ async def query_knowledge_base(req: RAGQueryRequest):
     if not GEMINI_API_KEY:
         raise HTTPException(500, "GEMINI_API_KEY não configurada")
 
-    # 1. Gerar embedding da query
-    emb_resp = genai.embed_content(
-        model="models/gemini-embedding-2",
-        content=req.query,
-        task_type="retrieval_query",
-        output_dimensionality=768
-    )
-    query_embedding = emb_resp['embedding']
+    # 1. Gerar embedding da query (com retry)
+    query_embedding = _embed_with_retry(req.query, task_type="retrieval_query")
     
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,

@@ -1,5 +1,6 @@
 import re
 from io import BytesIO
+from datetime import datetime
 from xml.sax.saxutils import escape
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -342,12 +343,47 @@ def _add_violencia_section(elements, dados, styles):
         _add_table(elements, ["Ordem/Pessoa", "Código", "Tipo", "Data"], rows, [3*cm, 3*cm, 3*cm, 3*cm], styles)
 
 
+def _draw_header_footer(canvas_obj, doc):
+    canvas_obj.saveState()
+    page_width = A4[0]
+    page_height = A4[1]
+    margin = 2 * cm
+
+    header_y = page_height - margin + 1.5 * cm
+    canvas_obj.setFont("Helvetica-Bold", 9)
+    canvas_obj.setFillColor(colors.HexColor("#2c3e50"))
+    canvas_obj.drawString(margin, header_y, "PRONTUÁRIO SUAS")
+
+    subheader_y = page_height - margin + 0.9 * cm
+    canvas_obj.setFont("Helvetica", 7)
+    canvas_obj.setFillColor(colors.HexColor("#7f8c8d"))
+    canvas_obj.drawString(margin, subheader_y, "Sistema Único de Assistência Social — CRAS")
+
+    line_y = page_height - margin + 0.45 * cm
+    canvas_obj.setStrokeColor(colors.HexColor("#bdc3c7"))
+    canvas_obj.setLineWidth(0.5)
+    canvas_obj.line(margin, line_y, page_width - margin, line_y)
+
+    canvas_obj.setFont("Helvetica", 7)
+    canvas_obj.setFillColor(colors.HexColor("#95a5a6"))
+    canvas_obj.drawString(margin, margin - 0.8 * cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+    canvas_obj.drawRightString(page_width - margin, margin - 0.8 * cm, f"Página {canvas_obj.getPageNumber()}")
+
+    canvas_obj.setStrokeColor(colors.HexColor("#bdc3c7"))
+    canvas_obj.setLineWidth(0.3)
+    canvas_obj.line(margin, margin - 0.4 * cm, page_width - margin, margin - 0.4 * cm)
+
+    canvas_obj.restoreState()
+
+
 def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
         leftMargin=2*cm, rightMargin=2*cm,
-        topMargin=2*cm, bottomMargin=2*cm,
+        topMargin=2.2*cm, bottomMargin=2.2*cm,
+        onFirstPage=_draw_header_footer,
+        onLaterPages=_draw_header_footer,
     )
 
     styles = getSampleStyleSheet()

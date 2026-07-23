@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import { ROLE_LABELS } from '../utils/roles'
+import { Trash2 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -23,6 +24,8 @@ export default function Videoconferencia() {
   })
   const [contacts, setContacts] = useState([])
   const [createdCode, setCreatedCode] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDeleteRoom, setConfirmDeleteRoom] = useState(null)
   const callFrameRef = useRef(null)
   const containerRef = useRef(null)
 
@@ -76,6 +79,7 @@ export default function Videoconferencia() {
       .select('id, nome, role')
       .neq('id', profile?.id)
       .eq('ativo', true)
+      .neq('role', 'requerente')
       .order('nome')
 
     setContacts(data || [])
@@ -162,6 +166,29 @@ export default function Videoconferencia() {
       enterRoom(room)
     } catch (e) {
       setJoinError('Erro ao validar código')
+    }
+  }
+
+  async function handleDeleteRoom(roomId) {
+    if (!profile || deleting) return
+    setDeleting(true)
+
+    try {
+      const res = await fetch(`${API_URL}/api/rooms/${roomId}?user_id=${profile.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || 'Erro ao excluir sala')
+      }
+
+      setRooms(prev => prev.filter(r => r.id !== roomId))
+    } catch (e) {
+      alert(e.message)
+    } finally {
+      setDeleting(false)
+      setConfirmDeleteRoom(null)
     }
   }
 
@@ -272,12 +299,24 @@ export default function Videoconferencia() {
                   )}
                 </div>
               </div>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => handleJoinClick(room)}
-              >
-                Entrar
-              </button>
+              <div className="video-room-actions">
+                {room.created_by === profile?.id && (
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => setConfirmDeleteRoom(room)}
+                    title="Excluir sala"
+                    style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => handleJoinClick(room)}
+                >
+                  Entrar
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -358,6 +397,35 @@ export default function Videoconferencia() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteRoom && (
+        <div className="modal-overlay" onClick={() => { if (!deleting) setConfirmDeleteRoom(null) }}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Excluir Sala</h3>
+              <button className="modal-close" onClick={() => { if (!deleting) setConfirmDeleteRoom(null) }}>×</button>
+            </div>
+            <div className="modal-body">
+              <p>Tem certeza que deseja excluir a sala <strong>{confirmDeleteRoom.room_name}</strong>?</p>
+              <p className="text-muted" style={{ fontSize: 13 }}>
+                Esta ação não pode ser desfeita. A sala será removida para todos os participantes.
+              </p>
+            </div>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setConfirmDeleteRoom(null)} disabled={deleting}>
+                Cancelar
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={() => handleDeleteRoom(confirmDeleteRoom.id)}
+                disabled={deleting}
+              >
+                {deleting ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
           </div>
         </div>
       )}

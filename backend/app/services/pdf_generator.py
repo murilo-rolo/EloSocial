@@ -7,7 +7,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, HRFlowable
 )
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 
@@ -416,7 +416,7 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
         fontSize=9, textColor=colors.HexColor("#7f8c8d"), spaceAfter=20
     ))
     styles["Heading2"].fontSize = 11
-    styles["Heading2"].spaceBefore = 10
+    styles["Heading2"].spaceBefore = 6
     styles["Heading2"].spaceAfter = 4
     styles["Heading2"].textColor = colors.HexColor("#2c3e50")
     styles["Normal"].fontSize = 9
@@ -440,10 +440,10 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
 
     # Dados do Requerente
     elements.append(Paragraph("DADOS DO REQUERENTE", styles["Heading2"]))
-    elements.append(Spacer(1, 0.2*cm))
+    elements.append(Spacer(1, 0.15*cm))
     for key in ["nome", "nis", "cpf", "rg", "data_nascimento", "telefone"]:
         _add_campo(elements, CAMPO_LABELS.get(key, key), requerente.get(key), styles)
-    elements.append(Spacer(1, 0.5*cm))
+    elements.append(Spacer(1, 0.3*cm))
 
     # Seções do prontuário
     secoes = [
@@ -453,14 +453,21 @@ def gerar_pdf(prontuario: dict, requerente: dict, profissional_nome: str):
         "medidas_socioeducativas", "acolhimento_institucional",
         "planejamento_evolucao", "encaminhamentos",
     ]
-    for secao in secoes:
+    for i, secao in enumerate(secoes):
         dados = prontuario.get(secao, {})
         if dados:
+            if i > 0:
+                elements.append(Spacer(1, 0.15*cm))
+                elements.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#dcdcdc")))
+                elements.append(Spacer(1, 0.15*cm))
             _add_secao(elements, secao, dados, styles)
 
     # Observações
     obs = prontuario.get("observacoes", prontuario.get("observacoes_tecnicas"))
     if obs:
+        elements.append(Spacer(1, 0.15*cm))
+        elements.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#dcdcdc")))
+        elements.append(Spacer(1, 0.15*cm))
         _add_secao(elements, "observacoes", obs, styles)
 
     # Assinatura

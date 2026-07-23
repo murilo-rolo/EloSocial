@@ -270,7 +270,7 @@ def _add_sub_table(elements, label, data, styles):
 def _add_secao(elements, secao_key, dados, styles):
     titulo = SECAO_TITULOS.get(secao_key, secao_key)
     elements.append(Paragraph(titulo, styles["Heading2"]))
-    elements.append(Spacer(1, 0.2 * cm))
+    elements.append(Spacer(1, 0.15 * cm))
 
     if secao_key == "composicao_familiar" and isinstance(dados, list):
         rows = []
@@ -337,7 +337,7 @@ def _add_secao(elements, secao_key, dados, styles):
         for campo in ["acolhimento_familia", "guarda_informal"]:
             val = dados.get(campo)
             if isinstance(val, dict) and any(v for v in val.values()):
-                _add_campo(elements, CAMPO_LABELS.get(campo, campo.replace("_", " ").title()), val, styles)
+                _add_sub_table(elements, CAMPO_LABELS.get(campo, campo.replace("_", " ").title()), val, styles)
         if dados.get("membro_prisao"):
             _add_campo(elements, CAMPO_LABELS["membro_prisao"], "Sim", styles)
         if dados.get("adolescente_internacao"):
@@ -397,11 +397,11 @@ def _add_secao(elements, secao_key, dados, styles):
 def _add_saude_section(elements, dados, styles):
     deficiencias = dados.get("deficiencias", [])
     if deficiencias:
-        rows = [[d.get("nome", ""), ", ".join(d.get("tipos", [])), d.get("necessita_cuidador", "")] for d in deficiencias]
+        rows = [[d.get("nome", ""), ", ".join(d.get("tipos", []) or []), d.get("necessita_cuidador", "")] for d in deficiencias]
         _add_table(elements, ["Nome", "Tipos", "Cuidador"], rows, [4*cm, 5*cm, 5*cm], styles)
     gestantes = dados.get("gestantes", [])
     if gestantes:
-        rows = [[g.get("nome", ""), str(g.get("meses_gestacao", "")), g.get("pre_natal", ""), g.get("data_anotacao", "")] for g in gestantes]
+        rows = [[g.get("nome", ""), str(g.get("meses_gestacao", "") or ""), g.get("pre_natal", ""), g.get("data_anotacao", "")] for g in gestantes]
         _add_table(elements, ["Nome", "Meses", "Pré-natal", "Data"], rows, [4*cm, 2.5*cm, 2.5*cm, 3*cm], styles)
     for campo in [
         "pessoa_necessita_cuidados", "inseguranca_alimentar", "doencas_graves",
@@ -409,12 +409,7 @@ def _add_saude_section(elements, dados, styles):
     ]:
         val = dados.get(campo)
         if isinstance(val, dict) and val.get("resposta"):
-            label = CAMPO_LABELS.get(campo, campo.replace("_", " ").title())
-            extras = "; ".join(f"{k}: {v}" for k, v in val.items() if k != "resposta" and v)
-            text = f"{label}: {val['resposta']}"
-            if extras:
-                text += f" ({extras})"
-            elements.append(Paragraph(f"<b>{text}</b>", styles["Normal"]))
+            _add_sub_table(elements, CAMPO_LABELS.get(campo, campo.replace("_", " ").title()), val, styles)
 
 
 def _add_convivencia_section(elements, dados, styles):
@@ -425,25 +420,12 @@ def _add_convivencia_section(elements, dados, styles):
     ]
     for p in perguntas:
         val = dados.get(p)
-        if isinstance(val, dict) and val.get("resposta"):
-            label = CAMPO_LABELS.get(p, p.replace("_", " ").title())
-            text = f"{label}: {val['resposta']}"
-            if val.get("observacao"):
-                text += f" — {val['observacao']}"
-            elements.append(Paragraph(text, styles["Normal"]))
+        if isinstance(val, dict) and any(v for v in val.values() if v):
+            _add_sub_table(elements, CAMPO_LABELS.get(p, p.replace("_", " ").title()), val, styles)
 
     tempo = dados.get("tempo_residencia")
     if isinstance(tempo, dict) and any(tempo.values()):
-        parts = []
-        for local in ["estado", "municipio", "bairro"]:
-            t = tempo.get(local)
-            if t:
-                if isinstance(t, dict) and t.get("sempre"):
-                    parts.append(f"{local.title()}: Sempre morou")
-                elif isinstance(t, dict) and t.get("anos"):
-                    parts.append(f"{local.title()}: {t['anos']} anos")
-        if parts:
-            elements.append(Paragraph(f"<b>Tempo de Residência:</b> {'; '.join(parts)}", styles["Normal"]))
+        _add_sub_table(elements, CAMPO_LABELS["tempo_residencia"], tempo, styles)
 
     for rel in ["relacoes_conjugais", "relacoes_pais_filhos", "relacoes_irmaos"]:
         items = dados.get(rel, [])
@@ -455,7 +437,7 @@ def _add_convivencia_section(elements, dados, styles):
 
     outros = dados.get("outros_conflitos")
     if outros:
-        _add_campo(elements, "Outros Conflitos", outros, styles)
+        _add_campo(elements, CAMPO_LABELS["outros_conflitos"], outros, styles)
 
 
 def _add_violencia_section(elements, dados, styles):

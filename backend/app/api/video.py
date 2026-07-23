@@ -154,6 +154,6 @@ def join_room(data: JoinRoomRequest):
     return {
         "id": room["id"],
         "room_name": room["room_name"],
-        "url": room["url"],
+        "url": room["room_url"],
         "privacy": room["privacy"],
     }

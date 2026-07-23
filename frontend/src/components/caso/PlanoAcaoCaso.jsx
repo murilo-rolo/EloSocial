@@ -211,8 +211,9 @@ export default function PlanoAcaoCaso({ casoId, modo, applicantId }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          created_by: profile.id,
           privacy: 'private',
-          ...(videoForm.observacoes ? { observacoes: videoForm.observacoes } : {}),
+          caso_id: casoId,
         }),
       })
 

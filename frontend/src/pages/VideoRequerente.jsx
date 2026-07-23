@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import Layout from '../components/Layout/Layout'
 import VideoCall from '../components/video/VideoCall'
-import { Video, PhoneOff } from 'lucide-react'
+import { Video, X } from 'lucide-react'
 
 const STATUS_LABELS = {
   pendente: 'Pendente',
@@ -18,7 +18,8 @@ export default function VideoRequerente() {
   const { profile } = useAuth()
   const [caso, setCaso] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [ended, setEnded] = useState(false)
+  const [invitationAccepted, setInvitationAccepted] = useState(false)
+  const [showInvitationModal, setShowInvitationModal] = useState(false)
 
   useEffect(() => {
     if (!profile?.id) return
@@ -40,6 +41,11 @@ export default function VideoRequerente() {
   useEffect(() => {
     if (!caso?.id) return
 
+    if (caso.status === 'em_atendimento' && caso.daily_room_url) {
+      setInvitationAccepted(false)
+      setShowInvitationModal(true)
+    }
+
     const channel = supabase
       .channel(`video-caso-${caso.id}`)
       .on(
@@ -55,11 +61,13 @@ export default function VideoRequerente() {
           setCaso(updated)
 
           if (updated.status === 'em_atendimento' && updated.daily_room_url) {
-            setEnded(false)
+            setInvitationAccepted(false)
+            setShowInvitationModal(true)
           }
 
           if (updated.status === 'em_acompanhamento' && !updated.daily_room_url) {
-            setEnded(true)
+            setInvitationAccepted(false)
+            setShowInvitationModal(false)
           }
         }
       )
@@ -71,7 +79,17 @@ export default function VideoRequerente() {
   }, [caso?.id])
 
   const handleLeave = useCallback(() => {
-    setEnded(true)
+    setInvitationAccepted(false)
+    setShowInvitationModal(false)
+  }, [])
+
+  const handleEnterCall = useCallback(() => {
+    setInvitationAccepted(true)
+    setShowInvitationModal(false)
+  }, [])
+
+  const handleDismissInvitation = useCallback(() => {
+    setShowInvitationModal(false)
   }, [])
 
   if (loading) {
@@ -111,9 +129,9 @@ export default function VideoRequerente() {
     )
   }
 
-  const isInCall = caso.status === 'em_atendimento' && caso.daily_room_url && !ended
+  const hasActiveRoom = caso.status === 'em_atendimento' && caso.daily_room_url
 
-  if (isInCall) {
+  if (hasActiveRoom && invitationAccepted) {
     return (
       <div>
         <div
@@ -174,17 +192,31 @@ export default function VideoRequerente() {
         </div>
       </div>
 
-      {ended ? (
+      {hasActiveRoom && !showInvitationModal ? (
         <div className="empty-state">
-          <div className="icon">
-            <PhoneOff size={48} style={{ color: 'var(--text-muted)' }} />
+          <div className="icon" style={{ color: '#22c55e' }}>
+            <Video size={48} />
           </div>
           <p style={{ fontSize: 16, marginBottom: 8 }}>
-            Chamada encerrada.
+            Chamada disponivel
           </p>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-            Sua videochamada foi finalizada. Aguarde um novo convite do seu assistente social.
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
+            Seu assistente social criou uma sala de videoconferencia.
           </p>
+          <button
+            onClick={handleEnterCall}
+            className="btn btn-primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '10px 24px',
+              fontSize: 15,
+            }}
+          >
+            <Video size={18} />
+            Entrar na sala
+          </button>
         </div>
       ) : (
         <div className="empty-state">
@@ -196,9 +228,56 @@ export default function VideoRequerente() {
           </p>
           <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
             Seu assistente social ira iniciar a videochamada em breve.
-            <br />
-            Voce sera conectado automaticamente.
           </p>
+        </div>
+      )}
+
+      {showInvitationModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 3000, padding: 20, backdropFilter: 'blur(4px)',
+        }}>
+          <div style={{
+            background: 'var(--card)', borderRadius: 16, padding: 28,
+            width: '100%', maxWidth: 400, boxShadow: 'var(--shadow-lg)',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              display: 'flex', justifyContent: 'flex-end', marginBottom: 8,
+            }}>
+              <button
+                onClick={handleDismissInvitation}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  padding: 4, color: 'var(--text-light)',
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="icon pulse" style={{ marginBottom: 16 }}>
+              <Video size={48} style={{ color: '#22c55e' }} />
+            </div>
+            <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Chamada recebida
+            </h3>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
+              Seu assistente social esta chamando para uma videoconferencia.
+            </p>
+            <button
+              onClick={handleEnterCall}
+              className="btn btn-primary"
+              style={{
+                width: '100%', justifyContent: 'center',
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '12px 24px', fontSize: 16,
+              }}
+            >
+              <Video size={18} />
+              Entrar
+            </button>
+          </div>
         </div>
       )}
 

@@ -3,7 +3,7 @@ import secrets
 import time
 import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 from app.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, DAILY_API_KEY
 
@@ -107,6 +107,18 @@ def create_room(data: CreateRoomRequest):
         )
 
     if data.caso_id:
+        resp_triagem_get = httpx.get(
+            f"{SUPABASE_URL}/rest/v1/triagens?id=eq.{data.caso_id}&select=user_id",
+            headers=HEADERS,
+        )
+        if resp_triagem_get.status_code == 200 and resp_triagem_get.json():
+            requester_id = resp_triagem_get.json()[0]["user_id"]
+            httpx.post(
+                f"{SUPABASE_URL}/rest/v1/video_participants",
+                headers=HEADERS,
+                json=[{"room_id": room_id, "user_id": requester_id}],
+            )
+
         daily_expires = int(time.time()) + 7 * 86400  # 7 dias
         triagem_update = {
             "daily_room_url": room_url,
@@ -130,6 +142,45 @@ def create_room(data: CreateRoomRequest):
         "privacy": data.privacy,
         "access_code": access_code,
     }
+
+
+@router.delete("/rooms/{room_id}")
+def delete_room(room_id: str, user_id: str):
+    if not SUPABASE_SERVICE_KEY:
+        raise HTTPException(status_code=500, detail="SUPABASE_SERVICE_KEY não configurada")
+
+    resp = httpx.get(
+        f"{SUPABASE_URL}/rest/v1/video_rooms?id=eq.{room_id}&select=*",
+        headers=HEADERS,
+    )
+
+    if resp.status_code != 200 or not resp.json():
+        raise HTTPException(status_code=404, detail="Sala não encontrada")
+
+    room = resp.json()[0]
+
+    if room["created_by"] != user_id:
+        raise HTTPException(status_code=403, detail="Apenas o criador pode excluir esta sala")
+
+    if DAILY_API_KEY:
+        try:
+            httpx.delete(
+                f"https://api.daily.co/v1/rooms/{room['room_name']}",
+                headers=DAILY_HEADERS,
+                timeout=10,
+            )
+        except httpx.RequestError:
+            pass
+
+    resp_del = httpx.delete(
+        f"{SUPABASE_URL}/rest/v1/video_rooms?id=eq.{room_id}",
+        headers=HEADERS,
+    )
+
+    if resp_del.status_code not in (200, 201, 204):
+        raise HTTPException(status_code=500, detail="Erro ao excluir sala do banco")
+
+    return Response(status_code=204)
 
 
 @router.post("/rooms/join")

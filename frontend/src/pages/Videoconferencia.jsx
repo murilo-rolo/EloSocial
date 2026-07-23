@@ -5,7 +5,7 @@ import Layout from '../components/Layout/Layout'
 import { ROLE_LABELS } from '../utils/roles'
 import { Trash2 } from 'lucide-react'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
 
 export default function Videoconferencia() {
   const { profile } = useAuth()

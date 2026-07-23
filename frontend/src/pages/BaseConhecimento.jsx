@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import Layout from '../components/Layout/Layout'
 import { BookOpen, Upload, Search, FileText, Trash2, FileUp } from 'lucide-react'
 import { useRef } from 'react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 export default function BaseConhecimento() {
+  const { user } = useAuth()
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -43,16 +46,29 @@ export default function BaseConhecimento() {
     }
     if (!title) return
     setUploading(true)
-    
-    const formData = new FormData()
-    formData.append('title', title)
-    formData.append('file', file)
 
     try {
+      const storagePath = `${Date.now()}-${file.name}`
+      const { error: storageError } = await supabase.storage
+        .from('conhecimento_uploads')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+      if (storageError) {
+        console.error(storageError)
+        throw new Error('Falha ao enviar arquivo para o storage.')
+      }
+
       const apiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
-      const res = await fetch(`${apiUrl}/api/rag/upload_file`, {
+      const res = await fetch(`${apiUrl}/api/rag/upload_from_storage`, {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          storage_path: storagePath,
+          user_id: user?.id || null
+        })
       })
       if (!res.ok) {
         throw new Error('Falha no upload')

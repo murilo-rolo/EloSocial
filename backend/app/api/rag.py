@@ -170,6 +170,84 @@ async def upload_document_file(
         user_id=user_id
     ))
 
+
+class StorageUploadRequest(BaseModel):
+    title: str
+    storage_path: str
+    user_id: Optional[str] = None
+
+
+async def _download_from_storage(bucket: str, path: str) -> bytes:
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+    }
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            f"{SUPABASE_URL}/storage/v1/object/{bucket}/{path}",
+            headers=headers
+        )
+        if resp.status_code == 404:
+            raise HTTPException(400, "Arquivo não encontrado no storage.")
+        if resp.status_code != 200:
+            raise HTTPException(500, f"Erro ao baixar arquivo do storage: {resp.text}")
+        return resp.content
+
+
+async def _delete_from_storage(bucket: str, path: str):
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+    }
+    async with httpx.AsyncClient() as client:
+        await client.delete(
+            f"{SUPABASE_URL}/storage/v1/object/{bucket}/{path}",
+            headers=headers
+        )
+
+
+@router.post("/rag/upload_from_storage")
+async def upload_document_from_storage(req: StorageUploadRequest):
+    if not GEMINI_API_KEY:
+        raise HTTPException(500, "GEMINI_API_KEY não configurada")
+
+    bucket = "conhecimento_uploads"
+
+    file_bytes = await _download_from_storage(bucket, req.storage_path)
+
+    content = ""
+
+    if req.storage_path.endswith(".pdf"):
+        try:
+            pdf_reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+            for page in pdf_reader.pages:
+                text = page.extract_text()
+                if text:
+                    content += text + "\n"
+        except Exception as e:
+            print(f"Erro ao ler PDF: {str(e)}")
+            raise HTTPException(400, f"Erro ao ler PDF: {str(e)}")
+    else:
+        try:
+            content = file_bytes.decode('utf-8')
+        except UnicodeDecodeError:
+            raise HTTPException(400, "Apenas arquivos PDF ou texto (.txt) são suportados.")
+
+    if not content.strip():
+        raise HTTPException(400, "Nenhum texto pôde ser extraído do arquivo.")
+
+    try:
+        await _delete_from_storage(bucket, req.storage_path)
+    except Exception:
+        pass
+
+    return await upload_document(DocumentUploadRequest(
+        title=req.title,
+        content=content,
+        user_id=req.user_id
+    ))
+
+
 @router.get("/rag/documents")
 async def list_documents():
     headers = {
